@@ -39,30 +39,42 @@ class AlertOut(AlertBase):
 
 
 # --- Translate ---
-class TranslateRequest(BaseModel):
-    text: str = Field(
-        ...,
-        min_length=1,
-        description="Raw text of a government relief form or terms & conditions.",
-    )
-    source_label: Optional[str] = Field(
-        default=None,
-        description="Optional label of where the text came from (e.g. program name).",
-    )
+class TaskItem(BaseModel):
+    """A single actionable step rendered in the interactive task list."""
+
+    id: int
+    task: str
+
+
+class TableData(BaseModel):
+    """Tabular allocations (fee breakdowns, eligibility brackets, etc.)."""
+
+    headers: list[str] = Field(default_factory=list)
+    rows: list[list[str]] = Field(default_factory=list)
+
+
+class DiagramStep(BaseModel):
+    """A node in the process visualizer / step-by-step flowchart."""
+
+    step_number: int
+    title: str
+    description: str
 
 
 class TranslateResponse(BaseModel):
-    """Structured, plain-language output rendered by the Translator view.
+    """Structured, multi-component output rendered by the Translator view.
 
-    Matches the exact schema the LLM is instructed to return.
+    The first four fields mirror the exact JSON schema the LLM is instructed
+    to return. `source_text` is attached by the backend (not the model) to
+    power the Source Transparency engine.
     """
 
-    bottom_line_summary: str
-    deadline: Optional[str] = None
-    required_attachments: list[str] = Field(default_factory=list)
-    signature_locations: list[str] = Field(default_factory=list)
-    critical_warnings: list[str] = Field(default_factory=list)
-    source_text_reference: str = ""
+    plain_language_explanation_markdown: str
+    task_list: list[TaskItem] = Field(default_factory=list)
+    table_data: TableData = Field(default_factory=TableData)
+    diagram_steps: list[DiagramStep] = Field(default_factory=list)
+    # Backend-attached provenance (the exact extracted/source text).
+    source_text: str = ""
 
 
 class HealthResponse(BaseModel):

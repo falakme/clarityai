@@ -95,12 +95,24 @@ export default function AdminTranslateTester() {
             <Card>
               <h3 className="mb-3 text-lg font-bold">Parsed result</h3>
               <dl className="space-y-3 text-base">
-                <Field label="Bottom line" value={result.bottom_line_summary} />
-                <Field label="Deadline" value={result.deadline ?? "— none —"} />
-                <ListField label="Required attachments" items={result.required_attachments} />
-                <ListField label="Signature locations" items={result.signature_locations} />
-                <ListField label="Critical warnings" items={result.critical_warnings} />
-                <Field label="Source reference" value={result.source_text_reference || "—"} />
+                <Field
+                  label="Explanation (markdown)"
+                  value={`${result.plain_language_explanation_markdown.length} chars`}
+                />
+                <Field label="Task list" value={`${result.task_list.length} tasks`} />
+                <Field
+                  label="Table"
+                  value={
+                    result.table_data.headers.length
+                      ? `${result.table_data.headers.length} cols × ${result.table_data.rows.length} rows`
+                      : "— empty —"
+                  }
+                />
+                <Field label="Diagram steps" value={`${result.diagram_steps.length} steps`} />
+                <Field
+                  label="Source text"
+                  value={`${result.source_text.length} chars captured`}
+                />
               </dl>
             </Card>
 
@@ -122,25 +134,6 @@ function Field({ label, value }: { label: string; value: string }) {
     <div>
       <dt className="text-sm font-bold uppercase tracking-wide text-muted-foreground">{label}</dt>
       <dd className="mt-0.5">{value}</dd>
-    </div>
-  );
-}
-
-function ListField({ label, items }: { label: string; items: string[] }) {
-  return (
-    <div>
-      <dt className="text-sm font-bold uppercase tracking-wide text-muted-foreground">{label}</dt>
-      <dd className="mt-0.5">
-        {items.length === 0 ? (
-          <span className="text-muted-foreground">— none —</span>
-        ) : (
-          <ul className="list-inside list-disc">
-            {items.map((it, i) => (
-              <li key={i}>{it}</li>
-            ))}
-          </ul>
-        )}
-      </dd>
     </div>
   );
 }

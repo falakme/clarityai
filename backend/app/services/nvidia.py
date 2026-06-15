@@ -15,72 +15,80 @@ import re
 import httpx
 
 from app.config import get_settings
-from app.schemas import TranslateResponse
+from app.schemas import DiagramStep, TableData, TaskItem, TranslateResponse
 
-# The EXACT system prompt required by the spec. Do not edit casually — the
-# downstream UI and Responsible AI guarantees depend on this schema.
-SYSTEM_PROMPT = """You are a legal crisis translator. Your user is a stressed victim of a natural disaster who needs to fill out government relief paperwork immediately. 
-I will provide you with the raw text of a government form or terms and conditions. 
-Your ONLY job is to read the text, skip the standard boilerplate, and output a highly specific, actionable checklist in strict JSON format. Do not use markdown blocks, and do not say "Here is the JSON." Output ONLY the raw JSON object.
+# The EXACT system prompt required by the spec. The model must return a
+# structured JSON object (markdown explanation + task list + table + diagram).
+SYSTEM_PROMPT = """You are a legal crisis translator. Your user is a stressed individual who needs to understand a complex administrative, legal, or financial document immediately. 
+Your ONLY job is to analyze the document text and output a highly structured JSON object. Do not include markdown code fences (like ```json), and do NOT use any emojis in your response. 
 
-Follow this exact JSON schema:
+Follow this exact JSON schema strictly:
 {
-  "bottom_line_summary": "A 1-sentence plain language summary of what this form gets the user.",
-  "deadline": "The exact submission deadline extracted from the text, or null if none.",
-  "required_attachments": ["List of physical documents needed, e.g., 'Utility Bill', 'Photo ID'"],
-  "signature_locations": ["List of exactly where to sign, e.g., 'Page 3, Bottom Right'"],
-  "critical_warnings": ["Any major catch, e.g., 'If you accept this, you waive other aid'"],
-  "source_text_reference": "A 1-2 sentence direct quote from the original text that proves the deadline or warning."
-}"""
+  "plain_language_explanation_markdown": "A comprehensive, simple explanation of the document written in clear Markdown. Use bolding and headers where necessary. Strictly NO emojis.",
+  "task_list": [
+    { "id": 1, "task": "Actionable task statement 1" },
+    { "id": 2, "task": "Actionable task statement 2" }
+  ],
+  "table_data": {
+    "headers": ["Column 1 Title", "Column 2 Title"],
+    "rows": [
+      ["Row 1 Cell 1 Data", "Row 1 Cell 2 Data"],
+      ["Row 2 Cell 1 Data", "Row 2 Cell 2 Data"]
+    ]
+  },
+  "diagram_steps": [
+    { "step_number": 1, "title": "Brief Step Title", "description": "What to do in this phase" },
+    { "step_number": 2, "title": "Next Step Title", "description": "What to do next" }
+  ]
+}
+If the document does not contain data relevant for a table, leave the 'table_data' arrays empty. Always populate the markdown explanation, the task_list, and the diagram_steps."""
 
 RETRY_INSTRUCTION = (
     "Your previous reply was not valid JSON. Reply again with ONLY the raw JSON "
-    "object matching the schema exactly — no markdown, no code fences, no commentary."
+    "object matching the schema exactly — no markdown code fences, no commentary, "
+    "and no emojis."
 )
 
-# Shared JSON schema all document types must return so the UI renders uniformly.
-_SCHEMA = """Follow this exact JSON schema and output ONLY the raw JSON object (no markdown, no preamble):
-{
-  "bottom_line_summary": "A 1-sentence plain language summary of what this document means for the user.",
-  "deadline": "The exact deadline or due date extracted from the text, or null if none.",
-  "required_attachments": ["List of documents or line items the user needs to gather or cross-reference"],
-  "signature_locations": ["List of exactly where to sign, or [] if not applicable"],
-  "critical_warnings": ["Any major catch, risk, or overcharge the user should notice"],
-  "source_text_reference": "A 1-2 sentence direct quote from the original text that supports the deadline or a warning."
-}"""
-
-# Everyday bureaucracy (eviction, school, housing, general government letters).
-GENERAL_PROMPT = f"""You are a bureaucratic document translator. Your user is a stressed person dealing with everyday official paperwork (eviction notices, school communications, housing forms, government letters). 
-Read the text, skip the standard boilerplate, and produce a highly specific, actionable checklist. You ONLY clarify jargon, extract deadlines and required documents, and format an action checklist — you do NOT give legal, medical, or financial advice. When relevant, add a brief note in critical_warnings that this is not legal advice.
-
-{_SCHEMA}"""
-
-# Medical Bill Auditor — exact instruction from the product spec, plus schema mapping.
-MEDICAL_PROMPT = f"""You are a medical billing translation tool. Analyze the provided itemized receipt or document. Identify confusing billing codes, translate them to plain-language descriptions, list any typical price discrepancies or common overcharges, and output a structured JSON checklist showing the exact line items the user should cross-reference or ask their hospital provider to clarify. Include a strict disclaimer that you do not offer medical or legal advice.
-
-Map your analysis onto this schema:
-- bottom_line_summary: one plain-language sentence on what this bill is for.
-- deadline: the payment due date if stated, otherwise null.
-- required_attachments: the exact line items or billing codes the user should cross-reference or ask the provider to clarify.
-- signature_locations: [] (not applicable).
-- critical_warnings: likely overcharges or price discrepancies, AND the disclaimer "This is not medical or legal advice."
-- source_text_reference: a 1-2 sentence direct quote from the document.
-
-{_SCHEMA}"""
-
-# doc_type -> system prompt.
-_PROMPTS = {
-    "emergency": SYSTEM_PROMPT,
-    "medical_bill": MEDICAL_PROMPT,
-    "eviction": GENERAL_PROMPT,
-    "housing": GENERAL_PROMPT,
-    "school": GENERAL_PROMPT,
-    "general": GENERAL_PROMPT,
+# Optional per-module nudge layered on top of the canonical system prompt
+# (without altering it). Keeps document-type specialization while enforcing
+# the single structured schema above.
+_DOC_TYPE_HINTS = {
+    "medical_bill": (
+        "Document category: itemized medical bill. Decode billing codes into "
+        "plain language, populate table_data with the line items and charges, "
+        "and flag likely overcharges. Include a clear statement that this is "
+        "not medical or legal advice. Do not give medical or legal advice."
+    ),
+    "eviction": (
+        "Document category: eviction or lease-termination notice. Clarify "
+        "deadlines and the recipient's options. This is not legal advice."
+    ),
+    "housing": "Document category: housing/benefits form. Clarify required documents and deadlines.",
+    "school": "Document category: school communication. Clarify dates, actions, and parent/guardian rights.",
+    "emergency": "Document category: disaster relief paperwork. Prioritize deadlines and required documents.",
 }
 
 
-def _system_prompt(doc_type: str) -> str:
-    return _PROMPTS.get(doc_type, GENERAL_PROMPT)
+def _doc_type_hint(doc_type: str) -> str | None:
+    return _DOC_TYPE_HINTS.get(doc_type)
+
+
+# Strip emojis and variation selectors so output stays clean and professional.
+_EMOJI_PATTERN = re.compile(
+    "["
+    "\U0001f000-\U0001ffff"  # SMP: emoji, symbols, pictographs, flags, etc.
+    "\u2600-\u27bf"  # misc symbols + dingbats
+    "\u2b00-\u2bff"  # misc symbols and arrows (stars, etc.)
+    "\ufe00-\ufe0f"  # variation selectors
+    "\u200d"  # zero-width joiner
+    "]",
+)
+
+
+def _strip_emoji(text: str) -> str:
+    cleaned = _EMOJI_PATTERN.sub("", text)
+    # Collapse any double spaces left behind by removed glyphs.
+    return re.sub(r"[ \t]{2,}", " ", cleaned).strip()
 
 
 class NvidiaConfigError(RuntimeError):
@@ -153,28 +161,65 @@ def _try_parse(content: str) -> dict | None:
     return None
 
 
-def _normalize(data: dict) -> TranslateResponse:
-    """Coerce model output into our strict response schema."""
+def _normalize(data: dict, source_text: str) -> TranslateResponse:
+    """Coerce model output into the structured response schema (emoji-free)."""
 
-    def as_list(value: object) -> list[str]:
-        if value is None:
-            return []
-        if isinstance(value, list):
-            return [str(item).strip() for item in value if str(item).strip()]
-        return [str(value).strip()]
+    # Markdown explanation (always present).
+    markdown = _strip_emoji(str(data.get("plain_language_explanation_markdown", "")).strip())
+    if not markdown:
+        markdown = "No explanation could be generated from the provided document."
 
-    deadline = data.get("deadline")
-    if isinstance(deadline, str) and deadline.strip().lower() in {"null", "none", ""}:
-        deadline = None
+    # Task list — accept dicts ({id, task}) or bare strings.
+    tasks: list[TaskItem] = []
+    for index, raw in enumerate(data.get("task_list") or [], start=1):
+        if isinstance(raw, dict):
+            label = _strip_emoji(str(raw.get("task", "")).strip())
+            raw_id = raw.get("id", index)
+        else:
+            label = _strip_emoji(str(raw).strip())
+            raw_id = index
+        if not label:
+            continue
+        try:
+            task_id = int(raw_id)
+        except (TypeError, ValueError):
+            task_id = index
+        tasks.append(TaskItem(id=task_id, task=label))
+
+    # Table — tolerate missing/garbled shapes; only keep well-formed rows.
+    raw_table = data.get("table_data") or {}
+    headers: list[str] = []
+    rows: list[list[str]] = []
+    if isinstance(raw_table, dict):
+        headers = [_strip_emoji(str(h).strip()) for h in (raw_table.get("headers") or [])]
+        for raw_row in raw_table.get("rows") or []:
+            if isinstance(raw_row, list):
+                rows.append([_strip_emoji(str(cell).strip()) for cell in raw_row])
+    # Drop a table that has no headers (nothing meaningful to render).
+    if not headers:
+        rows = []
+
+    # Diagram steps.
+    steps: list[DiagramStep] = []
+    for index, raw in enumerate(data.get("diagram_steps") or [], start=1):
+        if not isinstance(raw, dict):
+            continue
+        title = _strip_emoji(str(raw.get("title", "")).strip())
+        description = _strip_emoji(str(raw.get("description", "")).strip())
+        if not title and not description:
+            continue
+        try:
+            number = int(raw.get("step_number", index))
+        except (TypeError, ValueError):
+            number = index
+        steps.append(DiagramStep(step_number=number, title=title or f"Step {number}", description=description))
 
     return TranslateResponse(
-        bottom_line_summary=str(data.get("bottom_line_summary", "")).strip()
-        or "No summary could be generated from the provided text.",
-        deadline=deadline,
-        required_attachments=as_list(data.get("required_attachments")),
-        signature_locations=as_list(data.get("signature_locations")),
-        critical_warnings=as_list(data.get("critical_warnings")),
-        source_text_reference=str(data.get("source_text_reference", "")).strip(),
+        plain_language_explanation_markdown=markdown,
+        task_list=tasks,
+        table_data=TableData(headers=headers, rows=rows),
+        diagram_steps=steps,
+        source_text=source_text[:12000],
     )
 
 
@@ -230,10 +275,11 @@ async def translate_form(text: str, doc_type: str = "general") -> TranslateRespo
             "NVIDIA_API_KEY is not set. Add it to the backend environment."
         )
 
-    messages = [
-        {"role": "system", "content": _system_prompt(doc_type)},
-        {"role": "user", "content": text},
-    ]
+    messages: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    hint = _doc_type_hint(doc_type)
+    if hint:
+        messages.append({"role": "system", "content": hint})
+    messages.append({"role": "user", "content": text})
 
     async with httpx.AsyncClient(timeout=60.0) as client:
         content = await _call_model(client, messages)
@@ -253,4 +299,4 @@ async def translate_form(text: str, doc_type: str = "general") -> TranslateRespo
             "The AI returned malformed output. Please try again."
         )
 
-    return _normalize(data)
+    return _normalize(data, text)
