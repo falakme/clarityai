@@ -76,12 +76,34 @@ npm run dev
 
 ---
 
+## Admin console
+
+A hidden, demo-only console (linked from **Settings → Open admin console**) provides
+full control for the pitch. All data it touches is non-PII.
+
+- **`/admin`** — Overview: live system status (backend, database, NVIDIA AI config,
+  version) plus quick actions to load demo alerts or clear all alerts.
+- **`/admin/mock-alerts`** — Alerts manager: create, **edit**, activate/deactivate,
+  and delete alerts, with one-click presets.
+- **`/admin/translate`** — AI pipeline tester: send raw form text to
+  `POST /api/translate-form` and inspect the parsed fields and raw JSON.
+
+Admin mutations are proxied through Next.js server routes that inject `ADMIN_API_KEY`,
+so the key is never exposed to the browser.
+
+## PWA
+
+ClearAid is an installable Progressive Web App: web manifest, PNG + maskable icons
+(192/512), Apple touch icon, theme color, a service worker (offline app shell; API
+responses are never cached so crisis data stays fresh), push-notification handling,
+and an in-app "Add to Home Screen" prompt.
+
 ## Demo flow (for the pitch video)
 
 1. Open the app → onboard with a ZIP code + family size (saved to LocalStorage).
 2. Land on the dashboard → see active alerts + a Relief To-Do list.
-3. Open the **Admin panel** (`/admin/mock-alerts`) in another tab → trigger a disaster
-   alert. The dashboard reflects the new crisis state.
+3. Open the **Admin console** (`/admin`) in another tab → trigger a disaster alert.
+   The dashboard reflects the new crisis state live.
 4. Click an aid program → paste a mock FEMA terms block → watch ClearAid translate it
    into a Bottom Line, Deadline, Checklist, and a verifiable Legal Source.
 

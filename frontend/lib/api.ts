@@ -1,4 +1,4 @@
-import type { Alert, TranslateResult } from "./types";
+import type { Alert, Health, TranslateResult } from "./types";
 
 /**
  * Public base URL the browser uses to reach the FastAPI backend.
@@ -32,6 +32,13 @@ export async function fetchAlerts(zipCode?: string): Promise<Alert[]> {
   if (zipCode) url.searchParams.set("zip_code", zipCode);
 
   const res = await fetch(url.toString(), { cache: "no-store" });
+  if (!res.ok) throw new ApiError(await parseError(res), res.status);
+  return res.json();
+}
+
+/** Fetch backend health/status (used by the admin console). */
+export async function fetchHealth(): Promise<Health> {
+  const res = await fetch(`${API_BASE_URL}/api/health`, { cache: "no-store" });
   if (!res.ok) throw new ApiError(await parseError(res), res.status);
   return res.json();
 }

@@ -39,3 +39,13 @@ export interface TranslateResult {
   critical_warnings: string[];
   source_text_reference: string;
 }
+
+/** Backend health/status payload (GET /api/health). */
+export interface Health {
+  status: string;
+  service: string;
+  version: string;
+  nvidia_configured: boolean;
+  nvidia_model: string;
+  database_connected: boolean;
+}

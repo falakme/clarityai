@@ -19,6 +19,17 @@ class AlertCreate(AlertBase):
     """Payload used by the admin demo panel to trigger an alert."""
 
 
+class AlertUpdate(BaseModel):
+    """Partial update for an alert (admin). All fields optional."""
+
+    zip_code: Optional[str] = Field(default=None, max_length=16)
+    title: Optional[str] = Field(default=None, max_length=200)
+    message: Optional[str] = None
+    severity: Optional[str] = Field(default=None, pattern="^(info|warning|success)$")
+    programs_open: Optional[int] = Field(default=None, ge=0)
+    is_active: Optional[bool] = None
+
+
 class AlertOut(AlertBase):
     model_config = ConfigDict(from_attributes=True)
 
@@ -59,3 +70,5 @@ class HealthResponse(BaseModel):
     service: str = "clearaid-backend"
     version: str
     nvidia_configured: bool
+    nvidia_model: str = ""
+    database_connected: bool = False
