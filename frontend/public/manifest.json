@@ -1,0 +1,26 @@
+{
+  "name": "ClearAid — Crisis Navigation",
+  "short_name": "ClearAid",
+  "description": "Proactive crisis navigation and bureaucratic translation for displaced families.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F9FAFB",
+  "theme_color": "#2563EB",
+  "categories": ["utilities", "government", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

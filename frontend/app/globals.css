@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    /* Calm gradient wash behind glassmorphic cards. */
+    background-image:
+      radial-gradient(900px circle at 0% 0%, rgba(37, 99, 235, 0.06), transparent 40%),
+      radial-gradient(900px circle at 100% 0%, rgba(245, 158, 11, 0.05), transparent 40%);
+    background-attachment: fixed;
+    font-size: 16px; /* never below 16px */
+  }
+
+  /* Visible focus ring for accessibility under stress. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply rounded-lg border border-white/60 bg-card shadow-glass backdrop-blur-glass;
+  }
+
+  /* Skeleton shimmer for the calming loading state. */
+  .skeleton {
+    @apply relative overflow-hidden rounded-md bg-muted;
+  }
+  .skeleton::after {
+    @apply absolute inset-0 -translate-x-full animate-shimmer;
+    content: "";
+    background-image: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0,
+      rgba(255, 255, 255, 0.6) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  }
+}

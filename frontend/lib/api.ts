@@ -1,0 +1,51 @@
+import type { Alert, TranslateResult } from "./types";
+
+/**
+ * Public base URL the browser uses to reach the FastAPI backend.
+ * Baked in at build time via NEXT_PUBLIC_API_BASE_URL.
+ */
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+async function parseError(res: Response): Promise<string> {
+  try {
+    const data = await res.json();
+    return data?.detail ?? res.statusText;
+  } catch {
+    return res.statusText;
+  }
+}
+
+/** Fetch active disaster alerts, optionally scoped to a ZIP code. */
+export async function fetchAlerts(zipCode?: string): Promise<Alert[]> {
+  const url = new URL(`${API_BASE_URL}/api/alerts`);
+  if (zipCode) url.searchParams.set("zip_code", zipCode);
+
+  const res = await fetch(url.toString(), { cache: "no-store" });
+  if (!res.ok) throw new ApiError(await parseError(res), res.status);
+  return res.json();
+}
+
+/**
+ * Core Crisis-to-Action call. Sends raw legal text; receives a structured,
+ * plain-language checklist. Never submits anything on the user's behalf.
+ */
+export async function translateForm(text: string): Promise<TranslateResult> {
+  const res = await fetch(`${API_BASE_URL}/api/translate-form`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text }),
+  });
+  if (!res.ok) throw new ApiError(await parseError(res), res.status);
+  return res.json();
+}
