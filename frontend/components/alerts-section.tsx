@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, BellRing, CheckCircle2, Info, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { spring } from "@/lib/motion";
 import { fetchAlerts } from "@/lib/api";
 import type { Alert } from "@/lib/types";
 
@@ -73,25 +75,40 @@ export function AlertsSection({ zipCode }: { zipCode: string }) {
       )}
 
       <ul className="space-y-3">
-        {alerts.map((a) => {
-          const Icon = ICON[a.severity] ?? Info;
-          return (
-            <li key={a.id} className="clay-card flex items-start gap-4 p-5">
-              <span className="mt-0.5 text-primary">
-                <Icon className="h-6 w-6" />
-              </span>
-              <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-lg font-bold">{a.title}</h3>
-                  {a.programs_open > 0 && (
-                    <Badge variant="success">{a.programs_open} programs open</Badge>
-                  )}
+        <AnimatePresence initial={false}>
+          {alerts.map((a) => {
+            const Icon = ICON[a.severity] ?? Info;
+            return (
+              <motion.li
+                key={a.id}
+                layout
+                initial={{ opacity: 0, y: -12, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96, height: 0, marginTop: 0 }}
+                transition={spring}
+                className="clay-card flex items-start gap-4 p-5"
+              >
+                <motion.span
+                  className="mt-0.5 text-primary"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ ...spring, delay: 0.1 }}
+                >
+                  <Icon className="h-6 w-6" />
+                </motion.span>
+                <div className="flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-lg font-bold">{a.title}</h3>
+                    {a.programs_open > 0 && (
+                      <Badge variant="success">{a.programs_open} programs open</Badge>
+                    )}
+                  </div>
+                  <p className="mt-1 text-base text-muted-foreground">{a.message}</p>
                 </div>
-                <p className="mt-1 text-base text-muted-foreground">{a.message}</p>
-              </div>
-            </li>
-          );
-        })}
+              </motion.li>
+            );
+          })}
+        </AnimatePresence>
       </ul>
     </section>
   );

@@ -3,12 +3,17 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { motion } from "framer-motion";
 import { ChevronRight, ClipboardList, Settings } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { AlertsSection } from "@/components/alerts-section";
+import { Stagger } from "@/components/motion";
 import { Badge } from "@/components/ui/badge";
+import { popIn } from "@/lib/motion";
 import { useProfile } from "@/lib/storage";
 import { RELIEF_PROGRAMS } from "@/lib/mock-programs";
+
+const MotionLink = motion(Link);
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -60,12 +65,16 @@ export default function DashboardPage() {
           Tap a program to translate its form into clear steps.
         </p>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <Stagger className="grid gap-4 sm:grid-cols-2">
           {RELIEF_PROGRAMS.map((p) => (
-            <Link
+            <MotionLink
               key={p.id}
               href={`/translate/${p.id}`}
-              className="clay-card group flex min-h-tap flex-col p-5 transition-all hover:-translate-y-1 hover:shadow-clay-lg"
+              variants={popIn}
+              whileHover={{ y: -6 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 300, damping: 22 }}
+              className="clay-card group flex min-h-tap flex-col p-5 hover:shadow-clay-lg"
             >
               <div className="mb-2 flex items-center justify-between">
                 <Badge variant="info">{p.agency}</Badge>
@@ -73,9 +82,9 @@ export default function DashboardPage() {
               </div>
               <h3 className="text-xl font-bold">{p.title}</h3>
               <p className="mt-1 text-base text-muted-foreground">{p.description}</p>
-            </Link>
+            </MotionLink>
           ))}
-        </div>
+        </Stagger>
       </section>
 
       <footer className="mt-12 text-center text-sm text-muted-foreground">

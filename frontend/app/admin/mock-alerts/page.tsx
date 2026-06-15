@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Radio, Send, Trash2, Zap } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { spring } from "@/lib/motion";
 import type { Alert } from "@/lib/types";
 
 type Severity = "info" | "warning" | "success";
@@ -166,29 +168,39 @@ export default function MockAlertsPage() {
           <p className="text-muted-foreground">No alerts yet. Trigger one above.</p>
         )}
         <ul className="space-y-3">
-          {alerts.map((a) => (
-            <li key={a.id} className="clay-card flex items-start gap-4 p-4">
-              <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-bold">{a.title}</h3>
-                  <Badge variant={a.severity}>{a.severity}</Badge>
-                  <Badge variant="neutral">ZIP {a.zip_code}</Badge>
-                  {!a.is_active && <Badge variant="neutral">inactive</Badge>}
+          <AnimatePresence initial={false}>
+            {alerts.map((a) => (
+              <motion.li
+                key={a.id}
+                layout
+                initial={{ opacity: 0, y: -10, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95, height: 0, marginTop: 0 }}
+                transition={spring}
+                className="clay-card flex items-start gap-4 p-4"
+              >
+                <div className="flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-bold">{a.title}</h3>
+                    <Badge variant={a.severity}>{a.severity}</Badge>
+                    <Badge variant="neutral">ZIP {a.zip_code}</Badge>
+                    {!a.is_active && <Badge variant="neutral">inactive</Badge>}
+                  </div>
+                  <p className="mt-1 text-base text-muted-foreground">{a.message}</p>
                 </div>
-                <p className="mt-1 text-base text-muted-foreground">{a.message}</p>
-              </div>
-              {a.is_active && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Deactivate alert"
-                  onClick={() => deactivate(a.id)}
-                >
-                  <Trash2 className="h-5 w-5" />
-                </Button>
-              )}
-            </li>
-          ))}
+                {a.is_active && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Deactivate alert"
+                    onClick={() => deactivate(a.id)}
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </Button>
+                )}
+              </motion.li>
+            ))}
+          </AnimatePresence>
         </ul>
       </section>
 
