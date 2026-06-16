@@ -8,5 +8,14 @@ import { CLERK_ENABLED } from "@/lib/auth";
  */
 export function Providers({ children }: { children: React.ReactNode }) {
   if (!CLERK_ENABLED) return <>{children}</>;
-  return <ClerkProvider>{children}</ClerkProvider>;
+  return (
+    <ClerkProvider
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      signInFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl="/dashboard"
+    >
+      {children}
+    </ClerkProvider>
+  );
 }

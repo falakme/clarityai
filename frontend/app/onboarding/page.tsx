@@ -3,204 +3,168 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, BellRing, MapPin, Users } from "lucide-react";
+import { ArrowRight, Loader2, Lock, MapPin, ShieldCheck } from "lucide-react";
 import { Brand } from "@/components/brand";
+import { ThemeMode } from "@/components/theme";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { slideStep, spring } from "@/lib/motion";
+import { slideStep } from "@/lib/motion";
 import { useProfile } from "@/lib/storage";
+import { CLERK_ENABLED } from "@/lib/auth";
+import { fetchAlerts } from "@/lib/api";
+import { locateUser, GeoError, type GeoArea } from "@/lib/geo";
 import type { UserProfile } from "@/lib/types";
+
+type Status = "prompt" | "locating" | "error";
 
 export default function OnboardingPage() {
   const router = useRouter();
   const { save } = useProfile();
-  const [step, setStep] = useState(1);
+  const [status, setStatus] = useState<Status>("prompt");
+  const [error, setError] = useState("");
 
-  const [city, setCity] = useState("");
-  const [zipCode, setZipCode] = useState("");
-  const [familySize, setFamilySize] = useState(1);
+  /** Once an area is known, decide where to send the user. */
+  async function routeForArea(area: GeoArea) {
+    // Check the backend for an active emergency in this area.
+    let emergency = false;
+    if (area.zipCode) {
+      try {
+        const alerts = await fetchAlerts(area.zipCode);
+        emergency = alerts.some((a) => a.is_active);
+      } catch {
+        emergency = false;
+      }
+    }
 
-  function finish(notificationsEnabled: boolean) {
     const profile: UserProfile = {
-      zipCode: zipCode.trim(),
-      city: city.trim(),
-      familySize,
-      notificationsEnabled,
+      zipCode: area.zipCode,
+      city: area.city,
+      region: area.region,
+      label: area.label,
+      latitude: area.latitude,
+      longitude: area.longitude,
+      emergency,
+      notificationsEnabled: false,
       onboardedAt: new Date().toISOString(),
     };
     save(profile); // PRIVACY: written only to localStorage
-    router.push("/dashboard");
-  }
 
-  async function requestNotifications() {
-    try {
-      if ("Notification" in window) {
-        const perm = await Notification.requestPermission();
-        finish(perm === "granted");
-        return;
-      }
-    } catch {
-      /* fall through */
+    if (emergency) {
+      // Scenario A — active emergency: bypass auth, go straight to intake.
+      router.replace("/emergency");
+    } else if (CLERK_ENABLED) {
+      // Scenario B — everyday use: sign in, then land on the dashboard.
+      router.replace("/sign-in");
+    } else {
+      // Clerk not configured (demo) — go straight to the dashboard.
+      router.replace("/dashboard");
     }
-    finish(false);
   }
 
-
-  const zipValid = /^\d{5}$/.test(zipCode.trim());
+  async function requestLocation() {
+    setStatus("locating");
+    setError("");
+    try {
+      const area = await locateUser();
+      await routeForArea(area);
+    } catch (e) {
+      setError(
+        e instanceof GeoError
+          ? e.message
+          : "We couldn't read your location. Please try again.",
+      );
+      setStatus("error");
+    }
+  }
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col px-5 py-8">
+      <ThemeMode theme="default" />
       <Brand href="/" />
-
-      <div className="mt-6 flex items-center gap-2" aria-label={`Step ${step} of 3`}>
-        {[1, 2, 3].map((n) => (
-          <span key={n} className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-            <motion.span
-              className="block h-full origin-left rounded-full bg-primary"
-              initial={false}
-              animate={{ scaleX: n <= step ? 1 : 0 }}
-              transition={spring}
-            />
-          </span>
-        ))}
-      </div>
 
       <section className="flex flex-1 flex-col justify-center py-10">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
-            key={step}
+            key={status}
             variants={slideStep}
             initial="hidden"
             animate="show"
             exit="exit"
           >
-            {step === 1 && (
-              <Card>
-                <h1 className="text-3xl font-extrabold tracking-tight">
-                  You&apos;re in the right place.
+            {status === "locating" ? (
+              <Card className="text-center">
+                <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-md bg-primary/10 text-primary shadow-clay-sm">
+                  <Loader2 className="h-7 w-7 animate-spin" />
+                </span>
+                <h1 className="mt-5 text-3xl font-extrabold tracking-tight">
+                  Checking your area…
                 </h1>
-                <p className="mt-4 text-xl text-muted-foreground">
-                  In three quick steps we&apos;ll set up ClearAid for your area. We only ask
-                  for what we need, and it stays on your device.
-                </p>
-                <Button size="lg" className="mt-8 w-full" onClick={() => setStep(2)}>
-                  Continue <ArrowRight className="h-5 w-5" />
-                </Button>
-              </Card>
-            )}
-
-            {step === 2 && (
-              <Card>
-                <h1 className="text-3xl font-extrabold tracking-tight">Where are you?</h1>
                 <p className="mt-3 text-lg text-muted-foreground">
-                  This helps us show aid programs open in your area. Stored only on this
-                  device.
+                  Finding your location and checking for active emergencies near you.
+                </p>
+              </Card>
+            ) : (
+              <Card>
+                <span className="flex h-14 w-14 items-center justify-center rounded-md bg-primary/10 text-primary shadow-clay-sm">
+                  <MapPin className="h-7 w-7" />
+                </span>
+                <h1 className="mt-5 text-3xl font-extrabold tracking-tight">
+                  Privacy &amp; location
+                </h1>
+                <p className="mt-4 text-xl leading-relaxed text-muted-foreground">
+                  We require your location to check for active emergencies and serve you
+                  local aid. All data is encrypted, anonymized, and never stored.
                 </p>
 
-                <div className="mt-8 space-y-6">
-                  <label className="block">
-                    <span className="mb-2 flex items-center gap-2 text-lg font-semibold">
-                      <MapPin className="h-5 w-5 text-primary" /> ZIP code
-                    </span>
-                    <Input
-                      inputMode="numeric"
-                      maxLength={5}
-                      placeholder="e.g. 77001"
-                      value={zipCode}
-                      onChange={(e) => setZipCode(e.target.value.replace(/\D/g, ""))}
-                    />
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-2 block text-lg font-semibold">City (optional)</span>
-                    <Input
-                      placeholder="e.g. Houston"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                    />
-                  </label>
-
-                  <div>
-                    <span className="mb-2 flex items-center gap-2 text-lg font-semibold">
-                      <Users className="h-5 w-5 text-primary" /> Family size
-                    </span>
-                    <div className="flex items-center gap-4">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        aria-label="Decrease family size"
-                        onClick={() => setFamilySize((n) => Math.max(1, n - 1))}
-                      >
-                        −
-                      </Button>
-                      <motion.span
-                        key={familySize}
-                        initial={{ scale: 0.6, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={spring}
-                        className="min-w-[3ch] text-center text-3xl font-bold"
-                      >
-                        {familySize}
-                      </motion.span>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        aria-label="Increase family size"
-                        onClick={() => setFamilySize((n) => Math.min(20, n + 1))}
-                      >
-                        +
-                      </Button>
-                    </div>
-                  </div>
+                <div className="mt-6 space-y-3">
+                  <InfoRow
+                    icon={<ShieldCheck className="h-5 w-5" />}
+                    text="We use your location only to find emergencies and aid near you."
+                  />
+                  <InfoRow
+                    icon={<Lock className="h-5 w-5" />}
+                    text="Your location stays on this device — it's never sent to our servers."
+                  />
                 </div>
 
-                <Button
-                  size="lg"
-                  className="mt-8 w-full"
-                  disabled={!zipValid}
-                  onClick={() => setStep(3)}
-                >
-                  {zipValid ? "Continue" : "Enter a 5-digit ZIP"}
+                {status === "error" && (
+                  <p className="mt-6 rounded-md bg-warning/15 p-3 text-base text-amber-800">
+                    {error}
+                  </p>
+                )}
+
+                <Button size="lg" className="mt-8 w-full" onClick={requestLocation}>
+                  <MapPin className="h-5 w-5" />
+                  {status === "error" ? "Try again" : "Allow location & continue"}
                   <ArrowRight className="h-5 w-5" />
                 </Button>
-              </Card>
-            )}
 
-            {step === 3 && (
-              <Card>
-                <motion.span
-                  initial={{ scale: 0, rotate: -25 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ ...spring, delay: 0.1 }}
-                  className="flex h-14 w-14 items-center justify-center rounded-md bg-warning/15 text-amber-600 shadow-clay-sm"
-                >
-                  <BellRing className="h-7 w-7" />
-                </motion.span>
-                <h1 className="mt-5 text-3xl font-extrabold tracking-tight">
-                  Stay one step ahead
-                </h1>
-                <p className="mt-3 text-xl text-muted-foreground">
-                  Enable alerts so we can wake you up if aid becomes available in your area —
-                  even when the app is closed.
-                </p>
-
-                <Button size="lg" className="mt-8 w-full" onClick={requestNotifications}>
-                  <BellRing className="h-5 w-5" /> Enable alerts
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  className="mt-3 w-full"
-                  onClick={() => finish(false)}
-                >
-                  Maybe later
-                </Button>
+                {status === "error" && (
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    className="mt-3 w-full"
+                    onClick={() =>
+                      CLERK_ENABLED ? router.replace("/sign-in") : router.replace("/dashboard")
+                    }
+                  >
+                    Continue without location
+                  </Button>
+                )}
               </Card>
             )}
           </motion.div>
         </AnimatePresence>
       </section>
     </main>
+  );
+}
+
+function InfoRow({ icon, text }: { icon: React.ReactNode; text: string }) {
+  return (
+    <div className="flex items-start gap-3 rounded-md bg-white/60 p-3">
+      <span className="mt-0.5 text-primary">{icon}</span>
+      <p className="text-base text-foreground">{text}</p>
+    </div>
   );
 }

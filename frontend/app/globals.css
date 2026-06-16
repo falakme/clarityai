@@ -3,15 +3,43 @@
 @tailwind utilities;
 
 @layer base {
+  /*
+   * Accent theme tokens. The default is the calm, trustworthy blue scheme.
+   * Adding `data-theme="emergency"` to <html> (done programmatically when an
+   * active emergency is detected) swaps every accent surface — buttons,
+   * borders, rings, focus states, and the glossy clay shadow — to a highly
+   * visible RED scheme. See components/theme.tsx.
+   */
+  :root {
+    --color-primary: 37 99 235; /* #2563EB trustworthy blue */
+    --color-primary-foreground: 255 255 255;
+    --color-ring: 37 99 235;
+    --accent-blob: rgba(37, 99, 235, 0.12);
+    --shadow-clay-primary: 0 16px 28px -10px rgba(37, 99, 235, 0.55),
+      inset 0 8px 14px rgba(255, 255, 255, 0.4),
+      inset 0 -8px 14px rgba(20, 46, 120, 0.45);
+  }
+
+  [data-theme="emergency"] {
+    --color-primary: 220 38 38; /* #DC2626 red-600 — high visibility */
+    --color-primary-foreground: 255 255 255;
+    --color-ring: 220 38 38;
+    --accent-blob: rgba(220, 38, 38, 0.18);
+    --shadow-clay-primary: 0 16px 28px -10px rgba(220, 38, 38, 0.55),
+      inset 0 8px 14px rgba(255, 255, 255, 0.4),
+      inset 0 -8px 14px rgba(120, 20, 20, 0.45);
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
-    /* Soft pastel clay blobs floating behind the puffy surfaces. */
+    /* Soft pastel clay blobs floating behind the puffy surfaces. The first
+       blob follows the active accent (blue by default, red in emergencies). */
     background-image:
-      radial-gradient(circle at 12% 16%, rgba(37, 99, 235, 0.12), transparent 42%),
+      radial-gradient(circle at 12% 16%, var(--accent-blob), transparent 42%),
       radial-gradient(circle at 88% 10%, rgba(245, 158, 11, 0.12), transparent 40%),
       radial-gradient(circle at 50% 96%, rgba(99, 102, 241, 0.10), transparent 46%);
     background-attachment: fixed;

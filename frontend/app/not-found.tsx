@@ -10,8 +10,8 @@ export default function NotFound() {
       <p className="mt-3 text-xl text-muted-foreground">
         The page you&apos;re looking for doesn&apos;t exist.
       </p>
-      <Link href="/dashboard" className={buttonVariants({ className: "mt-8" })}>
-        Back to dashboard
+      <Link href="/" className={buttonVariants({ className: "mt-8" })}>
+        Back to home
       </Link>
     </main>
   );

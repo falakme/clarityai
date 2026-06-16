@@ -39,7 +39,10 @@ async def translate(
     if doc_type not in ALLOWED_DOC_TYPES:
         doc_type = "general"
 
-    source_text = (text or "").strip()
+    # The user's typed context — what they said they need help with. When a
+    # document is attached this is forwarded ALONGSIDE the extracted text.
+    user_context = (text or "").strip()
+    document_text = ""
 
     if file is not None:
         data = await file.read()
@@ -52,18 +55,20 @@ async def translate(
                 detail=f"File too large. Max {settings.max_upload_mb} MB.",
             )
         try:
-            source_text = extract_text(file.filename, file.content_type, data)
+            document_text = extract_text(file.filename, file.content_type, data)
         except ExtractionError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
-    if not source_text:
+    if not user_context and not document_text:
         raise HTTPException(
             status_code=422,
-            detail="Provide some text or upload a document to translate.",
+            detail="Tell us what you need help with, or upload a document to translate.",
         )
 
     try:
-        return await translate_form(source_text, doc_type)
+        return await translate_form(
+            document_text, doc_type, user_context=user_context
+        )
     except NvidiaConfigError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except NvidiaUpstreamError as exc:

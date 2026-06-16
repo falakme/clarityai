@@ -34,17 +34,19 @@ export default function SettingsPage() {
       <h1 className="mb-6 mt-6 text-3xl font-extrabold tracking-tight">Settings</h1>
 
       <Card>
-        <h2 className="text-xl font-bold">Your details</h2>
+        <h2 className="text-xl font-bold">Your area</h2>
         <p className="mt-1 text-base text-muted-foreground">
-          Stored only in this browser. Nothing is sent to our servers.
+          Derived from your device location and stored only in this browser. Nothing is
+          sent to our servers.
         </p>
         <dl className="mt-4 space-y-2 text-lg">
-          <Row label="ZIP code" value={profile.zipCode} />
+          <Row label="Area" value={profile.label || "—"} />
           <Row label="City" value={profile.city || "—"} />
-          <Row label="Family size" value={String(profile.familySize)} />
+          <Row label="Region" value={profile.region || "—"} />
+          <Row label="ZIP code" value={profile.zipCode || "—"} />
           <Row
-            label="Alerts"
-            value={profile.notificationsEnabled ? "Enabled" : "Off"}
+            label="Active emergency"
+            value={profile.emergency ? "Yes" : "No"}
           />
         </dl>
       </Card>
@@ -53,7 +55,7 @@ export default function SettingsPage() {
       <Card className="mt-5">
         <h2 className="text-xl font-bold">Clear my data</h2>
         <p className="mt-1 text-base text-muted-foreground">
-          Removes your profile and checklist progress from this device.
+          Removes your area and checklist progress from this device.
         </p>
         <Button
           variant="outline"

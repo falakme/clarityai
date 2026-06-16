@@ -1,19 +1,21 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowRight, FileText, Lock, ShieldCheck } from "lucide-react";
 import { Brand } from "@/components/brand";
+import { ThemeMode } from "@/components/theme";
 import { Stagger, Item } from "@/components/motion";
-import { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { popIn } from "@/lib/motion";
-import { useProfile } from "@/lib/storage";
 
 export default function LandingPage() {
-  const { profile, loaded } = useProfile();
+  const router = useRouter();
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-5 py-8">
+      {/* Landing always uses the calm default (blue) scheme. */}
+      <ThemeMode theme="default" />
       <Brand />
 
       <Stagger className="flex flex-1 flex-col justify-center py-12">
@@ -29,20 +31,20 @@ export default function LandingPage() {
         </Item>
         <Item>
           <p className="mt-5 max-w-xl text-xl text-muted-foreground">
-            ClearAid reads eviction notices, school letters, housing forms, medical bills,
-            and disaster relief paperwork — and turns them into a clear, plain-language
-            checklist. Upload a PDF, snap a photo, or paste the text.
+            ClearAid turns eviction notices, school letters, housing forms, medical bills,
+            and disaster relief paperwork into clear, plain-language steps. Describe your
+            situation, upload a PDF, or snap a photo — we read it and explain what to do.
           </p>
         </Item>
 
-        <Item className="mt-10 flex flex-col gap-3 sm:flex-row">
-          <Link
-            href={loaded && profile ? "/dashboard" : "/onboarding"}
-            className={buttonVariants({ size: "lg", className: "w-full sm:w-auto" })}
+        <Item className="mt-10">
+          <Button
+            size="lg"
+            className="h-20 w-full text-2xl sm:h-24 sm:text-3xl"
+            onClick={() => router.push("/onboarding")}
           >
-            {loaded && profile ? "Go to my dashboard" : "Get started"}
-            <ArrowRight className="h-5 w-5" />
-          </Link>
+            Begin <ArrowRight className="h-7 w-7" />
+          </Button>
         </Item>
 
         <div className="mt-14 grid gap-4 sm:grid-cols-3">
