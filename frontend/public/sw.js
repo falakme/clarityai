@@ -137,11 +137,12 @@ self.addEventListener("push", (event) => {
   } catch (e) {
     /* keep defaults */
   }
-  // Title is strictly "ClearAid"; the body carries the alert name.
+  // Alert name at the top (notification title), "from ClearAid" below —
+  // matching the standard [Notif Title] / from [App Name] format.
   const icon = data.icon || iconForFlag(data.severity, data.status);
   event.waitUntil(
-    self.registration.showNotification("ClearAid", {
-      body: data.body,
+    self.registration.showNotification(data.body || "New alert in your area", {
+      body: "from ClearAid",
       icon: icon,
       badge: icon,
       vibrate: [120, 60, 120],
