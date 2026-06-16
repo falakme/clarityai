@@ -3,20 +3,24 @@
 /**
  * Browser geolocation + reverse geocoding.
  *
- * PRIVACY: coordinates are resolved to a coarse area (ZIP / city / region)
- * entirely in the browser and stored ONLY in localStorage. Nothing here is
- * transmitted to or stored by the ClearAid backend. We never ask the user to
- * type a ZIP code or city — the area is derived from the device location.
+ * PRIVACY: the device's coordinates are converted to a COARSE AREA
+ * (city / region / country) in the browser and only the area is ever kept —
+ * raw latitude/longitude are never stored or sent to the backend. The user is
+ * never asked to type a ZIP code or city; the area comes from the device.
  */
 
+/** Coarse, non-PII area derived from a location. No coordinates retained. */
 export interface GeoArea {
-  latitude: number;
-  longitude: number;
-  zipCode: string;
+  /** Administrative city used for matching, e.g. "Cupertino" / "Dubai". */
   city: string;
+  /** State / province / emirate, e.g. "California" / "Maharashtra". */
   region: string;
-  /** Best-effort human label for display, e.g. "Houston, TX". */
+  /** Country (display form), e.g. "USA" / "India". */
+  country: string;
+  /** Pretty label, e.g. "Cupertino, California, USA". */
   label: string;
+  /** Optional ZIP/postcode (legacy; not required for matching). */
+  zipCode: string;
 }
 
 export class GeoError extends Error {
@@ -58,54 +62,80 @@ function getCurrentPosition(): Promise<GeolocationPosition> {
   });
 }
 
-/**
- * Reverse-geocode coordinates to a coarse area using BigDataCloud's free,
- * key-less, CORS-enabled client endpoint. Returns empty fields (rather than
- * throwing) so the flow can degrade gracefully if geocoding is unavailable.
- */
-async function reverseGeocode(
-  latitude: number,
-  longitude: number,
-): Promise<{ zipCode: string; city: string; region: string }> {
-  try {
-    const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new GeoError("Reverse geocoding failed.", "geocode");
-    const data = await res.json();
-    return {
-      zipCode: String(data.postcode ?? "").trim(),
-      city: String(data.city || data.locality || "").trim(),
-      region: String(data.principalSubdivisionCode || data.principalSubdivision || "").trim(),
-    };
-  } catch {
-    return { zipCode: "", city: "", region: "" };
-  }
+/** Common long country names → short forms used in the area label. */
+const COUNTRY_SHORT: Record<string, string> = {
+  US: "USA",
+  AE: "UAE",
+  GB: "UK",
+};
+
+function shortCountry(countryName: string, countryCode: string): string {
+  return COUNTRY_SHORT[countryCode?.toUpperCase()] ?? countryName;
 }
 
-function buildLabel(city: string, region: string, zipCode: string): string {
-  // principalSubdivisionCode comes back like "US-TX"; show just the state.
-  const state = region.includes("-") ? region.split("-").pop() ?? region : region;
-  const place = [city, state].filter(Boolean).join(", ");
-  if (place) return place;
+/** Builds "Locality, Region, Country" picking the most specific parts. */
+function buildLabel(opts: {
+  locality: string;
+  city: string;
+  region: string;
+  country: string;
+  zipCode: string;
+}): string {
+  const { locality, city, region, country, zipCode } = opts;
+  const segs: string[] = [];
+  const place = locality || city;
+  if (place) segs.push(place);
+  if (region && region !== place) segs.push(region);
+  else if (city && city !== place && !segs.includes(city)) segs.push(city);
+  if (country) segs.push(country);
+  if (segs.length) return segs.join(", ");
   if (zipCode) return `ZIP ${zipCode}`;
   return "your area";
 }
 
 /**
- * Full pipeline: request browser location, then reverse-geocode it to a
- * coarse area. Throws a GeoError if the user denies or location is
- * unavailable; geocoding failures degrade to coordinates-only.
+ * Reverse-geocode coordinates to a coarse area using BigDataCloud's free,
+ * key-less, CORS-enabled client endpoint. Used for BOTH the user's onboarding
+ * location and the admin/ER map picker, so both sides resolve cities the same
+ * way (and therefore match). Throws GeoError("geocode") on failure.
+ */
+export async function reverseGeocodeArea(
+  latitude: number,
+  longitude: number,
+): Promise<GeoArea> {
+  let data: Record<string, unknown>;
+  try {
+    const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("bad status");
+    data = await res.json();
+  } catch {
+    throw new GeoError("We couldn't determine the area for that location.", "geocode");
+  }
+
+  const locality = String(data.locality ?? "").trim();
+  const city = String((data.city as string) || locality).trim();
+  const region = String(data.principalSubdivision ?? "").trim();
+  const countryName = String(data.countryName ?? "").trim();
+  const countryCode = String(data.countryCode ?? "").trim();
+  const zipCode = String(data.postcode ?? "").trim();
+  const country = shortCountry(countryName, countryCode);
+
+  return {
+    city,
+    region,
+    country,
+    zipCode,
+    label: buildLabel({ locality, city, region, country, zipCode }),
+  };
+}
+
+/**
+ * Full onboarding pipeline: request browser location, then resolve it to a
+ * coarse area. Coordinates are used transiently and never returned/stored.
  */
 export async function locateUser(): Promise<GeoArea> {
   const position = await getCurrentPosition();
   const { latitude, longitude } = position.coords;
-  const { zipCode, city, region } = await reverseGeocode(latitude, longitude);
-  return {
-    latitude,
-    longitude,
-    zipCode,
-    city,
-    region,
-    label: buildLabel(city, region, zipCode),
-  };
+  return reverseGeocodeArea(latitude, longitude);
 }

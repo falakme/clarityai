@@ -49,9 +49,9 @@ export default function DashboardPage() {
         </h1>
       </div>
 
-      {profile.zipCode && (
+      {profile.city && (
         <div className="mb-10">
-          <AlertsSection zipCode={profile.zipCode} />
+          <AlertsSection city={profile.city} />
         </div>
       )}
 

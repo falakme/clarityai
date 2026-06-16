@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app import __version__
 from app.config import get_settings
@@ -15,6 +16,28 @@ from app.seed import seed
 logger = logging.getLogger("clearaid")
 
 
+def _ensure_area_columns() -> None:
+    """Add the city/region/country columns to pre-existing alert tables.
+
+    `create_all` does not alter existing tables, so databases created before
+    area-based targeting need these columns backfilled. Idempotent and safe to
+    run on every startup (Postgres supports ADD COLUMN IF NOT EXISTS).
+    """
+    statements = [
+        "ALTER TABLE alerts ADD COLUMN IF NOT EXISTS city VARCHAR(120) NOT NULL DEFAULT ''",
+        "ALTER TABLE alerts ADD COLUMN IF NOT EXISTS region VARCHAR(120) NOT NULL DEFAULT ''",
+        "ALTER TABLE alerts ADD COLUMN IF NOT EXISTS country VARCHAR(120) NOT NULL DEFAULT ''",
+        "ALTER TABLE alerts ALTER COLUMN zip_code DROP NOT NULL",
+        "CREATE INDEX IF NOT EXISTS ix_alerts_city ON alerts (lower(city))",
+    ]
+    with engine.begin() as conn:
+        for sql in statements:
+            try:
+                conn.execute(text(sql))
+            except Exception as exc:  # noqa: BLE001
+                logger.debug("Skipping migration step (%s): %s", exc.__class__.__name__, sql)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Create tables and seed non-PII demo alerts on startup.
@@ -22,6 +45,7 @@ async def lifespan(app: FastAPI):
     # endpoint does not need a database, so the API should still come up.
     try:
         Base.metadata.create_all(bind=engine)
+        _ensure_area_columns()
         seed()
     except Exception as exc:  # noqa: BLE001
         logger.warning(

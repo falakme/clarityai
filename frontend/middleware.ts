@@ -31,17 +31,16 @@ async function isAdminUser(userId: string): Promise<boolean> {
 }
 
 const handler = clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth();
-  const home = new URL("/", req.url);
+  const { userId, redirectToSignIn } = await auth();
 
-  // 1) Strictly protect /admin and /er-dashboard. Unauthenticated visitors
-  //    are sent back to the home page.
+  // 1) Strictly protect /admin and /er-dashboard behind a sign-in wall.
   if (isAdminRoute(req) || isErRoute(req)) {
-    if (!userId) return NextResponse.redirect(home);
-
-    // /admin is admin-only; non-admins are redirected home.
+    if (!userId) {
+      return redirectToSignIn({ returnBackUrl: req.url });
+    }
+    // /admin is admin-only; non-admins are sent to the home page.
     if (isAdminRoute(req) && !(await isAdminUser(userId))) {
-      return NextResponse.redirect(home);
+      return NextResponse.redirect(new URL("/", req.url));
     }
     // /er-dashboard is open to any authenticated responder (and admins).
     return NextResponse.next();

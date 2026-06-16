@@ -25,11 +25,11 @@ export default function OnboardingPage() {
 
   /** Once an area is known, decide where to send the user. */
   async function routeForArea(area: GeoArea) {
-    // Check the backend for an active emergency in this area.
+    // Check the backend for an active emergency in this city.
     let emergency = false;
-    if (area.zipCode) {
+    if (area.city) {
       try {
-        const alerts = await fetchAlerts(area.zipCode);
+        const alerts = await fetchAlerts({ city: area.city });
         emergency = alerts.some((a) => a.is_active);
       } catch {
         emergency = false;
@@ -37,17 +37,16 @@ export default function OnboardingPage() {
     }
 
     const profile: UserProfile = {
-      zipCode: area.zipCode,
       city: area.city,
       region: area.region,
+      country: area.country,
       label: area.label,
-      latitude: area.latitude,
-      longitude: area.longitude,
+      zipCode: area.zipCode || undefined,
       emergency,
       notificationsEnabled: false,
       onboardedAt: new Date().toISOString(),
     };
-    save(profile); // PRIVACY: written only to localStorage
+    save(profile); // PRIVACY: written only to localStorage (no coordinates)
 
     if (emergency) {
       // Scenario A — active emergency: bypass auth, go straight to intake.

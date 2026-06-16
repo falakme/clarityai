@@ -1,20 +1,25 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Radio, Send } from "lucide-react";
+import { MapPin, Radio, Send } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { ThemeMode } from "@/components/theme";
+import { CityAlertMap } from "@/components/admin/city-alert-map";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import type { GeoArea } from "@/lib/geo";
 import type { Alert } from "@/lib/types";
 
 type Severity = "info" | "warning" | "success";
 
 interface AlertForm {
-  zip_code: string;
+  city: string;
+  region: string;
+  country: string;
+  label: string;
   title: string;
   message: string;
   severity: Severity;
@@ -22,7 +27,10 @@ interface AlertForm {
 }
 
 const BLANK: AlertForm = {
-  zip_code: "",
+  city: "",
+  region: "",
+  country: "",
+  label: "",
   title: "",
   message: "",
   severity: "warning",
@@ -31,9 +39,9 @@ const BLANK: AlertForm = {
 
 /**
  * ER responder console (RBAC Tier 2). Strictly protected by middleware:
- * unauthenticated visitors are redirected home. ER teams post localized,
- * non-PII disaster alerts that surface on residents' dashboards. Writes are
- * proxied server-side so the admin key never reaches the browser.
+ * unauthenticated visitors hit the sign-in wall. ER teams pick a city on the
+ * map and broadcast a localized, non-PII disaster alert that surfaces on
+ * residents' dashboards in that city.
  */
 export default function ErDashboardPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -54,6 +62,16 @@ export default function ErDashboardPage() {
     load();
   }, [load]);
 
+  function applyArea(a: GeoArea) {
+    setForm((f) => ({
+      ...f,
+      city: a.city,
+      region: a.region,
+      country: a.country,
+      label: a.label,
+    }));
+  }
+
   async function submit() {
     setBusy(true);
     setStatus("");
@@ -61,10 +79,18 @@ export default function ErDashboardPage() {
       const res = await fetch("/api/admin/alerts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          city: form.city,
+          region: form.region,
+          country: form.country,
+          title: form.title,
+          message: form.message,
+          severity: form.severity,
+          programs_open: form.programs_open,
+        }),
       });
       if (res.ok) {
-        setStatus("Alert posted — live for residents in that area within seconds.");
+        setStatus(`Alert posted — live for residents in ${form.label} within seconds.`);
         setForm(BLANK);
         await load();
       } else {
@@ -77,6 +103,8 @@ export default function ErDashboardPage() {
       setBusy(false);
     }
   }
+
+  const canSubmit = !busy && !!form.city && !!form.title.trim() && !!form.message.trim();
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-8">
@@ -91,39 +119,21 @@ export default function ErDashboardPage() {
       </header>
 
       <h1 className="mb-1 mt-6 text-3xl font-extrabold tracking-tight">
-        Post a localized alert
+        Trigger a localized alert
       </h1>
       <p className="mb-6 text-base text-muted-foreground">
-        Broadcast a non-PII disaster alert to residents in a specific ZIP code.
+        Select a city on the map, then broadcast a non-PII disaster alert to residents there.
       </p>
 
       <Card>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block">
-            <span className="mb-1 block font-semibold">ZIP code</span>
-            <Input
-              value={form.zip_code}
-              maxLength={5}
-              placeholder="e.g. 77001"
-              onChange={(e) =>
-                setForm({ ...form, zip_code: e.target.value.replace(/\D/g, "") })
-              }
-            />
-          </label>
-          <label className="block">
-            <span className="mb-1 block font-semibold">Programs open</span>
-            <Input
-              type="number"
-              min={0}
-              value={form.programs_open}
-              onChange={(e) =>
-                setForm({ ...form, programs_open: Number(e.target.value) || 0 })
-              }
-            />
-          </label>
-        </div>
+        <h2 className="mb-3 flex items-center gap-2 text-xl font-bold">
+          <MapPin className="h-5 w-5 text-primary" /> 1 · Pick the city
+        </h2>
+        <CityAlertMap area={form.city ? form : null} onArea={applyArea} />
 
-        <label className="mt-4 block">
+        <h2 className="mb-3 mt-6 text-xl font-bold">2 · Compose the alert</h2>
+
+        <label className="block">
           <span className="mb-1 block font-semibold">Title</span>
           <Input
             value={form.title}
@@ -141,37 +151,47 @@ export default function ErDashboardPage() {
           />
         </label>
 
-        <div className="mt-4">
-          <span className="mb-1 block font-semibold">Severity</span>
-          <div className="flex gap-2">
-            {(["info", "warning", "success"] as Severity[]).map((s) => (
-              <Button
-                key={s}
-                size="sm"
-                variant={form.severity === s ? "primary" : "outline"}
-                onClick={() => setForm({ ...form, severity: s })}
-              >
-                {s}
-              </Button>
-            ))}
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="mb-1 block font-semibold">Programs open</span>
+            <Input
+              type="number"
+              min={0}
+              value={form.programs_open}
+              onChange={(e) =>
+                setForm({ ...form, programs_open: Number(e.target.value) || 0 })
+              }
+            />
+          </label>
+          <div>
+            <span className="mb-1 block font-semibold">Severity</span>
+            <div className="flex gap-2">
+              {(["info", "warning", "success"] as Severity[]).map((s) => (
+                <Button
+                  key={s}
+                  size="sm"
+                  variant={form.severity === s ? "primary" : "outline"}
+                  onClick={() => setForm({ ...form, severity: s })}
+                >
+                  {s}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
 
         {status && <p className="mt-4 rounded-md bg-primary/5 p-3 text-base">{status}</p>}
 
-        <Button
-          size="lg"
-          className="mt-5 w-full"
-          onClick={submit}
-          disabled={busy || !form.title.trim() || !form.message.trim() || !form.zip_code}
-        >
+        <Button size="lg" className="mt-5 w-full" onClick={submit} disabled={!canSubmit}>
           <Send className="h-5 w-5" />
-          {busy ? "Posting…" : "Post alert"}
+          {busy ? "Posting…" : form.city ? `Post alert for ${form.label}` : "Pick a city first"}
         </Button>
       </Card>
 
       <section className="mt-8">
-        <h2 className="mb-3 text-xl font-bold">Active alerts ({alerts.filter((a) => a.is_active).length})</h2>
+        <h2 className="mb-3 text-xl font-bold">
+          Active alerts ({alerts.filter((a) => a.is_active).length})
+        </h2>
         <ul className="space-y-3">
           {alerts
             .filter((a) => a.is_active)
@@ -181,7 +201,10 @@ export default function ErDashboardPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-bold">{a.title}</h3>
                     <Badge variant={a.severity}>{a.severity}</Badge>
-                    <Badge variant="neutral">ZIP {a.zip_code}</Badge>
+                    <Badge variant="neutral">
+                      {[a.city, a.region, a.country].filter(Boolean).join(", ") ||
+                        `ZIP ${a.zip_code}`}
+                    </Badge>
                   </div>
                   <p className="mt-1 text-base text-muted-foreground">{a.message}</p>
                 </div>

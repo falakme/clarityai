@@ -14,14 +14,14 @@ const ICON = {
   info: Info,
 } as const;
 
-export function AlertsSection({ zipCode }: { zipCode: string }) {
+export function AlertsSection({ city }: { city: string }) {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
 
   async function load() {
     setStatus("loading");
     try {
-      setAlerts(await fetchAlerts(zipCode));
+      setAlerts(await fetchAlerts({ city }));
       setStatus("ready");
     } catch {
       setStatus("error");
@@ -34,7 +34,7 @@ export function AlertsSection({ zipCode }: { zipCode: string }) {
     const id = setInterval(load, 15000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [zipCode]);
+  }, [city]);
 
 
   return (
@@ -69,7 +69,7 @@ export function AlertsSection({ zipCode }: { zipCode: string }) {
         <div className="clay-card flex items-center gap-3 p-5">
           <CheckCircle2 className="h-6 w-6 text-emerald-600" />
           <p className="text-lg">
-            No active alerts for ZIP {zipCode}. You&apos;re all caught up.
+            No active alerts for {city || "your area"}. You&apos;re all caught up.
           </p>
         </div>
       )}

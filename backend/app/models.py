@@ -19,8 +19,14 @@ class Alert(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    # Geographic targeting by ZIP code only (non-PII, public information).
-    zip_code: Mapped[str] = mapped_column(String(16), index=True)
+    # Geographic targeting by area (non-PII, public information). We target by
+    # city/region/country derived from coarse geolocation — never by exact
+    # coordinates or any personal address.
+    city: Mapped[str] = mapped_column(String(120), index=True, default="")
+    region: Mapped[str] = mapped_column(String(120), default="")
+    country: Mapped[str] = mapped_column(String(120), default="")
+    # Optional, legacy ZIP targeting (kept for backward compatibility).
+    zip_code: Mapped[str] = mapped_column(String(16), index=True, default="")
 
     title: Mapped[str] = mapped_column(String(200))
     message: Mapped[str] = mapped_column(Text)

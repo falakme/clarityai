@@ -26,10 +26,11 @@ async function parseError(res: Response): Promise<string> {
   }
 }
 
-/** Fetch active disaster alerts, optionally scoped to a ZIP code. */
-export async function fetchAlerts(zipCode?: string): Promise<Alert[]> {
+/** Fetch active disaster alerts, optionally scoped to a city or ZIP. */
+export async function fetchAlerts(opts?: { city?: string; zipCode?: string }): Promise<Alert[]> {
   const url = new URL(`${API_BASE_URL}/api/alerts`);
-  if (zipCode) url.searchParams.set("zip_code", zipCode);
+  if (opts?.city) url.searchParams.set("city", opts.city);
+  if (opts?.zipCode) url.searchParams.set("zip_code", opts.zipCode);
 
   const res = await fetch(url.toString(), { cache: "no-store" });
   if (!res.ok) throw new ApiError(await parseError(res), res.status);

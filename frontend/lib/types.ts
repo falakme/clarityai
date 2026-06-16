@@ -6,13 +6,16 @@
  * Lives ONLY in localStorage; never transmitted to the backend.
  */
 export interface UserProfile {
-  zipCode: string;
+  /** Administrative city, used to match area alerts. */
   city: string;
+  /** State / province / emirate. */
   region: string;
-  /** Human label for display, e.g. "Houston, TX". */
+  /** Country (display form), e.g. "USA". */
+  country: string;
+  /** Pretty area label, e.g. "Cupertino, California, USA". */
   label: string;
-  latitude: number;
-  longitude: number;
+  /** Optional ZIP/postcode (legacy; not used for matching). */
+  zipCode?: string;
   /** Whether an active emergency was detected for this area at onboarding. */
   emergency: boolean;
   notificationsEnabled?: boolean;
@@ -21,6 +24,9 @@ export interface UserProfile {
 
 export interface Alert {
   id: number;
+  city: string;
+  region: string;
+  country: string;
   zip_code: string;
   title: string;
   message: string;

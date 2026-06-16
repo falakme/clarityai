@@ -22,15 +22,15 @@ export default function EmergencyPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
 
   useEffect(() => {
-    if (!profile?.zipCode) return;
+    if (!profile?.city) return;
     let active = true;
-    fetchAlerts(profile.zipCode)
+    fetchAlerts({ city: profile.city })
       .then((a) => active && setAlerts(a.filter((x) => x.is_active)))
       .catch(() => active && setAlerts([]));
     return () => {
       active = false;
     };
-  }, [profile?.zipCode]);
+  }, [profile?.city]);
 
   return (
     <main className="mx-auto max-w-3xl px-5 py-8">
