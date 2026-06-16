@@ -45,17 +45,19 @@ def send_city_push(
     db: Session,
     city: str,
     alert_title: str,
+    alert_message: str = "",
     severity: str = "info",
     status: str = "active",
     url: str = "/home",
 ) -> int:
     """Send a push to every subscription registered for `city`.
 
-    Payload format (per spec): the notification title is strictly "ClearAid"
-    and the body is the alert name. A severity/status-driven colored icon URL
-    is included so the Service Worker shows the right badge. Returns the number
-    of notifications dispatched; silently no-ops if push isn't configured or
-    the library isn't installed.
+    Payload format: the notification title is the alert NAME and the body is
+    the alert MESSAGE (the OS appends "from ClearAid" itself, so we don't).
+    A severity/status-driven colored icon URL is included so the Service
+    Worker shows the right badge. Returns the number of notifications
+    dispatched; silently no-ops if push isn't configured or the library isn't
+    installed.
     """
     if not city or not push_configured():
         return 0
@@ -77,8 +79,8 @@ def send_city_push(
 
     payload = json.dumps(
         {
-            "title": "ClearAid",
-            "body": alert_title,
+            "title": alert_title,
+            "body": alert_message,
             "severity": severity,
             "status": status,
             "icon": _icon_for(severity, status),

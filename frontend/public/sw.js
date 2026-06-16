@@ -128,32 +128,31 @@ function iconForFlag(severity, status) {
 
 self.addEventListener("push", (event) => {
   let data = {
-    title: "ClearAid",
-    body: "New aid may be available in your area.",
-    url: "/emergency",
+    title: "Alert in your area",
+    body: "",
+    url: "/home",
   };
   try {
     if (event.data) data = { ...data, ...event.data.json() };
   } catch (e) {
     /* keep defaults */
   }
-  // Alert name at the top (notification title), "from ClearAid" below —
-  // matching the standard [Notif Title] / from [App Name] format.
+  // Title = alert name, body = alert message. The OS appends "from ClearAid".
   const icon = data.icon || iconForFlag(data.severity, data.status);
   event.waitUntil(
-    self.registration.showNotification(data.body || "New alert in your area", {
-      body: "from ClearAid",
+    self.registration.showNotification(data.title || "Alert in your area", {
+      body: data.body || "",
       icon: icon,
       badge: icon,
       vibrate: [120, 60, 120],
-      data: { url: data.url || "/emergency" },
+      data: { url: data.url || "/home" },
     })
   );
 });
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const target = (event.notification.data && event.notification.data.url) || "/emergency";
+  const target = (event.notification.data && event.notification.data.url) || "/home";
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
       for (const client of list) {

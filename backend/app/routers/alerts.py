@@ -107,6 +107,7 @@ def create_alert(
             db,
             city=alert.city,
             alert_title=alert.title,
+            alert_message=alert.message,
             severity=alert.severity,
             status=alert.status,
         )
@@ -157,6 +158,7 @@ def update_alert(
             db,
             city=alert.city,
             alert_title=alert.title,
+            alert_message=alert.message,
             severity=alert.severity,
             status=alert.status,
         )
