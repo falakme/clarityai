@@ -8,8 +8,27 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ApiError, translateForm } from "@/lib/api";
-import { RELIEF_PROGRAMS } from "@/lib/mock-programs";
 import type { TranslateResult } from "@/lib/types";
+
+const SAMPLES: { label: string; text: string }[] = [
+  {
+    label: "Eviction notice",
+    text: `NOTICE TO QUIT AND VACATE — NON-PAYMENT OF RENT
+
+YOU ARE HEREBY NOTIFIED that rent in the amount of $1,850.00 is now past due. Pursuant to applicable state landlord-tenant statutes, you are required to PAY the full amount due OR VACATE the premises within FOURTEEN (14) DAYS of service of this notice.
+
+IF YOU FAIL to either pay the amount demanded or vacate within this period, the landlord may commence summary eviction (unlawful detainer) proceedings against you in the appropriate court.`,
+  },
+  {
+    label: "FEMA housing",
+    text: `FEDERAL EMERGENCY MANAGEMENT AGENCY — INDIVIDUALS AND HOUSEHOLDS PROGRAM (IHP)
+TEMPORARY HOUSING ASSISTANCE — TERMS AND CONDITIONS
+
+DEADLINE: Applications for disaster DR-4729 must be received no later than 11:59 PM Central Time on August 30, 2025.
+
+REQUIRED SUPPORTING DOCUMENTATION: (1) a government-issued photo identification; (2) proof of occupancy such as a utility bill or lease agreement; and (3) proof of identity for all household members listed.`,
+  },
+];
 
 export default function AdminTranslateTester() {
   const [text, setText] = useState("");
@@ -54,14 +73,14 @@ export default function AdminTranslateTester() {
         </p>
 
         <div className="mb-3 flex flex-wrap gap-2">
-          {RELIEF_PROGRAMS.map((p) => (
+          {SAMPLES.map((s) => (
             <Button
-              key={p.id}
+              key={s.label}
               variant="outline"
               size="sm"
-              onClick={() => setText(p.sampleFormText)}
+              onClick={() => setText(s.text)}
             >
-              <FileText className="h-4 w-4" /> {p.title}
+              <FileText className="h-4 w-4" /> {s.label}
             </Button>
           ))}
         </div>

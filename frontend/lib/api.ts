@@ -26,10 +26,11 @@ async function parseError(res: Response): Promise<string> {
   }
 }
 
-/** Fetch active disaster alerts, optionally scoped to a ZIP code. */
-export async function fetchAlerts(zipCode?: string): Promise<Alert[]> {
+/** Fetch active disaster alerts, optionally scoped to a city or ZIP. */
+export async function fetchAlerts(opts?: { city?: string; zipCode?: string }): Promise<Alert[]> {
   const url = new URL(`${API_BASE_URL}/api/alerts`);
-  if (zipCode) url.searchParams.set("zip_code", zipCode);
+  if (opts?.city) url.searchParams.set("city", opts.city);
+  if (opts?.zipCode) url.searchParams.set("zip_code", opts.zipCode);
 
   const res = await fetch(url.toString(), { cache: "no-store" });
   if (!res.ok) throw new ApiError(await parseError(res), res.status);
@@ -43,21 +44,25 @@ export async function fetchHealth(): Promise<Health> {
   return res.json();
 }
 
-/** Input for a translation request: pasted text and/or an uploaded file. */
+/** Input for a translation request: typed context and/or an uploaded file. */
 export interface TranslateInput {
+  /** What the user typed — their custom context / situation / pasted text. */
   text?: string;
+  /** Uploaded PDF or image (OCR'd server-side). */
   file?: File | null;
   docType?: string;
 }
 
 /**
- * Core call. Sends pasted text and/or an uploaded document (PDF/image) as
- * multipart form data; receives a structured, plain-language checklist.
- * Never submits anything on the user's behalf.
+ * Core call. Sends the user's typed context AND/OR an uploaded document
+ * (PDF/image) as multipart form data; receives a structured, plain-language
+ * checklist. When a file is attached, the typed text is forwarded as extra
+ * context alongside the document's extracted/OCR'd text. Never submits
+ * anything on the user's behalf.
  */
 export async function translateForm(input: TranslateInput): Promise<TranslateResult> {
   const form = new FormData();
-  if (input.text) form.append("text", input.text);
+  if (input.text && input.text.trim()) form.append("text", input.text.trim());
   form.append("doc_type", input.docType ?? "general");
   if (input.file) form.append("file", input.file);
 

@@ -7,7 +7,7 @@ for the hackathon demo control panel. All data here is non-PII.
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
@@ -28,14 +28,21 @@ def require_admin(x_admin_key: Optional[str] = Header(default=None)) -> None:
 
 @router.get("/api/alerts", response_model=list[AlertOut])
 def list_alerts(
-    zip_code: Optional[str] = Query(default=None, description="Filter by ZIP code."),
+    city: Optional[str] = Query(default=None, description="Filter by city (case-insensitive)."),
+    zip_code: Optional[str] = Query(default=None, description="Filter by ZIP code (legacy)."),
     include_inactive: bool = Query(default=False),
     db: Session = Depends(get_db),
 ) -> list[Alert]:
-    """Fetch active disaster alerts, optionally scoped to a ZIP code."""
+    """Fetch active disaster alerts, optionally scoped to an area.
+
+    Targeting is primarily by city (matched case-insensitively). The legacy
+    `zip_code` filter is still honoured for backward compatibility.
+    """
     stmt = select(Alert)
     if not include_inactive:
         stmt = stmt.where(Alert.is_active.is_(True))
+    if city:
+        stmt = stmt.where(func.lower(Alert.city) == city.strip().lower())
     if zip_code:
         stmt = stmt.where(Alert.zip_code == zip_code)
     stmt = stmt.order_by(Alert.created_at.desc())

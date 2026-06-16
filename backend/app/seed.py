@@ -10,16 +10,22 @@ from app.models import Alert
 
 SEED_ALERTS = [
     {
+        "city": "Houston",
+        "region": "Texas",
+        "country": "USA",
         "zip_code": "77001",
         "title": "Hurricane warning lifted",
-        "message": "The hurricane warning for your area has been lifted. 3 aid programs are now open for ZIP 77001.",
+        "message": "The hurricane warning for your area has been lifted. 3 aid programs are now open in Houston, Texas.",
         "severity": "success",
         "programs_open": 3,
     },
     {
+        "city": "New Orleans",
+        "region": "Louisiana",
+        "country": "USA",
         "zip_code": "70112",
         "title": "Flood recovery assistance open",
-        "message": "Federal flood recovery assistance is now accepting applications for ZIP 70112.",
+        "message": "Federal flood recovery assistance is now accepting applications in New Orleans, Louisiana.",
         "severity": "info",
         "programs_open": 2,
     },

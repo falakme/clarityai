@@ -2,19 +2,24 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Eye, EyeOff, Pencil, Send, Trash2, X, Zap } from "lucide-react";
+import { Eye, EyeOff, MapPin, Pencil, Send, Trash2, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { CityAlertMap } from "@/components/admin/city-alert-map";
 import { spring } from "@/lib/motion";
+import type { GeoArea } from "@/lib/geo";
 import type { Alert } from "@/lib/types";
 
 type Severity = "info" | "warning" | "success";
 
 interface AlertForm {
-  zip_code: string;
+  city: string;
+  region: string;
+  country: string;
+  label: string;
   title: string;
   message: string;
   severity: Severity;
@@ -22,7 +27,10 @@ interface AlertForm {
 }
 
 const BLANK: AlertForm = {
-  zip_code: "77001",
+  city: "",
+  region: "",
+  country: "",
+  label: "",
   title: "",
   message: "",
   severity: "info",
@@ -33,9 +41,12 @@ const PRESETS: { label: string; data: AlertForm }[] = [
   {
     label: "Hurricane lifted",
     data: {
-      zip_code: "77001",
+      city: "Houston",
+      region: "Texas",
+      country: "USA",
+      label: "Houston, Texas, USA",
       title: "Hurricane warning lifted",
-      message: "Hurricane warning lifted. 3 aid programs now open for your zip code.",
+      message: "Hurricane warning lifted. 3 aid programs now open in your city.",
       severity: "success",
       programs_open: 3,
     },
@@ -43,7 +54,10 @@ const PRESETS: { label: string; data: AlertForm }[] = [
   {
     label: "Flood recovery",
     data: {
-      zip_code: "70112",
+      city: "New Orleans",
+      region: "Louisiana",
+      country: "USA",
+      label: "New Orleans, Louisiana, USA",
       title: "Flood recovery assistance open",
       message: "Federal flood recovery assistance is now accepting applications.",
       severity: "info",
@@ -53,7 +67,10 @@ const PRESETS: { label: string; data: AlertForm }[] = [
   {
     label: "Evacuation order",
     data: {
-      zip_code: "33101",
+      city: "Miami",
+      region: "Florida",
+      country: "USA",
+      label: "Miami, Florida, USA",
       title: "Voluntary evacuation in effect",
       message: "A voluntary evacuation is in effect. Shelters are open nearby.",
       severity: "warning",
@@ -62,10 +79,13 @@ const PRESETS: { label: string; data: AlertForm }[] = [
   },
 ];
 
+function areaLabel(a: Alert): string {
+  return [a.city, a.region, a.country].filter(Boolean).join(", ") || `ZIP ${a.zip_code}`;
+}
 
 export default function AlertsManagerPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [form, setForm] = useState<AlertForm>(PRESETS[0].data);
+  const [form, setForm] = useState<AlertForm>(BLANK);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
@@ -84,6 +104,16 @@ export default function AlertsManagerPage() {
     setEditingId(null);
   }
 
+  function applyArea(a: GeoArea) {
+    setForm((f) => ({
+      ...f,
+      city: a.city,
+      region: a.region,
+      country: a.country,
+      label: a.label,
+    }));
+  }
+
   async function submit() {
     setBusy(true);
     setStatus("");
@@ -93,10 +123,22 @@ export default function AlertsManagerPage() {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          city: form.city,
+          region: form.region,
+          country: form.country,
+          title: form.title,
+          message: form.message,
+          severity: form.severity,
+          programs_open: form.programs_open,
+        }),
       });
       if (res.ok) {
-        setStatus(editingId ? "Alert updated." : "Alert triggered — live on the dashboard within seconds.");
+        setStatus(
+          editingId
+            ? "Alert updated."
+            : `Alert triggered for ${form.label} — live on residents' dashboards within seconds.`,
+        );
         resetForm();
         await load();
       } else {
@@ -113,7 +155,10 @@ export default function AlertsManagerPage() {
   function startEdit(a: Alert) {
     setEditingId(a.id);
     setForm({
-      zip_code: a.zip_code,
+      city: a.city,
+      region: a.region,
+      country: a.country,
+      label: areaLabel(a),
       title: a.title,
       message: a.message,
       severity: a.severity,
@@ -138,6 +183,7 @@ export default function AlertsManagerPage() {
     await load();
   }
 
+  const canSubmit = !busy && !!form.city && !!form.title.trim() && !!form.message.trim();
 
   return (
     <div className="space-y-6">
@@ -168,28 +214,11 @@ export default function AlertsManagerPage() {
           </div>
         )}
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <label className="block">
-            <span className="mb-1 block font-semibold">ZIP code</span>
-            <Input
-              value={form.zip_code}
-              maxLength={5}
-              onChange={(e) =>
-                setForm({ ...form, zip_code: e.target.value.replace(/\D/g, "") })
-              }
-            />
-          </label>
-          <label className="block">
-            <span className="mb-1 block font-semibold">Programs open</span>
-            <Input
-              type="number"
-              min={0}
-              value={form.programs_open}
-              onChange={(e) =>
-                setForm({ ...form, programs_open: Number(e.target.value) || 0 })
-              }
-            />
-          </label>
+        <div className="mt-4">
+          <span className="mb-2 flex items-center gap-2 font-semibold">
+            <MapPin className="h-5 w-5 text-primary" /> Target city
+          </span>
+          <CityAlertMap area={form.city ? form : null} onArea={applyArea} />
         </div>
 
         <label className="mt-4 block">
@@ -209,30 +238,38 @@ export default function AlertsManagerPage() {
           />
         </label>
 
-        <div className="mt-4">
-          <span className="mb-1 block font-semibold">Severity</span>
-          <div className="flex gap-2">
-            {(["info", "warning", "success"] as Severity[]).map((s) => (
-              <Button
-                key={s}
-                size="sm"
-                variant={form.severity === s ? "primary" : "outline"}
-                onClick={() => setForm({ ...form, severity: s })}
-              >
-                {s}
-              </Button>
-            ))}
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="mb-1 block font-semibold">Programs open</span>
+            <Input
+              type="number"
+              min={0}
+              value={form.programs_open}
+              onChange={(e) =>
+                setForm({ ...form, programs_open: Number(e.target.value) || 0 })
+              }
+            />
+          </label>
+          <div>
+            <span className="mb-1 block font-semibold">Severity</span>
+            <div className="flex gap-2">
+              {(["info", "warning", "success"] as Severity[]).map((s) => (
+                <Button
+                  key={s}
+                  size="sm"
+                  variant={form.severity === s ? "primary" : "outline"}
+                  onClick={() => setForm({ ...form, severity: s })}
+                >
+                  {s}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
 
         {status && <p className="mt-4 rounded-md bg-primary/5 p-3 text-base">{status}</p>}
 
-        <Button
-          size="lg"
-          className="mt-5 w-full"
-          onClick={submit}
-          disabled={busy || !form.title.trim() || !form.message.trim() || !form.zip_code}
-        >
+        <Button size="lg" className="mt-5 w-full" onClick={submit} disabled={!canSubmit}>
           <Send className="h-5 w-5" />
           {busy ? "Saving…" : editingId ? "Save changes" : "Trigger alert"}
         </Button>
@@ -261,7 +298,7 @@ export default function AlertsManagerPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-bold">{a.title}</h3>
                     <Badge variant={a.severity}>{a.severity}</Badge>
-                    <Badge variant="neutral">ZIP {a.zip_code}</Badge>
+                    <Badge variant="neutral">{areaLabel(a)}</Badge>
                     {a.programs_open > 0 && (
                       <Badge variant="success">{a.programs_open} open</Badge>
                     )}

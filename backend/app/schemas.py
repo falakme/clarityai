@@ -8,7 +8,12 @@ from pydantic import BaseModel, ConfigDict, Field
 
 # --- Alerts ---
 class AlertBase(BaseModel):
-    zip_code: str = Field(..., max_length=16, examples=["77001"])
+    # Area targeting (derived from coarse geolocation; non-PII).
+    city: str = Field(default="", max_length=120, examples=["Houston"])
+    region: str = Field(default="", max_length=120, examples=["Texas"])
+    country: str = Field(default="", max_length=120, examples=["USA"])
+    # Optional legacy ZIP targeting.
+    zip_code: str = Field(default="", max_length=16, examples=["77001"])
     title: str = Field(..., max_length=200)
     message: str
     severity: str = Field(default="info", pattern="^(info|warning|success)$")
@@ -22,6 +27,9 @@ class AlertCreate(AlertBase):
 class AlertUpdate(BaseModel):
     """Partial update for an alert (admin). All fields optional."""
 
+    city: Optional[str] = Field(default=None, max_length=120)
+    region: Optional[str] = Field(default=None, max_length=120)
+    country: Optional[str] = Field(default=None, max_length=120)
     zip_code: Optional[str] = Field(default=None, max_length=16)
     title: Optional[str] = Field(default=None, max_length=200)
     message: Optional[str] = None

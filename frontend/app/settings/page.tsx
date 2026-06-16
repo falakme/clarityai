@@ -3,11 +3,13 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect } from "react";
-import { ArrowLeft, Radio, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { AccountSection } from "@/components/auth/account-section";
 import { useProfile } from "@/lib/storage";
+import { CLERK_ENABLED } from "@/lib/auth";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -34,26 +36,27 @@ export default function SettingsPage() {
       <h1 className="mb-6 mt-6 text-3xl font-extrabold tracking-tight">Settings</h1>
 
       <Card>
-        <h2 className="text-xl font-bold">Your details</h2>
+        <h2 className="text-xl font-bold">Your area</h2>
         <p className="mt-1 text-base text-muted-foreground">
-          Stored only in this browser. Nothing is sent to our servers.
+          Derived from your device location and stored only in this browser. We keep the
+          area only — never your exact coordinates.
         </p>
         <dl className="mt-4 space-y-2 text-lg">
-          <Row label="ZIP code" value={profile.zipCode} />
+          <Row label="Area" value={profile.label || "—"} />
           <Row label="City" value={profile.city || "—"} />
-          <Row label="Family size" value={String(profile.familySize)} />
-          <Row
-            label="Alerts"
-            value={profile.notificationsEnabled ? "Enabled" : "Off"}
-          />
+          <Row label="Region" value={profile.region || "—"} />
+          <Row label="Country" value={profile.country || "—"} />
+          <Row label="Active emergency" value={profile.emergency ? "Yes" : "No"} />
         </dl>
       </Card>
 
+      {/* Clerk account management — only when auth is configured. */}
+      {CLERK_ENABLED && <AccountSection />}
 
       <Card className="mt-5">
         <h2 className="text-xl font-bold">Clear my data</h2>
         <p className="mt-1 text-base text-muted-foreground">
-          Removes your profile and checklist progress from this device.
+          Removes your area and checklist progress from this device.
         </p>
         <Button
           variant="outline"
@@ -66,13 +69,6 @@ export default function SettingsPage() {
           <Trash2 className="h-5 w-5" /> Clear all local data
         </Button>
       </Card>
-
-      <Link
-        href="/admin"
-        className="mt-5 flex min-h-tap items-center justify-center gap-2 rounded-md text-base font-semibold text-muted-foreground hover:text-primary"
-      >
-        <Radio className="h-5 w-5" /> Open admin console (demo)
-      </Link>
     </main>
   );
 }

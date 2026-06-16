@@ -10,16 +10,25 @@ import { Item, Stagger } from "@/components/motion";
 import { DataTable } from "./data-table";
 import { ProcessDiagram } from "./process-diagram";
 import { TaskList } from "./task-list";
-import type { ReliefProgram, TranslateResult } from "@/lib/types";
+import type { TranslateResult } from "@/lib/types";
 
 interface Props {
-  program: ReliefProgram;
   result: TranslateResult;
   originalText: string;
+  /** Stable key for persisting checklist progress to localStorage. */
+  storageKey: string;
+  /** Optional "official site" link shown as a primary action. */
+  officialUrl?: string;
   onReset: () => void;
 }
 
-export function TranslatorResult({ program, result, originalText, onReset }: Props) {
+export function TranslatorResult({
+  result,
+  originalText,
+  storageKey,
+  officialUrl,
+  onReset,
+}: Props) {
   const [showSource, setShowSource] = useState(false);
   const sourceText = result.source_text || originalText;
 
@@ -42,7 +51,7 @@ export function TranslatorResult({ program, result, originalText, onReset }: Pro
 
       {/* 3. Interactive task list + progress (renders only when tasks exist) */}
       <Item>
-        <TaskList tasks={result.task_list} storageKey={program.id} />
+        <TaskList tasks={result.task_list} storageKey={storageKey} />
       </Item>
 
       {/* 4. Data table (renders only when headers exist) */}
@@ -89,16 +98,18 @@ export function TranslatorResult({ program, result, originalText, onReset }: Pro
       </Item>
 
       {/* Direct action + reset */}
-      <Item>
-        <a
-          href={program.officialUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={buttonVariants({ size: "lg", className: "w-full" })}
-        >
-          <ExternalLink className="h-5 w-5" /> Go to official site
-        </a>
-      </Item>
+      {officialUrl && (
+        <Item>
+          <a
+            href={officialUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants({ size: "lg", className: "w-full" })}
+          >
+            <ExternalLink className="h-5 w-5" /> Go to official site
+          </a>
+        </Item>
+      )}
 
       <Item>
         <Button variant="ghost" className="w-full" onClick={onReset}>

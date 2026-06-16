@@ -1,15 +1,32 @@
 /** Shared domain types for ClearAid. */
 
+/**
+ * Locally-stored profile. Derived from the device's geolocation (reverse
+ * geocoded in the browser) — the user is never asked to type a ZIP or city.
+ * Lives ONLY in localStorage; never transmitted to the backend.
+ */
 export interface UserProfile {
-  zipCode: string;
+  /** Administrative city, used to match area alerts. */
   city: string;
-  familySize: number;
-  notificationsEnabled: boolean;
+  /** State / province / emirate. */
+  region: string;
+  /** Country (display form), e.g. "USA". */
+  country: string;
+  /** Pretty area label, e.g. "Cupertino, California, USA". */
+  label: string;
+  /** Optional ZIP/postcode (legacy; not used for matching). */
+  zipCode?: string;
+  /** Whether an active emergency was detected for this area at onboarding. */
+  emergency: boolean;
+  notificationsEnabled?: boolean;
   onboardedAt: string;
 }
 
 export interface Alert {
   id: number;
+  city: string;
+  region: string;
+  country: string;
   zip_code: string;
   title: string;
   message: string;
@@ -20,30 +37,7 @@ export interface Alert {
 }
 
 /** Document type that selects the backend AI prompt. */
-export type DocType =
-  | "emergency"
-  | "eviction"
-  | "medical_bill"
-  | "school"
-  | "housing"
-  | "general";
-
-/** A document-translation module shown on the dashboard. */
-export interface ReliefProgram {
-  id: string;
-  title: string;
-  agency: string;
-  description: string;
-  /** Pre-filled sample form text used to demo the translator. */
-  sampleFormText: string;
-  officialUrl: string;
-  /** Selects the backend system prompt. */
-  docType: DocType;
-  /** Requires Clerk sign-in when there is NO active emergency. */
-  gated: boolean;
-  /** Grouping label shown on the dashboard. */
-  category: "Emergency" | "Housing & Legal" | "Medical" | "School" | "Government";
-}
+export type DocType = "emergency" | "general";
 
 /** A single actionable step in the interactive task list. */
 export interface TaskItem {

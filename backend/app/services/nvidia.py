@@ -259,14 +259,22 @@ async def _call_model(client: httpx.AsyncClient, messages: list[dict]) -> str:
         raise NvidiaUpstreamError("Unexpected response shape from NVIDIA API.") from exc
 
 
-async def translate_form(text: str, doc_type: str = "general") -> TranslateResponse:
+async def translate_form(
+    document_text: str,
+    doc_type: str = "general",
+    user_context: str = "",
+) -> TranslateResponse:
     """Call the NVIDIA model and return a structured checklist.
 
-    `doc_type` selects the system prompt (emergency relief, general
-    bureaucracy, or the medical bill auditor). Retries once with a corrective
-    instruction if the first reply is not parseable JSON. Raises
-    NvidiaUpstreamError (handled as HTTP 502) rather than crashing if the
-    model output cannot be parsed.
+    Accepts the user's typed `user_context` (what they said they need help
+    with) and/or the `document_text` extracted from an uploaded file (OCR or
+    PDF). Both are forwarded to the model, clearly delineated, so the
+    explanation reflects the user's situation as well as the document.
+
+    `doc_type` selects an optional domain hint layered on top of the canonical
+    system prompt. Retries once with a corrective instruction if the first
+    reply is not parseable JSON. Raises NvidiaUpstreamError (handled as HTTP
+    502) rather than crashing if the model output cannot be parsed.
     """
     settings = get_settings()
 
@@ -275,11 +283,31 @@ async def translate_form(text: str, doc_type: str = "general") -> TranslateRespo
             "NVIDIA_API_KEY is not set. Add it to the backend environment."
         )
 
+    context = (user_context or "").strip()
+    document = (document_text or "").strip()
+
+    # Compose a single user message that clearly separates the user's own
+    # words from the (OCR'd) document text so the model can use both.
+    sections: list[str] = []
+    if context:
+        sections.append(
+            "USER CONTEXT (what the user said they need help with):\n" + context
+        )
+    if document:
+        sections.append(
+            "DOCUMENT TEXT (extracted from the user's uploaded file):\n" + document
+        )
+    user_message = "\n\n".join(sections) if sections else document
+
+    # Provenance for the Source Transparency engine: prefer the document text,
+    # falling back to the user's typed words when no file was provided.
+    source_text = document or context
+
     messages: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
     hint = _doc_type_hint(doc_type)
     if hint:
         messages.append({"role": "system", "content": hint})
-    messages.append({"role": "user", "content": text})
+    messages.append({"role": "user", "content": user_message})
 
     async with httpx.AsyncClient(timeout=60.0) as client:
         content = await _call_model(client, messages)
@@ -299,4 +327,4 @@ async def translate_form(text: str, doc_type: str = "general") -> TranslateRespo
             "The AI returned malformed output. Please try again."
         )
 
-    return _normalize(data, text)
+    return _normalize(data, source_text)

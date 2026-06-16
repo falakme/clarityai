@@ -15,9 +15,12 @@ const config: Config = {
       colors: {
         background: "#EEF0FB", // soft cool off-white
         foreground: "#27314A", // deep slate-indigo, high contrast & friendly
+        // Accent is CSS-variable driven so the whole app can swap from the
+        // calm blue scheme to the high-visibility RED emergency scheme at
+        // runtime (see globals.css + components/theme.tsx).
         primary: {
-          DEFAULT: "#2563EB", // trustworthy blue
-          foreground: "#FFFFFF",
+          DEFAULT: "rgb(var(--color-primary) / <alpha-value>)",
+          foreground: "rgb(var(--color-primary-foreground) / <alpha-value>)",
         },
         warning: {
           DEFAULT: "#F59E0B", // soft amber
@@ -28,7 +31,7 @@ const config: Config = {
           foreground: "#5A6588",
         },
         border: "#E2E7F7",
-        ring: "#2563EB",
+        ring: "rgb(var(--color-ring) / <alpha-value>)",
         card: {
           DEFAULT: "#FBFCFF", // solid clay surface (catches light)
           foreground: "#27314A",
@@ -58,8 +61,9 @@ const config: Config = {
         clay: "0 16px 32px -12px rgba(40,48,86,0.28), inset 0 8px 16px rgba(255,255,255,0.9), inset 0 -8px 14px rgba(40,48,86,0.10)",
         "clay-lg": "0 26px 50px -14px rgba(40,48,86,0.34), inset 0 9px 18px rgba(255,255,255,0.92), inset 0 -9px 16px rgba(40,48,86,0.10)",
         "clay-sm": "0 8px 18px -8px rgba(40,48,86,0.25), inset 0 4px 8px rgba(255,255,255,0.85), inset 0 -4px 8px rgba(40,48,86,0.08)",
-        // Colored buttons get a glossy tinted clay.
-        "clay-primary": "0 16px 28px -10px rgba(37,99,235,0.55), inset 0 8px 14px rgba(255,255,255,0.40), inset 0 -8px 14px rgba(20,46,120,0.45)",
+        // Colored buttons get a glossy tinted clay. Driven by a CSS variable
+        // so it re-tints (blue -> red) with the active theme.
+        "clay-primary": "var(--shadow-clay-primary)",
         "clay-warning": "0 16px 28px -10px rgba(245,158,11,0.50), inset 0 8px 14px rgba(255,255,255,0.55), inset 0 -8px 14px rgba(161,98,7,0.40)",
         // Pressed-in surface for inputs / active state.
         "clay-inset": "inset 0 6px 12px rgba(40,48,86,0.16), inset 0 -4px 8px rgba(255,255,255,0.75)",
