@@ -7,10 +7,10 @@ export function TranslatorSkeleton() {
     <Card aria-busy="true" aria-live="polite">
       <div className="flex items-center gap-3 text-primary">
         <Loader2 className="h-6 w-6 animate-spin" />
-        <p className="text-xl font-semibold">ClearAid is translating the legalese…</p>
+        <p className="text-xl font-semibold">Reading your document</p>
       </div>
       <p className="mt-2 text-base text-muted-foreground">
-        Reading the document and pulling out what matters. This usually takes a few
+        Pulling out the deadlines, the costs, and exactly what to do next. This takes a few
         seconds.
       </p>
 

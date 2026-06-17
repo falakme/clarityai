@@ -43,7 +43,7 @@ export function UrgencyBanner({ tier, brief }: { tier: UrgencyTier; brief: strin
 }
 
 /** Compact urgency pill for the dashboard header. */
-export function UrgencyPill({ tier }: { tier: UrgencyTier }) {
+export function UrgencyPill({ tier, className }: { tier: UrgencyTier; className?: string }) {
   const style = URGENCY_STYLE[tier] ?? URGENCY_STYLE["Informational Only"];
   const Icon = style.icon;
   return (
@@ -51,6 +51,7 @@ export function UrgencyPill({ tier }: { tier: UrgencyTier }) {
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold",
         style.wrap,
+        className,
       )}
     >
       <Icon className="h-3.5 w-3.5" />

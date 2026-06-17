@@ -4,11 +4,8 @@
 
 @layer base {
   /*
-   * Accent theme tokens. The default is the calm, trustworthy blue scheme.
-   * Adding `data-theme="emergency"` to <html> (done programmatically when an
-   * active emergency is detected) swaps every accent surface — buttons,
-   * borders, rings, focus states, and the glossy clay shadow — to a highly
-   * visible RED scheme. See components/theme.tsx.
+   * Accent theme tokens. ClearAid uses one calm, trustworthy blue scheme.
+   * The accent is variable-driven so it can be re-tinted in a single place.
    */
   :root {
     --color-primary: 37 99 235; /* #2563EB trustworthy blue */
@@ -60,6 +57,20 @@
   :focus-visible {
     @apply outline-none ring-4 ring-ring/40 ring-offset-2 ring-offset-background;
   }
+
+  /* Custom thin scrollbar for the dashboard scroll areas. */
+  .scroll-clay {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--color-primary) / 0.3) transparent;
+  }
+  .scroll-clay::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scroll-clay::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--color-primary) / 0.25);
+    border-radius: 9999px;
+  }
 }
 
 @layer components {
@@ -86,5 +97,37 @@
       rgba(255, 255, 255, 0.7) 50%,
       rgba(255, 255, 255, 0) 100%
     );
+  }
+}
+
+
+/* ── Print: render a clean, ink-friendly action plan ──────────────────────
+ * The on-screen app (.print-hidden) is suppressed and a dedicated printable
+ * sheet (.print-only) is shown, so users get a tidy takeaway document
+ * regardless of which dashboard tab is active. */
+@media screen {
+  .print-only {
+    display: none;
+  }
+}
+
+@media print {
+  .print-hidden {
+    display: none !important;
+  }
+  .print-only {
+    display: block;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 12pt;
+  }
+  body {
+    background-image: none !important;
+  }
+  @page {
+    margin: 16mm;
   }
 }

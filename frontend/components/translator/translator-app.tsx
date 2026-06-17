@@ -10,6 +10,7 @@ import type { DemoDoc } from "@/lib/demo-docs";
 import { phaseFade } from "@/lib/motion";
 import { IntakeView } from "./intake-view";
 import { DashboardView } from "./dashboard-view";
+import { PrintablePlan } from "./printable-plan";
 import { TranslatorSkeleton } from "./translator-skeleton";
 
 type Phase = "input" | "loading" | "result" | "error";
@@ -216,6 +217,8 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
               sourceText={sourceText}
               onReset={handleReset}
             />
+            {/* Hidden on screen; rendered cleanly when the user prints. */}
+            <PrintablePlan result={result} checked={checkedTasks} />
           </motion.div>
         ) : (
           <motion.div key="intake" variants={phaseFade} initial="hidden" animate="show" exit="exit">

@@ -166,6 +166,18 @@ the four tabs:
 State is lifted into the orchestrator and the checklist (`translator/task-list.tsx`)
 is a **controlled** component, so switching tabs never wipes progress.
 
+**Responsive shell.** The dashboard adapts to the viewport: phones and tablets
+get the floating bottom nav with a single content column; desktops (`lg+`) get
+a persistent left sidebar, a wider centred column, and two-column tab layouts
+(path beside checklist, resource beside safeguards). The intake screen is a
+two-column hero on desktop and a single stack on mobile.
+
+**Extra capabilities.** Read-aloud of the plain-language summary
+(`components/listen-button.tsx`, Web Speech Synthesis), one-tap **Print / Save
+as PDF** of a clean takeaway sheet (`translator/printable-plan.tsx` + print
+stylesheet), an **offline** indicator (`components/offline-badge.tsx`), and the
+installable PWA shell with offline translation caching.
+
 ---
 
 ## 5. Responsible AI Protocols

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/service-worker";
 import { InstallPrompt } from "@/components/install-prompt";
+import { OfflineBadge } from "@/components/offline-badge";
 import { Providers } from "@/components/providers";
 
 const inter = Inter({
@@ -12,9 +13,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ClearAid — Paperwork, made plain",
+  title: "ClearAid — Understand any official letter",
   description:
-    "Translate confusing bureaucratic documents — eviction notices, school letters, housing forms, medical bills, and disaster relief — into clear, actionable checklists.",
+    "Paste or photograph a confusing letter, bill, or form and get a clear plain-language summary, a step-by-step plan, and trusted local help. Free, private, no sign-in.",
   manifest: "/manifest.json",
   applicationName: "ClearAid",
   icons: {
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={inter.variable}>
       <body className="min-h-screen font-sans">
         <Providers>{children}</Providers>
+        <OfflineBadge />
         <ServiceWorkerRegister />
         <InstallPrompt />
       </body>

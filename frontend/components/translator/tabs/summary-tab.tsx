@@ -1,20 +1,23 @@
 "use client";
 
+import { useMemo } from "react";
 import { Baby, BookOpenText, Languages, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
+import { ListenButton } from "@/components/listen-button";
 import { Item, Stagger } from "@/components/motion";
 import { LANGUAGES } from "@/lib/languages";
+import { markdownToPlainText } from "@/lib/text";
 import type { TranslateResult } from "@/lib/types";
 import { DataTable } from "../data-table";
 import { ConfidenceBadge, UrgencyBanner } from "./shared";
 
 /**
  * Tab 1 — Summary.
- * ELI5 / output-language controls at the top, the urgency classification
- * banner, the "What this means" plain-language explanation, and the optional
- * breakdown table. Changing a control re-fetches the translation (handled by
- * the orchestrator); `refreshing` shows that in-place without leaving the tab.
+ * ELI5 / output-language controls, the urgency banner, the plain-language
+ * explanation (with read-aloud), and the optional breakdown table. Changing a
+ * control re-translates in place; `refreshing` shows that without leaving the
+ * tab.
  */
 export function SummaryTab({
   result,
@@ -31,9 +34,17 @@ export function SummaryTab({
   onLanguageChange: (next: string) => void;
   refreshing: boolean;
 }) {
+  const spoken = useMemo(
+    () =>
+      [result.plain_language_brief, markdownToPlainText(result.plain_language_explanation_markdown)]
+        .filter(Boolean)
+        .join(". "),
+    [result.plain_language_brief, result.plain_language_explanation_markdown],
+  );
+
   return (
     <Stagger className="space-y-5">
-      {/* ELI5 / language controls */}
+      {/* Controls */}
       <Item>
         <div className="flex flex-wrap items-center gap-3">
           <button
@@ -46,7 +57,7 @@ export function SummaryTab({
               (eli5 ? "bg-primary text-primary-foreground" : "bg-card text-foreground")
             }
           >
-            <Baby className="h-5 w-5" /> Explain like I&apos;m 5
+            <Baby className="h-5 w-5" /> Simple words
           </button>
 
           <label className="flex min-h-tap items-center gap-2 rounded-md bg-card px-3 text-base font-semibold shadow-clay-sm">
@@ -68,7 +79,7 @@ export function SummaryTab({
 
           {refreshing && (
             <span className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin text-primary" /> Updating&hellip;
+              <Loader2 className="h-4 w-4 animate-spin text-primary" /> Updating
             </span>
           )}
         </div>
@@ -82,11 +93,14 @@ export function SummaryTab({
       {/* Plain-language explanation */}
       <Item>
         <Card>
-          <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-primary">
               <BookOpenText className="h-4 w-4" /> What this means
             </h2>
-            <ConfidenceBadge score={result.ai_confidence_score} />
+            <div className="flex items-center gap-2">
+              <ConfidenceBadge score={result.ai_confidence_score} />
+              <ListenButton text={spoken} className="px-3 text-sm" />
+            </div>
           </div>
           <Markdown>{result.plain_language_explanation_markdown}</Markdown>
         </Card>

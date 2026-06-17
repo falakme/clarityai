@@ -1,30 +1,7 @@
 "use client";
 
 import { motion, type Variants } from "framer-motion";
-import { fadeUp, popIn, staggerContainer } from "@/lib/motion";
-
-/** Single element that fades + drifts up into view on mount. */
-export function Reveal({
-  children,
-  className,
-  delay = 0,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-}) {
-  return (
-    <motion.div
-      className={className}
-      variants={fadeUp}
-      initial="hidden"
-      animate="show"
-      transition={{ delay }}
-    >
-      {children}
-    </motion.div>
-  );
-}
+import { popIn, staggerContainer } from "@/lib/motion";
 
 /** Container that reveals its <Item> children in a gentle stagger. */
 export function Stagger({

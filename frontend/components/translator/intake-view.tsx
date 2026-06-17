@@ -5,11 +5,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronDown,
   FlaskConical,
+  Globe,
   Lock,
   MapPin,
   Mic,
   MicOff,
   Paperclip,
+  ScanText,
   ShieldCheck,
   Wand2,
 } from "lucide-react";
@@ -21,10 +23,10 @@ import { DEMO_DOCS, type DemoDoc } from "@/lib/demo-docs";
 import { FileIntake } from "./file-intake";
 
 /**
- * State 0 — the intake screen. Fills the viewport. Judge Demo Mode sits at the
- * top as a collapsible, horizontally-scrollable carousel to conserve vertical
- * space. Below it: the hero, a free-text area with voice dictation, an optional
- * location, and a document upload. Inputs are controlled by the orchestrator.
+ * State 0 — the start screen. Fills the viewport. Judge Demo Mode is a
+ * collapsible, swipeable carousel at the top. On desktop the pitch and the
+ * input form sit side by side; on phones they stack. Inputs are controlled by
+ * the orchestrator.
  */
 export function IntakeView({
   text,
@@ -87,8 +89,14 @@ export function IntakeView({
     recognition.start();
   }
 
+  const trust = [
+    { icon: ScanText, label: "Reads PDFs & photos" },
+    { icon: Globe, label: "13 languages + read-aloud" },
+    { icon: ShieldCheck, label: "Nothing stored on our servers" },
+  ];
+
   return (
-    <main className="mx-auto flex min-h-[100dvh] max-w-xl flex-col px-5 py-6">
+    <main className="mx-auto flex min-h-[100dvh] max-w-screen-lg flex-col px-5 py-6 lg:px-8 lg:py-8">
       <header className="flex items-center justify-between">
         <Brand href="/" />
         <span className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
@@ -96,7 +104,7 @@ export function IntakeView({
         </span>
       </header>
 
-      {/* Judge Demo Mode — collapsible, compact horizontal carousel */}
+      {/* Judge Demo Mode — collapsible, swipeable carousel */}
       <section className="mt-5 rounded-xl border-2 border-primary/40 bg-primary/5">
         <button
           type="button"
@@ -105,7 +113,7 @@ export function IntakeView({
           className="flex w-full items-center justify-between gap-2 px-4 py-3 text-primary"
         >
           <span className="flex items-center gap-2 text-sm font-extrabold uppercase tracking-wide">
-            <FlaskConical className="h-4 w-4" /> Judge Demo Mode
+            <FlaskConical className="h-4 w-4" /> Judge demo mode
           </span>
           <ChevronDown
             className={"h-5 w-5 transition-transform " + (demoOpen ? "rotate-180" : "")}
@@ -121,7 +129,7 @@ export function IntakeView({
               className="overflow-hidden"
             >
               <p className="px-4 text-sm text-muted-foreground">
-                One tap loads a complex synthetic document and runs the full pipeline.
+                One tap loads a real-world document and runs the whole pipeline.
               </p>
               <div className="flex snap-x gap-2 overflow-x-auto px-4 pb-4 pt-3">
                 {DEMO_DOCS.map((doc) => (
@@ -130,7 +138,7 @@ export function IntakeView({
                     type="button"
                     onClick={() => onLoadDemo(doc)}
                     title={doc.caption}
-                    className="flex min-w-[8.5rem] shrink-0 snap-start flex-col gap-1 rounded-lg border border-white/70 bg-card p-3 text-left shadow-clay-sm transition-all hover:brightness-[1.02] active:translate-y-0.5"
+                    className="flex min-w-[9rem] shrink-0 snap-start flex-col gap-1 rounded-lg border border-white/70 bg-card p-3 text-left shadow-clay-sm transition-all hover:brightness-[1.02] active:translate-y-0.5"
                   >
                     <span className="text-sm font-bold text-foreground">{doc.label}</span>
                     <span className="text-xs leading-snug text-muted-foreground">
@@ -144,88 +152,102 @@ export function IntakeView({
         </AnimatePresence>
       </section>
 
-      {/* Hero */}
-      <div className="mb-5 mt-7">
-        <p className="text-base font-semibold text-primary">Paperwork, made plain</p>
-        <h1 className="mt-1 text-3xl font-extrabold tracking-tight">
-          Confusing letter? We&apos;ll explain it.
-        </h1>
-        <p className="mt-2 text-base text-muted-foreground">
-          Turn eviction notices, discharge papers, benefit letters, and bills into clear,
-          plain-language steps. Describe your situation, paste the text, or upload a PDF
-          or photo.
-        </p>
+      {/* Pitch + form */}
+      <div className="mt-8 lg:grid lg:grid-cols-2 lg:items-start lg:gap-12">
+        {/* Pitch */}
+        <div className="lg:pt-6">
+          <p className="text-base font-semibold text-primary">Free · Private · No sign-in</p>
+          <h1 className="mt-2 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+            Understand any confusing letter in seconds.
+          </h1>
+          <p className="mt-3 text-lg text-muted-foreground">
+            Paste the text, snap a photo, or just describe what happened. ClearAid explains
+            it in plain language, lays out exactly what to do, and points you to trusted
+            local help.
+          </p>
+
+          <ul className="mt-6 hidden gap-3 lg:grid">
+            {trust.map(({ icon: Icon, label }) => (
+              <li key={label} className="flex items-center gap-3 text-base font-semibold">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary shadow-clay-sm">
+                  <Icon className="h-5 w-5" />
+                </span>
+                {label}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Input form */}
+        <Card className="mt-7 lg:mt-0">
+          <div className="relative">
+            <Textarea
+              rows={6}
+              value={text}
+              onChange={(e) => onTextChange(e.target.value)}
+              placeholder="Tell us what's going on, for example: 'I got this letter and I don't understand the deadline.' Or paste the notice, bill, or form here."
+              aria-label="Describe what you need help with"
+            />
+            {voiceSupported && (
+              <button
+                type="button"
+                onClick={toggleVoice}
+                aria-label={listening ? "Stop dictation" : "Dictate with your voice"}
+                aria-pressed={listening}
+                className={
+                  "absolute bottom-3 right-3 flex h-11 w-11 items-center justify-center rounded-full shadow-clay-sm transition-all " +
+                  (listening
+                    ? "animate-pulse bg-primary text-primary-foreground"
+                    : "bg-card text-primary")
+                }
+              >
+                {listening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+              </button>
+            )}
+          </div>
+
+          <label className="mt-4 flex min-h-tap items-center gap-2 rounded-md bg-card px-3 text-base font-semibold shadow-clay-sm">
+            <MapPin className="h-5 w-5 shrink-0 text-primary" />
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => onLocationChange(e.target.value)}
+              placeholder="Your city or state (optional)"
+              aria-label="Your location (optional)"
+              className="w-full bg-transparent py-2 font-medium outline-none placeholder:font-normal placeholder:text-muted-foreground"
+            />
+          </label>
+
+          <div className="mt-5">
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+              <Paperclip className="h-4 w-4" /> Add a document (optional)
+            </div>
+            <FileIntake file={file} onFile={onFileChange} />
+          </div>
+
+          <AnimatePresence>
+            {error && (
+              <motion.p
+                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                className="overflow-hidden rounded-md bg-warning/15 p-3 text-base text-amber-800"
+              >
+                {error}
+              </motion.p>
+            )}
+          </AnimatePresence>
+
+          <Button size="lg" className="mt-6 w-full" onClick={onSubmit} disabled={!canSubmit}>
+            <Wand2 className="h-5 w-5" /> Explain this for me
+          </Button>
+        </Card>
       </div>
 
-      {/* Intake form */}
-      <Card>
-        <div className="relative">
-          <Textarea
-            rows={6}
-            value={text}
-            onChange={(e) => onTextChange(e.target.value)}
-            placeholder="Type what you need help with — for example: 'I got this letter and I don't understand the deadline.' Or paste the text of a notice, bill, or form here…"
-            aria-label="Describe what you need help with"
-          />
-          {voiceSupported && (
-            <button
-              type="button"
-              onClick={toggleVoice}
-              aria-label={listening ? "Stop dictation" : "Dictate with your voice"}
-              aria-pressed={listening}
-              className={
-                "absolute bottom-3 right-3 flex h-11 w-11 items-center justify-center rounded-full shadow-clay-sm transition-all " +
-                (listening
-                  ? "animate-pulse bg-primary text-primary-foreground"
-                  : "bg-card text-primary")
-              }
-            >
-              {listening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-            </button>
-          )}
-        </div>
-
-        <label className="mt-4 flex min-h-tap items-center gap-2 rounded-md bg-card px-3 text-base font-semibold shadow-clay-sm">
-          <MapPin className="h-5 w-5 shrink-0 text-primary" />
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => onLocationChange(e.target.value)}
-            placeholder="Your city/state (optional) — finds local support"
-            aria-label="Your location (optional)"
-            className="w-full bg-transparent py-2 font-medium outline-none placeholder:font-normal placeholder:text-muted-foreground"
-          />
-        </label>
-
-        <div className="mt-5">
-          <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-            <Paperclip className="h-4 w-4" /> ADD A DOCUMENT (OPTIONAL)
-          </div>
-          <FileIntake file={file} onFile={onFileChange} />
-        </div>
-
-        <AnimatePresence>
-          {error && (
-            <motion.p
-              initial={{ opacity: 0, height: 0, marginTop: 0 }}
-              animate={{ opacity: 1, height: "auto", marginTop: 16 }}
-              exit={{ opacity: 0, height: 0, marginTop: 0 }}
-              className="overflow-hidden rounded-md bg-warning/15 p-3 text-base text-amber-800"
-            >
-              {error}
-            </motion.p>
-          )}
-        </AnimatePresence>
-
-        <Button size="lg" className="mt-6 w-full" onClick={onSubmit} disabled={!canSubmit}>
-          <Wand2 className="h-5 w-5" /> Explain this for me
-        </Button>
-      </Card>
-
-      <p className="mt-auto pt-6 text-center text-sm text-muted-foreground">
+      <p className="mt-auto pt-8 text-center text-sm text-muted-foreground">
         <span className="flex items-center justify-center gap-1.5">
-          <ShieldCheck className="h-4 w-4" /> Stateless &amp; private — ClearAid stores
-          nothing and never submits anything for you.
+          <ShieldCheck className="h-4 w-4" /> Private by design. ClearAid never files or
+          submits anything for you.
         </span>
       </p>
     </main>

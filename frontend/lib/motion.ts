@@ -39,13 +39,6 @@ export const staggerContainer: Variants = {
   },
 };
 
-// Forward slide used between onboarding steps / wizard phases.
-export const slideStep: Variants = {
-  hidden: { opacity: 0, x: 48, scale: 0.98 },
-  show: { opacity: 1, x: 0, scale: 1, transition: gentle },
-  exit: { opacity: 0, x: -48, scale: 0.98, transition: { duration: 0.28, ease: "easeIn" } },
-};
-
 // Cross-fade with a soft vertical drift, for swapping translator phases.
 export const phaseFade: Variants = {
   hidden: { opacity: 0, y: 16 },

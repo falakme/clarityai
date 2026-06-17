@@ -1,12 +1,12 @@
 {
-  "name": "ClearAid — Crisis Navigation",
+  "name": "ClearAid — Understand any official letter",
   "short_name": "ClearAid",
-  "description": "Proactive crisis navigation and bureaucratic translation for displaced families.",
+  "description": "Turn confusing letters, bills, and forms into a clear summary, a step-by-step plan, and trusted local help. Free, private, no sign-in.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F9FAFB",
+  "background_color": "#EEF0FB",
   "theme_color": "#2563EB",
   "categories": ["utilities", "government", "productivity"],
   "icons": [

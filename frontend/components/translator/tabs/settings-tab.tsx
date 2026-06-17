@@ -1,6 +1,6 @@
 "use client";
 
-import { RotateCcw, ShieldCheck } from "lucide-react";
+import { Printer, RotateCcw, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DataPurgeButton } from "@/components/data-purge-button";
@@ -8,32 +8,35 @@ import { Item, Stagger } from "@/components/motion";
 
 /**
  * Tab 4 — Settings.
- * Reset to the intake screen (State 0), the "Erase my data" panic button
- * (clears localStorage), and the standard disclaimers.
+ * Print/export, reset to the start screen, the "erase my data" panic button,
+ * and the disclaimer.
  */
 export function SettingsTab({ onReset }: { onReset: () => void }) {
   return (
     <Stagger className="space-y-5">
       <Item>
         <Card>
-          <h2 className="text-sm font-bold uppercase tracking-wide text-primary">Document</h2>
+          <h2 className="text-sm font-bold uppercase tracking-wide text-primary">This document</h2>
           <p className="mb-4 mt-1 text-base text-muted-foreground">
-            Done with this one? Start over with a new letter, bill, or form.
+            Save a clean copy to keep or share, or start fresh with another letter.
           </p>
-          <Button className="w-full" onClick={onReset}>
-            <RotateCcw className="h-5 w-5" /> Translate another document
-          </Button>
+          <div className="space-y-3">
+            <Button variant="outline" className="w-full" onClick={() => window.print()}>
+              <Printer className="h-5 w-5" /> Print or save as PDF
+            </Button>
+            <Button className="w-full" onClick={onReset}>
+              <RotateCcw className="h-5 w-5" /> Start a new document
+            </Button>
+          </div>
         </Card>
       </Item>
 
       <Item>
         <Card>
-          <h2 className="text-sm font-bold uppercase tracking-wide text-primary">
-            Privacy &amp; data
-          </h2>
+          <h2 className="text-sm font-bold uppercase tracking-wide text-primary">Your privacy</h2>
           <p className="mb-4 mt-1 text-base text-muted-foreground">
-            ClearAid is stateless and stores nothing on our servers. The only thing kept
-            on this device is your checklist progress. You can wipe it anytime.
+            We store nothing on our servers. The only thing saved on this device is your
+            checklist progress, and you can wipe it instantly.
           </p>
           <DataPurgeButton className="w-full justify-center rounded-md border border-white/70 bg-card py-3 shadow-clay-sm" />
         </Card>
@@ -41,17 +44,15 @@ export function SettingsTab({ onReset }: { onReset: () => void }) {
 
       <Item>
         <div className="space-y-2 px-1 text-center text-sm text-muted-foreground">
-          <p className="flex items-center justify-center gap-1.5 font-semibold">
-            <ShieldCheck className="h-4 w-4" /> Private by design
+          <p className="flex items-center justify-center gap-1.5 font-semibold text-foreground">
+            <ShieldCheck className="h-4 w-4 text-primary" /> ClearAid explains, you decide
           </p>
           <p>
-            ClearAid only explains and organizes. It never submits anything — you stay in
-            control of signing and submitting. It does not provide official medical, legal,
-            or financial advice.
+            ClearAid helps you understand and organize. It never files or submits anything
+            for you, and it isn&apos;t a substitute for advice from a lawyer, doctor, or
+            caseworker.
           </p>
-          <p className="pt-2">
-            Built for the USAII Global AI Hackathon · Crisis-to-Action Translator
-          </p>
+          <p className="pt-2">USAII Global AI Hackathon · Crisis-to-Action Translator</p>
         </div>
       </Item>
     </Stagger>

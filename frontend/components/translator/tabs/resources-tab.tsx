@@ -19,10 +19,10 @@ import { buildShareText } from "./shared";
 /**
  * Tab 3 — Resources.
  * The agentic "Verified Local Support" card and the Responsible AI &
- * Human-in-the-Loop Safeguards block. The "Open verified resource" (and the
- * Share plan) actions live here and stay strictly disabled until the user
- * ticks the acknowledgement checkbox. `acknowledged` is owned by the
- * orchestrator so it survives tab switches.
+ * Human-in-the-Loop block sit side by side on desktop. The "Open verified
+ * resource" and "Share plan" actions stay disabled until the user ticks the
+ * acknowledgement checkbox. `acknowledged` is owned by the orchestrator so it
+ * survives tab switches.
  */
 export function ResourcesTab({
   result,
@@ -48,7 +48,7 @@ export function ResourcesTab({
       }
       if (typeof navigator !== "undefined" && navigator.clipboard) {
         await navigator.clipboard.writeText(textToShare);
-        setShareMsg("Plan copied to clipboard.");
+        setShareMsg("Copied to clipboard.");
         setTimeout(() => setShareMsg(""), 2500);
       }
     } catch {
@@ -57,27 +57,23 @@ export function ResourcesTab({
   }
 
   return (
-    <Stagger className="space-y-5">
+    <Stagger className="grid gap-5 lg:grid-cols-2 lg:items-start">
       {/* Verified Local Support — agentic recommendation (AI-evaluated) */}
-      {recommendationLoading && !hasResource && (
-        <Item>
+      <Item>
+        {recommendationLoading && !hasResource ? (
           <Card className="border-2 border-emerald-200 bg-emerald-50/40">
             <h2 className="mb-1 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-emerald-700">
-              <BadgeCheck className="h-4 w-4" /> Verified Local Support
+              <BadgeCheck className="h-4 w-4" /> Verified local support
             </h2>
             <p className="flex items-center gap-2 text-base text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
-              Searching for a trustworthy local resource and evaluating the options&hellip;
+              Finding a trustworthy organization and checking it&apos;s the right fit
             </p>
           </Card>
-        </Item>
-      )}
-
-      {hasResource && (
-        <Item>
+        ) : hasResource ? (
           <Card className="border-2 border-emerald-200 bg-emerald-50/40">
             <h2 className="mb-1 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-emerald-700">
-              <BadgeCheck className="h-4 w-4" /> Verified Local Support
+              <BadgeCheck className="h-4 w-4" /> Verified local support
             </h2>
             <p className="text-lg font-extrabold text-foreground">
               {result.recommended_resource_name || "Recommended resource"}
@@ -86,7 +82,7 @@ export function ResourcesTab({
               <p className="mt-2 flex items-start gap-2 rounded-md bg-card/70 p-3 text-base text-muted-foreground">
                 <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
                 <span>
-                  <span className="font-semibold text-emerald-700">AI reasoning: </span>
+                  <span className="font-semibold text-emerald-700">Why this one: </span>
                   {result.ai_reasoning_for_recommendation}
                 </span>
               </p>
@@ -95,29 +91,24 @@ export function ResourcesTab({
               {result.recommended_resource_url}
             </p>
           </Card>
-        </Item>
-      )}
-
-      {!recommendationLoading && !hasResource && (
-        <Item>
+        ) : (
           <Card>
             <h2 className="mb-1 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-emerald-700">
-              <BadgeCheck className="h-4 w-4" /> Verified Local Support
+              <BadgeCheck className="h-4 w-4" /> Verified local support
             </h2>
             <p className="text-base text-muted-foreground">
-              No verified local resource was found for this document. Try adding your
-              city/state on the intake screen to scope the search.
+              No specific local organization came up for this one. Add your city or state
+              on the start screen and we&apos;ll look again.
             </p>
           </Card>
-        </Item>
-      )}
+        )}
+      </Item>
 
       {/* Responsible AI & Human-in-the-Loop Safeguards (amber gateway) */}
       <Item>
-        <div className="rounded-md border-2 border-amber-300 bg-amber-50/60 p-5">
+        <div className="rounded-md border-2 border-amber-300 bg-amber-50/60 p-5 sm:p-6">
           <h2 className="flex items-center gap-2 text-base font-extrabold text-amber-900">
-            <ShieldCheck className="h-5 w-5" /> Responsible AI &amp; Human-in-the-Loop
-            Safeguards
+            <ShieldCheck className="h-5 w-5" /> Responsible AI &amp; human-in-the-loop
           </h2>
 
           {/* Confidence indicator */}
@@ -148,7 +139,7 @@ export function ResourcesTab({
           <div className="mt-4 space-y-3">
             {!acknowledged && (
               <p className="text-sm font-medium text-amber-800">
-                Confirm the statement above to enable the actions below.
+                Tick the box above to unlock the buttons below.
               </p>
             )}
 
