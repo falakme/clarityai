@@ -1,15 +1,18 @@
-"""Core Crisis-to-Action translation endpoint.
+"""Core Crisis-to-Action translation endpoints.
 
-Accepts either pasted text OR an uploaded document (PDF / image). The pipeline:
+The work is split across TWO endpoints so neither request runs long enough to
+hit a reverse-proxy / gateway timeout (which surfaces in the browser as a
+502 Bad Gateway):
 
-  1. Extract text (pypdf / OCR) and redact PII.
-  2. AI step 1 — classify + summarize + extract into a structured object.
-  3. Retrieval — query Brave Search by document category + location.
-  4. AI step 2 — evaluate the live search hits and select ONE trustworthy
-     "Verified Local Support" resource, with a one-sentence rationale.
+  POST /api/translate-form  — extract text, redact PII, ONE NVIDIA call that
+                              classifies + summarizes + extracts. Fast.
+  POST /api/recommend       — the agentic step: Brave retrieval + a SECOND
+                              NVIDIA call that evaluates the hits and selects
+                              one "Verified Local Support" resource. The client
+                              fires this after the translation renders, so the
+                              card streams in without blocking the result.
 
-The endpoint NEVER submits anything on the user's behalf; it only clarifies
-and organizes.
+Neither endpoint ever submits anything on the user's behalf.
 """
 
 from typing import Optional
@@ -17,7 +20,7 @@ from typing import Optional
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from app.config import get_settings
-from app.schemas import TranslateResponse
+from app.schemas import RecommendRequest, TranslateResponse, VerifiedResource
 from app.services import brave
 from app.services.extract import ExtractionError, extract_text
 from app.services.pii import redact_pii
@@ -40,14 +43,14 @@ async def translate(
     doc_type: str = Form(default="general"),
     eli5: bool = Form(default=False),
     language: str = Form(default=""),
-    location: str = Form(default=""),
     file: Optional[UploadFile] = File(default=None),
 ) -> TranslateResponse:
     """Translate dense paperwork into an actionable, multi-capability workspace.
 
-    Provide `text` OR a `file` (PDF/image). `location` (optional) scopes the
-    agentic resource recommendation; when empty, the model's detected location
-    is used. Human-in-the-loop: this endpoint NEVER submits anything.
+    Provide `text` OR a `file` (PDF/image). Returns the structured translation
+    (classification + summary + extraction). The "Verified Local Support"
+    recommendation is fetched separately via POST /api/recommend so this call
+    stays fast. Human-in-the-loop: this endpoint NEVER submits anything.
     """
     settings = get_settings()
     if doc_type not in ALLOWED_DOC_TYPES:
@@ -82,7 +85,7 @@ async def translate(
     user_context = redact_pii(user_context)
     document_text = redact_pii(document_text)
 
-    # AI step 1 — classify + summarize + extract.
+    # AI step — classify + summarize + extract (single call, kept fast).
     try:
         result = await translate_form(
             document_text,
@@ -96,23 +99,27 @@ async def translate(
     except NvidiaUpstreamError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
-    # Agentic recommendation — retrieval (Brave) + AI evaluation. Best-effort:
-    # any failure here leaves the recommendation fields empty and the core
-    # translation is still returned.
-    search_location = (location or "").strip() or result.detected_location
-    try:
-        query = brave.build_recommendation_query(result.document_category, search_location)
-        hits = await brave.search(query)
-        if hits:
-            verified = await evaluate_resources(
-                hits,
-                document_brief=result.plain_language_brief,
-                document_category=result.document_category,
-            )
-            result.recommended_resource_name = verified.recommended_resource_name
-            result.recommended_resource_url = verified.recommended_resource_url
-            result.ai_reasoning_for_recommendation = verified.ai_reasoning_for_recommendation
-    except Exception:  # noqa: BLE001 - recommendations never break the response
-        pass
-
     return result
+
+
+@router.post("/api/recommend", response_model=VerifiedResource)
+async def recommend(payload: RecommendRequest) -> VerifiedResource:
+    """Agentic resource recommendation: Brave retrieval + AI evaluation.
+
+    Best-effort by design — returns empty fields (rather than an error) when
+    Brave/NVIDIA are unconfigured, find nothing, or fail, so the client can
+    simply omit the "Verified Local Support" card.
+    """
+    search_location = (payload.location or "").strip() or (payload.detected_location or "").strip()
+    try:
+        query = brave.build_recommendation_query(payload.document_category, search_location)
+        hits = await brave.search(query)
+        if not hits:
+            return VerifiedResource()
+        return await evaluate_resources(
+            hits,
+            document_brief=payload.plain_language_brief,
+            document_category=payload.document_category,
+        )
+    except Exception:  # noqa: BLE001 - recommendations never raise to the client
+        return VerifiedResource()

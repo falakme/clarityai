@@ -43,6 +43,17 @@ class VerifiedResource(BaseModel):
     ai_reasoning_for_recommendation: str = ""
 
 
+class RecommendRequest(BaseModel):
+    """Input for the agentic recommendation step (run as a separate request so
+    the main translation can return fast and stay under gateway timeouts)."""
+
+    document_category: str = "general"
+    plain_language_brief: str = ""
+    # Location source priority: explicit `location`, else `detected_location`.
+    location: str = ""
+    detected_location: str = ""
+
+
 # --- Translate response ---
 URGENCY_TIERS = ("Urgent Action Required", "Time Sensitive", "Informational Only")
 

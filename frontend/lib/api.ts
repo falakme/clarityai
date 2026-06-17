@@ -55,8 +55,9 @@ export interface TranslateInput {
 /**
  * Core call. Sends the user's typed context AND/OR an uploaded document
  * (PDF/image) as multipart form data; receives a structured, multi-capability
- * result (classification, summary, extraction, and an agentic resource
- * recommendation). Never submits anything on the user's behalf.
+ * result (classification, summary, extraction). The "Verified Local Support"
+ * recommendation is fetched separately via `recommend()` so this call stays
+ * well under gateway timeouts. Never submits anything on the user's behalf.
  */
 export async function translateForm(input: TranslateInput): Promise<TranslateResult> {
   const form = new FormData();
@@ -64,13 +65,46 @@ export async function translateForm(input: TranslateInput): Promise<TranslateRes
   form.append("doc_type", input.docType ?? "general");
   if (input.eli5) form.append("eli5", "true");
   if (input.language && input.language.trim()) form.append("language", input.language.trim());
-  if (input.location && input.location.trim()) form.append("location", input.location.trim());
   if (input.file) form.append("file", input.file);
 
   // Note: do NOT set Content-Type — the browser sets the multipart boundary.
   const res = await fetch(`${API_BASE_URL}/api/translate-form`, {
     method: "POST",
     body: form,
+  });
+  if (!res.ok) throw new ApiError(await parseError(res), res.status);
+  return res.json();
+}
+
+/** The single AI-selected support resource (agentic recommendation). */
+export interface Recommendation {
+  recommended_resource_name: string;
+  recommended_resource_url: string;
+  ai_reasoning_for_recommendation: string;
+}
+
+export interface RecommendInput {
+  document_category: string;
+  plain_language_brief: string;
+  location?: string;
+  detected_location?: string;
+}
+
+/**
+ * Agentic "Verified Local Support" recommendation: Brave retrieval + an AI
+ * evaluation that picks one trustworthy resource. Best-effort — returns empty
+ * fields when nothing suitable is found, so callers just omit the card.
+ */
+export async function recommend(input: RecommendInput): Promise<Recommendation> {
+  const res = await fetch(`${API_BASE_URL}/api/recommend`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      document_category: input.document_category || "general",
+      plain_language_brief: input.plain_language_brief || "",
+      location: input.location || "",
+      detected_location: input.detected_location || "",
+    }),
   });
   if (!res.ok) throw new ApiError(await parseError(res), res.status);
   return res.json();

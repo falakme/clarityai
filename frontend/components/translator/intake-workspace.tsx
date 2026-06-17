@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { phaseFade } from "@/lib/motion";
-import { translateForm, ApiError } from "@/lib/api";
+import { translateForm, recommend, ApiError } from "@/lib/api";
 import { LANGUAGES } from "@/lib/languages";
 import type { TranslateResult } from "@/lib/types";
 import { FileIntake } from "./file-intake";
@@ -68,6 +68,11 @@ export const IntakeWorkspace = forwardRef<IntakeWorkspaceHandle, Props>(function
   const [error, setError] = useState("");
   const [eli5, setEli5] = useState(false);
   const [language, setLanguage] = useState<string>("English");
+  // The "Verified Local Support" recommendation is fetched in a SEPARATE
+  // request after the translation renders, so the slower Brave + AI-evaluation
+  // step never blocks the main result (and never trips a gateway timeout).
+  const [recLoading, setRecLoading] = useState(false);
+  const runIdRef = useRef(0);
 
   // --- Voice intake (Web Speech API) ---
   const [listening, setListening] = useState(false);
@@ -121,8 +126,11 @@ export const IntakeWorkspace = forwardRef<IntakeWorkspaceHandle, Props>(function
       const submitText = opts?.text ?? text;
       const submitFile = opts?.file !== undefined ? opts.file : file;
       if (!submitFile && submitText.trim().length === 0) return;
+      const runId = ++runIdRef.current;
+      const submitLocation = opts?.location ?? location;
       setPhase("loading");
       setError("");
+      setRecLoading(false);
       try {
         const res = await translateForm({
           text: submitText,
@@ -130,11 +138,31 @@ export const IntakeWorkspace = forwardRef<IntakeWorkspaceHandle, Props>(function
           docType: opts?.docType ?? docType,
           eli5: opts?.eli5 ?? eli5,
           language: opts?.language ?? language,
-          location: opts?.location ?? location,
         });
+        if (runId !== runIdRef.current) return; // a newer run superseded this one
         setResult(res);
         setPhase("result");
+
+        // Fire-and-forget the agentic recommendation; merge it in when ready.
+        setRecLoading(true);
+        recommend({
+          document_category: res.document_category,
+          plain_language_brief: res.plain_language_brief,
+          location: submitLocation,
+          detected_location: res.detected_location,
+        })
+          .then((rec) => {
+            if (runId !== runIdRef.current) return;
+            setResult((prev) => (prev ? { ...prev, ...rec } : prev));
+          })
+          .catch(() => {
+            /* recommendations are best-effort */
+          })
+          .finally(() => {
+            if (runId === runIdRef.current) setRecLoading(false);
+          });
       } catch (e) {
+        if (runId !== runIdRef.current) return;
         const msg =
           e instanceof ApiError
             ? e.status === 503
@@ -236,6 +264,7 @@ export const IntakeWorkspace = forwardRef<IntakeWorkspaceHandle, Props>(function
             result={result}
             originalText={originalText}
             storageKey={storageKey}
+            recommendationLoading={recLoading}
             onReset={() => {
               setFile(null);
               setText("");

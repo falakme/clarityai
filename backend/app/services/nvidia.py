@@ -349,6 +349,16 @@ async def translate_form(
     context = (user_context or "").strip()
     document = (document_text or "").strip()
 
+    # Bound the input so a very large paste/OCR result can't blow the model's
+    # context window (an upstream 400 -> 502) or push latency past the gateway
+    # timeout. Generous limits that comfortably hold a multi-page notice.
+    MAX_DOC_CHARS = 20000
+    MAX_CONTEXT_CHARS = 6000
+    if len(document) > MAX_DOC_CHARS:
+        document = document[:MAX_DOC_CHARS] + "\n\n[Document truncated for length.]"
+    if len(context) > MAX_CONTEXT_CHARS:
+        context = context[:MAX_CONTEXT_CHARS] + " [truncated]"
+
     sections: list[str] = []
     if context:
         sections.append("USER CONTEXT (what the user said they need help with):\n" + context)

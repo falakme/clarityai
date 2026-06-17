@@ -11,6 +11,7 @@ import {
   ExternalLink,
   FileSearch,
   Info,
+  Loader2,
   RotateCcw,
   ShieldCheck,
   Share2,
@@ -33,6 +34,8 @@ interface Props {
   originalText: string;
   /** Stable key for persisting checklist progress to localStorage. */
   storageKey: string;
+  /** True while the agentic recommendation is still being fetched. */
+  recommendationLoading?: boolean;
   /** Optional "official site" link shown as a gated action. */
   officialUrl?: string;
   onReset: () => void;
@@ -106,6 +109,7 @@ export function TranslatorResult({
   result,
   originalText,
   storageKey,
+  recommendationLoading = false,
   officialUrl,
   onReset,
 }: Props) {
@@ -170,6 +174,20 @@ export function TranslatorResult({
       </Item>
 
       {/* 5. Verified Local Support — agentic recommendation (AI-evaluated) */}
+      {recommendationLoading && !hasResource && (
+        <Item>
+          <Card className="border-2 border-emerald-200 bg-emerald-50/40">
+            <h2 className="mb-1 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-emerald-700">
+              <BadgeCheck className="h-4 w-4" /> Verified Local Support
+            </h2>
+            <p className="flex items-center gap-2 text-base text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
+              Searching for a trustworthy local resource and evaluating the
+              options&hellip;
+            </p>
+          </Card>
+        </Item>
+      )}
       {hasResource && (
         <Item>
           <Card className="border-2 border-emerald-200 bg-emerald-50/40">
