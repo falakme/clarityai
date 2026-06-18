@@ -5,7 +5,7 @@ POST /api/tts  — synthesize a neutral English neural voice for the supplied
 
 Returns HTTP 503 when AZURE_TTS_KEY is not configured so the frontend can fall
 back to the browser's built-in Web Speech synthesis; 502 on upstream failure.
-Like the rest of ClearAid, this endpoint is stateless and persists nothing.
+Like the rest of ClarityAI, this endpoint is stateless and persists nothing.
 """
 
 from fastapi import APIRouter, HTTPException, Response

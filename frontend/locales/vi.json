@@ -1,7 +1,7 @@
 {
   "tagline": "Miễn phí · Riêng tư · Ngôn ngữ dễ hiểu",
   "headline": "Hiểu bất kỳ lá thư khó hiểu nào chỉ trong vài giây.",
-  "subhead": "Dán văn bản, chụp ảnh hoặc chỉ cần nói. ClearAid giải thích bằng ngôn ngữ dễ hiểu, chỉ cho bạn chính xác phải làm gì và hướng bạn đến sự trợ giúp địa phương đáng tin cậy.",
+  "subhead": "Dán văn bản, chụp ảnh hoặc chỉ cần nói. ClarityAI giải thích bằng ngôn ngữ dễ hiểu, chỉ cho bạn chính xác phải làm gì và hướng bạn đến sự trợ giúp địa phương đáng tin cậy.",
   "trust_docs": "Đọc PDF và ảnh",
   "trust_langs": "15 ngôn ngữ + đọc to",
   "trust_private": "Không lưu trữ gì trên máy chủ của chúng tôi",
@@ -26,7 +26,7 @@
   "file_ready": "sẵn sàng để dịch",
   "remove_file": "Xóa tệp",
   "submit": "Giải thích giúp tôi",
-  "footer": "Riêng tư theo thiết kế. ClearAid không bao giờ nộp hay gửi bất cứ điều gì thay bạn.",
+  "footer": "Riêng tư theo thiết kế. ClarityAI không bao giờ nộp hay gửi bất cứ điều gì thay bạn.",
   "voice_unsupported": "Trình duyệt này không hỗ trợ nhập bằng giọng nói. Hãy thử gõ chữ.",
   "back_to_keyboard": "Chuyển sang bàn phím",
   "speak_situation": "Kể về tình huống của bạn",
@@ -51,7 +51,7 @@
   "done": "xong",
   "no_action_steps": "Tài liệu này không yêu cầu bước hành động cụ thể. Hãy vào tab Tóm tắt để xem giải thích đầy đủ.",
   "compare_original": "So sánh với bản gốc",
-  "source_hint": "Đây là văn bản chính xác mà ClearAid đã đọc. Luôn đối chiếu ngày tháng và số tiền với nó.",
+  "source_hint": "Đây là văn bản chính xác mà ClarityAI đã đọc. Luôn đối chiếu ngày tháng và số tiền với nó.",
   "verified_support": "Hỗ trợ địa phương đã xác minh",
   "finding_resource": "Đang tìm một tổ chức đáng tin cậy và kiểm tra xem có phù hợp không",
   "recommended_resource": "Tài nguyên được đề xuất",
@@ -71,7 +71,7 @@
   "start_new_document": "Bắt đầu một tài liệu mới",
   "your_privacy": "Quyền riêng tư của bạn",
   "your_privacy_hint": "Chúng tôi không lưu trữ gì trên máy chủ. Thứ duy nhất được lưu trên thiết bị này là tiến độ danh sách của bạn, và bạn có thể xóa ngay lập tức.",
-  "explains_you_decide": "ClearAid giải thích, bạn quyết định",
-  "disclaimer_body": "ClearAid giúp bạn hiểu và sắp xếp. Nó không bao giờ nộp hay gửi bất cứ điều gì thay bạn, và không thay thế lời khuyên của luật sư, bác sĩ hay nhân viên xã hội.",
+  "explains_you_decide": "ClarityAI giải thích, bạn quyết định",
+  "disclaimer_body": "ClarityAI giúp bạn hiểu và sắp xếp. Nó không bao giờ nộp hay gửi bất cứ điều gì thay bạn, và không thay thế lời khuyên của luật sư, bác sĩ hay nhân viên xã hội.",
   "tts_english_only": "Đọc to phát bằng tiếng Anh."
 }

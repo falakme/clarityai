@@ -35,7 +35,7 @@ interface Props {
  */
 export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "home" }: Props) {
   // Intake inputs.
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [text, setText] = useState("");
   const [docType, setDocType] = useState<"emergency" | "general">(docTypeProp);
 
@@ -51,24 +51,24 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
   const [language, setLanguage] = useState("English");
   const [acknowledged, setAcknowledged] = useState(false);
   const [checkedTasks, setCheckedTasks] = useLocalStorage<Record<string, boolean>>(
-    `clearaid.tasks.${storageKey}`,
+    `clarityai.tasks.${storageKey}`,
     {},
   );
 
-  const canSubmit = !!file || text.trim().length > 0;
+  const canSubmit = files.length > 0 || text.trim().length > 0;
 
   const runTranslate = useCallback(
     async (opts?: {
       language?: string;
       text?: string;
-      file?: File | null;
+      files?: File[];
       docType?: "emergency" | "general";
       /** In-dashboard re-fetch (control change) — stay on the dashboard. */
       refresh?: boolean;
     }) => {
       const submitText = opts?.text ?? text;
-      const submitFile = opts?.file !== undefined ? opts.file : file;
-      if (!submitFile && submitText.trim().length === 0) return;
+      const submitFiles = opts?.files !== undefined ? opts.files : files;
+      if (submitFiles.length === 0 && submitText.trim().length === 0) return;
 
       const runId = ++runIdRef.current;
       const isRefresh = !!opts?.refresh && result !== null;
@@ -84,7 +84,7 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
       try {
         const res = await translateForm({
           text: submitText,
-          file: submitFile,
+          files: submitFiles,
           docType: opts?.docType ?? docType,
           language: opts?.language ?? language,
         });
@@ -124,7 +124,7 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
             ? e.status === 503
               ? "The AI service isn't configured yet. Add an NVIDIA_API_KEY to the backend."
               : e.status === 502
-                ? "ClearAid had trouble reading that. Please try again."
+                ? "ClarityAI had trouble reading that. Please try again."
                 : e.status === 422 || e.status === 413
                   ? e.message === "blur_detected"
                     ? "This photo is a bit too blurry for us to read accurately. To ensure we give you the right guidance, please take another photo with good lighting."
@@ -138,7 +138,7 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
         if (runId === runIdRef.current && isRefresh) setRefreshing(false);
       }
     },
-    [file, text, docType, language, result, setCheckedTasks],
+    [files, text, docType, language, result, setCheckedTasks],
   );
 
   // Output language: changing it re-translates in place while on the dashboard.
@@ -152,10 +152,10 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
   }
 
   function handleLoadDemo(doc: DemoDoc) {
-    setFile(null);
+    setFiles([]);
     setText(doc.text);
     setDocType(doc.docType);
-    runTranslate({ text: doc.text, file: null, docType: doc.docType });
+    runTranslate({ text: doc.text, files: [], docType: doc.docType });
   }
 
   function handleReset() {
@@ -163,15 +163,15 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
     setPhase("input");
     setResult(null);
     setError("");
-    setFile(null);
+    setFiles([]);
     setText("");
     setAcknowledged(false);
     setRecLoading(false);
     setRefreshing(false);
   }
 
-  const originalText = file
-    ? `${text ? text + "\n\n" : ""}Uploaded document: ${file.name}`
+  const originalText = files.length > 0
+    ? `${text ? text + "\n\n" : ""}Uploaded documents: ${files.map(f => f.name).join(", ")}`
     : text;
   const sourceText = result?.source_text || originalText;
 
@@ -214,8 +214,8 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
             <IntakeView
               text={text}
               onTextChange={setText}
-              file={file}
-              onFileChange={setFile}
+              files={files}
+              onFilesChange={setFiles}
               language={language}
               onLanguageChange={handleLanguage}
               canSubmit={canSubmit}

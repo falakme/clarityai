@@ -1,7 +1,7 @@
 {
   "tagline": "Kostenlos · Privat · Klare Sprache",
   "headline": "Verstehe jeden verwirrenden Brief in Sekunden.",
-  "subhead": "Füge den Text ein, mach ein Foto oder sprich einfach. ClearAid erklärt es in klarer Sprache, zeigt dir genau, was zu tun ist, und verweist dich an vertrauenswürdige lokale Hilfe.",
+  "subhead": "Füge den Text ein, mach ein Foto oder sprich einfach. ClarityAI erklärt es in klarer Sprache, zeigt dir genau, was zu tun ist, und verweist dich an vertrauenswürdige lokale Hilfe.",
   "trust_docs": "Liest PDFs und Fotos",
   "trust_langs": "15 Sprachen + Vorlesen",
   "trust_private": "Nichts wird auf unseren Servern gespeichert",
@@ -26,7 +26,7 @@
   "file_ready": "bereit zum Übersetzen",
   "remove_file": "Datei entfernen",
   "submit": "Erkläre mir das",
-  "footer": "Privat von Grund auf. ClearAid reicht oder sendet niemals etwas für dich ein.",
+  "footer": "Privat von Grund auf. ClarityAI reicht oder sendet niemals etwas für dich ein.",
   "voice_unsupported": "Spracheingabe wird in diesem Browser nicht unterstützt. Versuche stattdessen zu tippen.",
   "back_to_keyboard": "Zur Tastatur wechseln",
   "speak_situation": "Schildere deine Situation",
@@ -51,7 +51,7 @@
   "done": "erledigt",
   "no_action_steps": "Dieses Dokument erfordert keine bestimmten Handlungsschritte. Gehe zum Tab Übersicht für die vollständige Erklärung.",
   "compare_original": "Mit dem Original vergleichen",
-  "source_hint": "Das ist der genaue Text, den ClearAid gelesen hat. Prüfe Daten und Beträge immer daran.",
+  "source_hint": "Das ist der genaue Text, den ClarityAI gelesen hat. Prüfe Daten und Beträge immer daran.",
   "verified_support": "Geprüfte lokale Unterstützung",
   "finding_resource": "Wir suchen eine vertrauenswürdige Organisation und prüfen, ob sie passt",
   "recommended_resource": "Empfohlene Ressource",
@@ -71,7 +71,7 @@
   "start_new_document": "Ein neues Dokument beginnen",
   "your_privacy": "Deine Privatsphäre",
   "your_privacy_hint": "Wir speichern nichts auf unseren Servern. Das Einzige, was auf diesem Gerät gespeichert wird, ist der Fortschritt deiner Liste, und du kannst ihn sofort löschen.",
-  "explains_you_decide": "ClearAid erklärt, du entscheidest",
-  "disclaimer_body": "ClearAid hilft dir zu verstehen und zu organisieren. Es reicht oder sendet niemals etwas für dich ein und ersetzt nicht den Rat eines Anwalts, Arztes oder Sozialarbeiters.",
+  "explains_you_decide": "ClarityAI erklärt, du entscheidest",
+  "disclaimer_body": "ClarityAI hilft dir zu verstehen und zu organisieren. Es reicht oder sendet niemals etwas für dich ein und ersetzt nicht den Rat eines Anwalts, Arztes oder Sozialarbeiters.",
   "tts_english_only": "Das Vorlesen erfolgt auf Englisch."
 }

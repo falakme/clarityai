@@ -41,8 +41,8 @@ export async function fetchHealth(): Promise<Health> {
 export interface TranslateInput {
   /** What the user typed — their custom context / situation / pasted text. */
   text?: string;
-  /** Uploaded PDF or image (OCR'd server-side). */
-  file?: File | null;
+  /** Uploaded PDFs or images (OCR'd server-side). */
+  files?: File[];
   docType?: string;
   /** Translate the output values into this language (e.g. "Spanish"). */
   language?: string;
@@ -60,7 +60,11 @@ export async function translateForm(input: TranslateInput): Promise<TranslateRes
   if (input.text && input.text.trim()) form.append("text", input.text.trim());
   form.append("doc_type", input.docType ?? "general");
   if (input.language && input.language.trim()) form.append("language", input.language.trim());
-  if (input.file) form.append("file", input.file);
+  if (input.files && input.files.length > 0) {
+    for (const file of input.files) {
+      form.append("files", file);
+    }
+  }
 
   // Note: do NOT set Content-Type — the browser sets the multipart boundary.
   const res = await fetch(`${API_BASE_URL}/api/translate-form`, {

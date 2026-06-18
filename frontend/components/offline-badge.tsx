@@ -5,7 +5,7 @@ import { WifiOff } from "lucide-react";
 import { useOnline } from "@/lib/use-online";
 
 /**
- * A small pill that appears when the device goes offline. ClearAid is a PWA
+ * A small pill that appears when the device goes offline. ClarityAI is a PWA
  * that caches your last translation, so this reassures the user that the app
  * still works without a connection.
  */

@@ -1,4 +1,4 @@
-/* ClearAid service worker — offline shell + translation caching.
+/* ClarityAI service worker — offline shell + translation caching.
  *
  * Caching strategy so a user keeps a working app offline:
  *  - App shell + static GETs: cache-first, fall back to network, then "/".
@@ -6,8 +6,8 @@
  *    response keyed by a hash of the request body; on failure, replay the
  *    cached translation for that exact input.
  */
-const SHELL_CACHE = "clearaid-shell-v3";
-const TRANSLATE_CACHE = "clearaid-translate-v3";
+const SHELL_CACHE = "clarityai-shell-v3";
+const TRANSLATE_CACHE = "clarityai-translate-v3";
 const SHELL = ["/", "/manifest.json", "/icons/icon.svg"];
 
 self.addEventListener("install", (event) => {

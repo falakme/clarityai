@@ -1,6 +1,6 @@
-# ClearAid — Engineering Blueprint
+# ClarityAI — Engineering Blueprint
 
-**Direction A: Crisis-to-Action Translator.** ClearAid converts unstructured
+**Direction A: Crisis-to-Action Translator.** ClarityAI converts unstructured
 administrative, legal, medical, and financial documents into a structured,
 interactive workspace: an urgency classification, a plain-language brief, a
 full Markdown explanation, a stateful task list, a conditional data table, a
@@ -8,7 +8,7 @@ step-by-step process visualizer, and an AI-evaluated "Verified Local Support"
 recommendation — all behind a Responsible-AI, human-in-the-loop gate, and all
 fully localizable into 15 languages.
 
-ClearAid is **stateless and frictionless**: no login, no onboarding, no
+ClarityAI is **stateless and frictionless**: no login, no onboarding, no
 location tracking, and no database. Documents are processed in memory for the
 lifetime of a single request and never persisted.
 
@@ -99,16 +99,10 @@ demonstrates four capabilities:
 A defensive parser strips fences, balances braces, repairs trailing commas, and
 retries once before failing with a clean **HTTP 502**.
 
-### Step 4 — Agentic Resource Recommendation (Retrieval-Augmented Evaluation)
-1. **Retrieval** — `app/services/brave.py` builds a query from the classified
-   `document_category` + location and fetches live results.
-2. **AI evaluation** — the raw search hits (title, url, description) are fed
-   back into `gemma-3n-e4b-it`, which selects the **single** most relevant and
-   trustworthy resource and explains why. This populates
-   `recommended_resource_name`, `recommended_resource_url`, and
-   `ai_reasoning_for_recommendation`. The chosen URL is validated against the
-   retrieved set. This step runs as a separate `POST /api/recommend` request,
-   is best-effort, and never breaks the response.
+### Step 4 — Autonomous Agentic RAG Architecture
+1. **IP Geolocation** — Resolves the user's City/State/Country via `ip-api.com` using their request IP, giving the agent real-world localization without asking the user.
+2. **Autonomous Intent Research** — If the user provides a text prompt (e.g., "I got evicted"), the backend automatically performs a live Brave Search (incorporating the IP-geolocated context) and injects the top results directly into the LLM context. No file upload is strictly required.
+3. **Multi-Document & Hybrid Processing** — Users can upload multiple documents simultaneously. The extracted text is concatenated into a single context block. The system seamlessly handles hybrid contexts (multiple uploaded files + user text + autonomous web search results) in a single unified prompt.
 
 ### Step 5 — Read-Aloud (Azure Neural TTS, English)
 The Summary tab's **Listen** control (`components/listen-button.tsx`) POSTs the
@@ -157,7 +151,7 @@ The serialized API response additionally carries backend-attached
 
 ## 3. Access Model
 
-ClearAid is fully **anonymous and frictionless** — there is no authentication,
+ClarityAI is fully **anonymous and frictionless** — there is no authentication,
 no onboarding, and no role-based access. Visiting the site drops the user
 straight into the translator. The only client-side state is checklist progress,
 stored in `localStorage` (device-only) and clearable with one tap.
@@ -251,7 +245,7 @@ per-language dictionaries:
   verified resource, share the plan) stay **disabled** until the user confirms
   they will use the summary only as an organizational guide and that it is not
   official medical or legal advice.
-- **No automated submission.** ClearAid clarifies and organizes only; it never
+- **No automated submission.** ClarityAI clarifies and organizes only; it never
   submits, signs, or acts on the user's behalf.
 
 ---
@@ -261,7 +255,7 @@ per-language dictionaries:
 ### Repository structure
 
 ```
-clearaid/
+clarityai/
 ├── docker-compose.yml          # 2-service orchestration (frontend, backend)
 ├── .env.example                # all environment variables
 ├── backend/

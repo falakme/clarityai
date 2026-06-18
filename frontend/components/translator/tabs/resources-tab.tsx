@@ -39,14 +39,14 @@ export function ResourcesTab({
   t: Translator;
 }) {
   const [shareMsg, setShareMsg] = useState("");
-  const hasResource = Boolean(result.recommended_resource_url);
+  const hasResource = Boolean(result.local_support_resources && result.local_support_resources.length > 0);
   const hasTasks = result.task_list.length > 0;
 
   async function sharePlan() {
     const textToShare = buildShareText(result);
     try {
       if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({ title: "My ClearAid action plan", text: textToShare });
+        await navigator.share({ title: "My ClarityAI action plan", text: textToShare });
         return;
       }
       if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -78,21 +78,15 @@ export function ResourcesTab({
             <h2 className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
               <BadgeCheck className="h-4 w-4" /> {t("verified_support")}
             </h2>
-            <p className="text-base font-bold text-foreground">
-              {result.recommended_resource_name || t("recommended_resource")}
-            </p>
-            {result.ai_reasoning_for_recommendation && (
-              <p className="mt-2 flex items-start gap-2 rounded-md bg-card/70 p-3 text-xs text-muted-foreground">
-                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>
-                  <span className="font-semibold text-emerald-700">{t("why_this_one")} </span>
-                  {result.ai_reasoning_for_recommendation}
-                </span>
-              </p>
-            )}
-            <p className="mt-2 break-all text-xs text-muted-foreground">
-              {result.recommended_resource_url}
-            </p>
+            <div className="mt-2 space-y-2">
+              {result.local_support_resources?.map((url, i) => (
+                <p key={i} className="break-all text-sm font-medium text-foreground">
+                  <a href={url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                    {url}
+                  </a>
+                </p>
+              ))}
+            </div>
           </Card>
         ) : (
           <Card>
@@ -146,14 +140,19 @@ export function ResourcesTab({
 
             {hasResource &&
               (acknowledged ? (
-                <a
-                  href={result.recommended_resource_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={buttonVariants({ size: "sm", className: "w-full" })}
-                >
-                  <ExternalLink className="h-4 w-4" /> {t("open_resource")}
-                </a>
+                <div className="flex flex-col gap-2">
+                  {result.local_support_resources?.map((url, i) => (
+                    <a
+                      key={i}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={buttonVariants({ size: "sm", className: "w-full" })}
+                    >
+                      <ExternalLink className="h-4 w-4" /> {t("open_resource")} {i > 0 ? i + 1 : ""}
+                    </a>
+                  ))}
+                </div>
               ) : (
                 <Button size="sm" className="w-full" disabled>
                   <ExternalLink className="h-4 w-4" /> {t("open_resource")}

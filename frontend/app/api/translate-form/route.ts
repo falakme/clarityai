@@ -21,6 +21,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ detail: "Invalid form data." }, { status: 400 });
   }
 
+  // Inject client IP for backend geolocation
+  const clientIp = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "127.0.0.1";
+  form.append("client_ip", clientIp.split(",")[0].trim());
+
   try {
     const res = await fetch(`${BACKEND}/api/translate-form`, {
       method: "POST",

@@ -34,8 +34,8 @@ import { SmartInput } from "./smart-input";
 export function IntakeView({
   text,
   onTextChange,
-  file,
-  onFileChange,
+  files,
+  onFilesChange,
   language,
   onLanguageChange,
   canSubmit,
@@ -45,8 +45,8 @@ export function IntakeView({
 }: {
   text: string;
   onTextChange: (v: string) => void;
-  file: File | null;
-  onFileChange: (f: File | null) => void;
+  files: File[];
+  onFilesChange: (f: File[]) => void;
   language: string;
   onLanguageChange: (v: string) => void;
   canSubmit: boolean;
@@ -156,7 +156,7 @@ export function IntakeView({
             <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
               <Paperclip className="h-4 w-4" /> {t("add_document")}
             </div>
-            <FileIntake file={file} onFile={onFileChange} t={t} />
+            <FileIntake files={files} onFilesChange={onFilesChange} t={t} />
           </div>
 
           <AnimatePresence>

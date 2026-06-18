@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 /**
- * PRIVACY SAFEGUARD: any local state ClearAid keeps (e.g. checklist progress)
+ * PRIVACY SAFEGUARD: any local state ClarityAI keeps (e.g. checklist progress)
  * lives ONLY in the browser's localStorage. It is never sent to or stored by
  * the backend. The app itself is fully stateless.
  */

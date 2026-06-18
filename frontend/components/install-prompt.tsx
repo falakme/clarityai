@@ -9,7 +9,7 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-const DISMISS_KEY = "clearaid.installDismissed";
+const DISMISS_KEY = "clarityai.installDismissed";
 
 /**
  * Floating "Add to Home Screen" prompt. Appears only when the browser fires
@@ -66,13 +66,13 @@ export function InstallPrompt() {
           transition={{ type: "spring", stiffness: 240, damping: 24 }}
           className="clay-card fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-md items-center gap-3 p-4 sm:left-auto sm:right-4"
           role="dialog"
-          aria-label="Install ClearAid"
+          aria-label="Install ClarityAI"
         >
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary shadow-clay-sm">
             <Download className="h-6 w-6" />
           </span>
           <div className="flex-1">
-            <p className="font-bold leading-tight">Install ClearAid</p>
+            <p className="font-bold leading-tight">Install ClarityAI</p>
             <p className="text-sm text-muted-foreground">
               Add it to your home screen for quick, offline-friendly access.
             </p>

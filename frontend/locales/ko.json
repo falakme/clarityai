@@ -1,7 +1,7 @@
 {
   "tagline": "무료 · 비공개 · 쉬운 언어",
   "headline": "복잡한 편지도 몇 초 만에 이해하세요.",
-  "subhead": "텍스트를 붙여넣거나 사진을 찍거나 그냥 말하세요. ClearAid가 쉬운 언어로 설명하고, 정확히 무엇을 해야 하는지 알려주며, 신뢰할 수 있는 지역 지원으로 안내합니다.",
+  "subhead": "텍스트를 붙여넣거나 사진을 찍거나 그냥 말하세요. ClarityAI가 쉬운 언어로 설명하고, 정확히 무엇을 해야 하는지 알려주며, 신뢰할 수 있는 지역 지원으로 안내합니다.",
   "trust_docs": "PDF와 사진을 읽습니다",
   "trust_langs": "15개 언어 + 소리내어 읽기",
   "trust_private": "서버에 아무것도 저장하지 않습니다",
@@ -26,7 +26,7 @@
   "file_ready": "번역 준비됨",
   "remove_file": "파일 제거",
   "submit": "이걸 설명해 주세요",
-  "footer": "설계부터 비공개. ClearAid는 결코 당신을 대신해 제출하거나 신청하지 않습니다.",
+  "footer": "설계부터 비공개. ClarityAI는 결코 당신을 대신해 제출하거나 신청하지 않습니다.",
   "voice_unsupported": "이 브라우저에서는 음성 입력이 지원되지 않습니다. 대신 입력해 보세요.",
   "back_to_keyboard": "키보드로 전환",
   "speak_situation": "당신의 상황을 말해 주세요",
@@ -51,7 +51,7 @@
   "done": "완료",
   "no_action_steps": "이 문서는 특정한 조치 단계를 요구하지 않습니다. 전체 설명은 요약 탭을 확인하세요.",
   "compare_original": "원본과 비교",
-  "source_hint": "이것은 ClearAid가 읽은 정확한 텍스트입니다. 날짜와 금액은 항상 이것과 대조하세요.",
+  "source_hint": "이것은 ClarityAI가 읽은 정확한 텍스트입니다. 날짜와 금액은 항상 이것과 대조하세요.",
   "verified_support": "검증된 지역 지원",
   "finding_resource": "신뢰할 수 있는 기관을 찾아 적합한지 확인하는 중",
   "recommended_resource": "추천 자원",
@@ -71,7 +71,7 @@
   "start_new_document": "새 문서 시작",
   "your_privacy": "당신의 개인정보",
   "your_privacy_hint": "우리는 서버에 아무것도 저장하지 않습니다. 이 기기에 저장되는 유일한 것은 체크리스트 진행 상황이며, 즉시 지울 수 있습니다.",
-  "explains_you_decide": "ClearAid는 설명하고, 결정은 당신이 합니다",
-  "disclaimer_body": "ClearAid는 이해하고 정리하도록 돕습니다. 결코 당신을 대신해 제출하거나 신청하지 않으며, 변호사, 의사 또는 사회복지사의 조언을 대신하지 않습니다.",
+  "explains_you_decide": "ClarityAI는 설명하고, 결정은 당신이 합니다",
+  "disclaimer_body": "ClarityAI는 이해하고 정리하도록 돕습니다. 결코 당신을 대신해 제출하거나 신청하지 않으며, 변호사, 의사 또는 사회복지사의 조언을 대신하지 않습니다.",
   "tts_english_only": "소리내어 읽기는 영어로 재생됩니다."
 }

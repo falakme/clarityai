@@ -1,5 +1,5 @@
 /**
- * Lightweight, fully offline i18n for ClearAid's static UI.
+ * Lightweight, fully offline i18n for ClarityAI's static UI.
  *
  * Every interface string — the intake screen AND the dashboard chrome (tab
  * names, section headers, buttons, disclaimers) — is translated client-side

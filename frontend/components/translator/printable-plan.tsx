@@ -22,7 +22,7 @@ export function PrintablePlan({
   return (
     <div className="print-only" aria-hidden>
       <div style={{ borderBottom: "2px solid #000", paddingBottom: "8px", marginBottom: "16px" }}>
-        <h1 style={{ fontSize: "20pt", fontWeight: 800, margin: 0 }}>ClearAid action plan</h1>
+        <h1 style={{ fontSize: "20pt", fontWeight: 800, margin: 0 }}>ClarityAI action plan</h1>
         <p style={{ margin: "4px 0 0", fontSize: "10pt" }}>
           Generated {new Date().toLocaleDateString()} · A plain-language guide, not legal,
           medical, or financial advice.
@@ -72,20 +72,16 @@ export function PrintablePlan({
         </>
       )}
 
-      {result.recommended_resource_url && (
+      {result.local_support_resources && result.local_support_resources.length > 0 && (
         <>
           <h2 style={{ fontSize: "13pt", fontWeight: 700, margin: "16px 0 6px" }}>
             Verified local support
           </h2>
-          <p style={{ margin: "0 0 2px", fontWeight: 700 }}>
-            {result.recommended_resource_name}
-          </p>
-          <p style={{ margin: "0 0 4px" }}>{result.recommended_resource_url}</p>
-          {result.ai_reasoning_for_recommendation && (
-            <p style={{ margin: 0, fontStyle: "italic" }}>
-              {stripEmoji(result.ai_reasoning_for_recommendation)}
-            </p>
-          )}
+          <ul style={{ margin: 0, paddingLeft: "20px" }}>
+            {result.local_support_resources.map((url, i) => (
+              <li key={i} style={{ margin: "0 0 4px" }}>{url}</li>
+            ))}
+          </ul>
         </>
       )}
     </div>

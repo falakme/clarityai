@@ -60,7 +60,7 @@ async def synthesize_speech(text: str) -> bytes:
         "Ocp-Apim-Subscription-Key": settings.azure_tts_key,
         "Content-Type": "application/ssml+xml",
         "X-Microsoft-OutputFormat": _OUTPUT_FORMAT,
-        "User-Agent": "clearaid",
+        "User-Agent": "clarityai",
     }
     ssml = _build_ssml(cleaned, settings.azure_tts_voice)
 

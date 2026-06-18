@@ -33,50 +33,16 @@ from app.schemas import (
 
 # The system prompt for the multi-capability extraction step. The model must
 # return a single JSON object: classification + summary + structured extraction.
-SYSTEM_PROMPT = """You are a crisis-to-action document translator. Your user is a stressed individual who needs to understand a complex administrative, legal, medical, or financial document immediately.
-Your ONLY job is to analyze the document text and output a single, highly structured JSON object. Do not include markdown code fences (like ```json), and do NOT use any emojis anywhere in your response.
-
-CRITICAL LEGIBILITY CHECK:
-Before doing anything else, analyze the provided document text for legibility and coherence. If the text is largely garbled, illegible, or contains completely incoherent nonsense (often indicating a blurry image upload or failed OCR), you must immediately return EXACTLY this JSON response and nothing else:
-{
-  "error": "blur_detected",
-  "message": "The document text is too unclear to process safely."
-}
-Do not attempt to hallucinate an explanation, tasks, table data, or diagram steps if the text is illegible. Otherwise, proceed with the standard JSON schema.
-
-Follow this exact JSON schema strictly for legible documents:
-{
-  "urgency_tier": "Urgent Action Required",
-  "document_category": "eviction",
-  "plain_language_brief": "A 1-2 sentence summary, in plain language, of what this document is and the single most important thing the reader must know.",
-  "plain_language_explanation_markdown": "A comprehensive, simple explanation of the document written in clear Markdown. Use bolding and headers where helpful. Strictly NO emojis.",
-  "task_list": [
-    { "id": 1, "task": "Actionable task statement 1" },
-    { "id": 2, "task": "Actionable task statement 2" }
-  ],
-  "table_data": {
-    "headers": ["Column 1 Title", "Column 2 Title"],
-    "rows": [
-      ["Row 1 Cell 1", "Row 1 Cell 2"],
-      ["Row 2 Cell 1", "Row 2 Cell 2"]
-    ]
-  },
-  "diagram_steps": [
-    { "step_number": 1, "title": "Brief Step Title", "description": "What to do in this phase" },
-    { "step_number": 2, "title": "Next Step Title", "description": "What to do next" }
-  ],
-  "detected_location": "City, State if any location is mentioned in the document, otherwise an empty string",
-  "ai_confidence_score": "High"
-}
-
-FIELD RULES:
-- "urgency_tier" MUST be EXACTLY one of: "Urgent Action Required" (a hard deadline, legal action, or money is at immediate risk), "Time Sensitive" (action is needed soon but there is some buffer), or "Informational Only" (no action strictly required).
-- "document_category" MUST be a short lowercase machine label, ONE of: "eviction", "housing", "medical", "food_assistance", "utility", "legal", "benefits", or "general".
-- "plain_language_brief" is a SHORT summary (1-2 sentences). The "plain_language_explanation_markdown" is the LONGER, full explanation.
-- "detected_location" must contain only a place mentioned IN the document (city/state/ZIP). If none is present, use an empty string. Never invent one.
-- "ai_confidence_score" MUST be exactly one of "High", "Medium", or "Low": "High" when the text is clear and complete, "Medium" when some details are ambiguous, "Low" when the input is sparse, garbled, or largely inferred.
-- If the document has no tabular data (fees, amounts, eligibility brackets), leave the table_data arrays empty.
-Always populate urgency_tier, document_category, plain_language_brief, the markdown explanation, the task_list, the diagram_steps, the detected_location, and the ai_confidence_score."""
+SYSTEM_PROMPT = """You are ClarityAI. Your role is to provide empathetic, highly actionable legal and bureaucratic guidance. 
+You are equipped with real-time location data and live search results. 
+If the user provides an uploaded document, analyze it strictly. 
+If the user provides a text-based problem, synthesize the provided local search results to build a roadmap for them.
+Your output must be a structured JSON with:
+- "urgency_tier": "Critical/Urgent/Informational"
+- "plain_language_brief": "Explanation of their current situation based on local law."
+- "task_list": Array of objects [{"id": 1, "task": "Short task title", "description": "More context on the task"}].
+- "local_support_resources": Array of verified links from the provided search data.
+Strictly NO emojis. Professional, clear, and action-oriented tone only."""
 
 RETRY_INSTRUCTION = (
     "Your previous reply was not valid JSON or was missing required fields. Reply again with ONLY the raw JSON "
@@ -237,14 +203,16 @@ def _normalize(data: dict, source_text: str) -> TranslateResponse:
     if not markdown:
         markdown = "No explanation could be generated from the provided document."
 
-    # Task list — accept dicts ({id, task}) or bare strings.
+    # Task list — accept dicts ({id, task, description}) or bare strings.
     tasks: list[TaskItem] = []
     for index, raw in enumerate(data.get("task_list") or [], start=1):
         if isinstance(raw, dict):
             label = _strip_emoji(str(raw.get("task", "")).strip())
+            desc = _strip_emoji(str(raw.get("description", "")).strip())
             raw_id = raw.get("id", index)
         else:
             label = _strip_emoji(str(raw).strip())
+            desc = ""
             raw_id = index
         if not label:
             continue
@@ -252,7 +220,7 @@ def _normalize(data: dict, source_text: str) -> TranslateResponse:
             task_id = int(raw_id)
         except (TypeError, ValueError):
             task_id = index
-        tasks.append(TaskItem(id=task_id, task=label))
+        tasks.append(TaskItem(id=task_id, task=label, description=desc))
 
     # Table — tolerate missing/garbled shapes; only keep well-formed rows.
     raw_table = data.get("table_data") or {}
@@ -287,6 +255,12 @@ def _normalize(data: dict, source_text: str) -> TranslateResponse:
 
     detected_location = _strip_emoji(str(data.get("detected_location", "")).strip())
 
+    resources = data.get("local_support_resources") or []
+    if not isinstance(resources, list):
+        resources = []
+    else:
+        resources = [str(r).strip() for r in resources if str(r).strip()]
+
     return TranslateResponse(
         urgency_tier=urgency,
         document_category=category,
@@ -298,6 +272,7 @@ def _normalize(data: dict, source_text: str) -> TranslateResponse:
         ai_confidence_score=confidence,
         confidence_percent=_CONFIDENCE_PERCENT[confidence],
         detected_location=detected_location,
+        local_support_resources=resources,
         source_text=source_text[:12000],
     )
 

@@ -13,11 +13,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ClearAid — Understand any official letter",
+  title: "ClarityAI — Making complex information, simple.",
   description:
-    "Paste or photograph a confusing letter, bill, or form and get a clear plain-language summary, a step-by-step plan, and trusted local help. Free, private, no sign-in.",
+    "ClarityAI: Making complex information, simple. Paste or photograph a confusing letter, bill, or form and get a clear plain-language summary, an actionable plan, and trusted local help.",
   manifest: "/manifest.json",
-  applicationName: "ClearAid",
+  applicationName: "ClarityAI",
   icons: {
     icon: [
       { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "ClearAid",
+    title: "ClarityAI",
   },
   other: {
     "mobile-web-app-capable": "yes",

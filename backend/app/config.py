@@ -1,6 +1,6 @@
 """Application configuration loaded from environment variables.
 
-PRIVACY: ClearAid is a stateless, in-memory translation service. It persists
+PRIVACY: ClarityAI is a stateless, in-memory translation service. It persists
 nothing — there is no database. Uploaded documents and typed context exist
 only for the lifetime of a single request.
 """

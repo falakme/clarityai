@@ -1,4 +1,4 @@
-/** Shared domain types for ClearAid. */
+/** Shared domain types for ClarityAI. */
 
 /** Document type that selects the backend AI domain hint. */
 export type DocType = "emergency" | "general";
@@ -7,6 +7,7 @@ export type DocType = "emergency" | "general";
 export interface TaskItem {
   id: number;
   task: string;
+  description?: string;
 }
 
 /** Tabular allocations (fee breakdowns, eligibility brackets, etc.). */
@@ -49,10 +50,11 @@ export interface TranslateResult {
   ai_confidence_score: "High" | "Medium" | "Low";
   /** Confidence as a percentage, for the Responsible AI indicator. */
   confidence_percent: number;
-  /** Agentic recommendation — the single verified support resource. */
-  recommended_resource_name: string;
-  recommended_resource_url: string;
-  ai_reasoning_for_recommendation: string;
+  /** Agentic recommendation — array of local support resources. */
+  local_support_resources?: string[];
+  recommended_resource_name?: string;
+  recommended_resource_url?: string;
+  ai_reasoning_for_recommendation?: string;
   /** Location the model detected in the document. */
   detected_location: string;
   /** Backend-attached provenance (exact extracted/source text). */

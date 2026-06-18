@@ -8,7 +8,7 @@ import { Trash2 } from "lucide-react";
  */
 export function DataPurgeButton({ className = "" }: { className?: string }) {
   function purge() {
-    if (!confirm("Erase all ClearAid data stored on this device?")) return;
+    if (!confirm("Erase all ClarityAI data stored on this device?")) return;
     try {
       localStorage.clear();
     } catch {

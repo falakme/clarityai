@@ -1,7 +1,7 @@
 import type { Transition, Variants } from "framer-motion";
 
 /**
- * Shared motion language for ClearAid.
+ * Shared motion language for ClarityAI.
  * Calm and fluid — gentle springs and soft easing so animations soothe a
  * stressed user rather than startle them. All motion respects the user's
  * reduced-motion preference (configured globally in app/template.tsx).

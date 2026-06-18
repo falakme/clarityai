@@ -1,7 +1,7 @@
 {
   "tagline": "Free · Private · Plain language",
   "headline": "Understand any confusing letter in seconds.",
-  "subhead": "Paste the text, snap a photo, or just talk. ClearAid explains it in plain language, lays out exactly what to do, and points you to trusted local help.",
+  "subhead": "Paste the text, snap a photo, or just talk. ClarityAI explains it in plain language, lays out exactly what to do, and points you to trusted local help.",
   "trust_docs": "Reads PDFs & photos",
   "trust_langs": "15 languages + read-aloud",
   "trust_private": "Nothing stored on our servers",
@@ -26,7 +26,7 @@
   "file_ready": "ready to translate",
   "remove_file": "Remove file",
   "submit": "Explain this for me",
-  "footer": "Private by design. ClearAid never files or submits anything for you.",
+  "footer": "Private by design. ClarityAI never files or submits anything for you.",
   "voice_unsupported": "Voice input isn't supported on this browser. Try typing instead.",
   "back_to_keyboard": "Switch to keyboard",
   "speak_situation": "Speak your situation",
@@ -51,7 +51,7 @@
   "done": "done",
   "no_action_steps": "This document doesn't call for specific action steps. Head to the Summary tab for the full explanation.",
   "compare_original": "Compare with the original",
-  "source_hint": "This is the exact text ClearAid read. Always check dates and dollar amounts against it.",
+  "source_hint": "This is the exact text ClarityAI read. Always check dates and dollar amounts against it.",
   "verified_support": "Verified local support",
   "finding_resource": "Finding a trustworthy organization and checking it's the right fit",
   "recommended_resource": "Recommended resource",
@@ -71,7 +71,7 @@
   "start_new_document": "Start a new document",
   "your_privacy": "Your privacy",
   "your_privacy_hint": "We store nothing on our servers. The only thing saved on this device is your checklist progress, and you can wipe it instantly.",
-  "explains_you_decide": "ClearAid explains, you decide",
-  "disclaimer_body": "ClearAid helps you understand and organize. It never files or submits anything for you, and it isn't a substitute for advice from a lawyer, doctor, or caseworker.",
+  "explains_you_decide": "ClarityAI explains, you decide",
+  "disclaimer_body": "ClarityAI helps you understand and organize. It never files or submits anything for you, and it isn't a substitute for advice from a lawyer, doctor, or caseworker.",
   "tts_english_only": "Read-aloud plays in English."
 }

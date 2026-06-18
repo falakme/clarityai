@@ -4,7 +4,7 @@
 
 @layer base {
   /*
-   * Accent theme tokens. ClearAid uses one calm, trustworthy blue scheme.
+   * Accent theme tokens. ClarityAI uses one calm, trustworthy blue scheme.
    * The accent is variable-driven so it can be re-tinted in a single place.
    */
   :root {

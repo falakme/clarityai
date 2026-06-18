@@ -1,6 +1,6 @@
 /**
  * Strip emojis and variation selectors from a string.
- * ClearAid keeps a clean, professional look, so emojis are removed both
+ * ClarityAI keeps a clean, professional look, so emojis are removed both
  * server-side and again here as a defensive client-side pass.
  */
 const EMOJI =

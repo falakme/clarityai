@@ -1,7 +1,7 @@
 {
   "tagline": "Grátis · Privado · Linguagem clara",
   "headline": "Entenda qualquer carta confusa em segundos.",
-  "subhead": "Cole o texto, tire uma foto ou simplesmente fale. O ClearAid explica em linguagem clara, mostra exatamente o que fazer e indica ajuda local confiável.",
+  "subhead": "Cole o texto, tire uma foto ou simplesmente fale. O ClarityAI explica em linguagem clara, mostra exatamente o que fazer e indica ajuda local confiável.",
   "trust_docs": "Lê PDFs e fotos",
   "trust_langs": "15 idiomas + leitura em voz alta",
   "trust_private": "Nada é armazenado em nossos servidores",
@@ -26,7 +26,7 @@
   "file_ready": "pronto para traduzir",
   "remove_file": "Remover arquivo",
   "submit": "Explique isto para mim",
-  "footer": "Privado por design. O ClearAid nunca registra nem envia nada por você.",
+  "footer": "Privado por design. O ClarityAI nunca registra nem envia nada por você.",
   "voice_unsupported": "A entrada de voz não é compatível com este navegador. Tente digitar.",
   "back_to_keyboard": "Mudar para o teclado",
   "speak_situation": "Conte sua situação",
@@ -51,7 +51,7 @@
   "done": "feitas",
   "no_action_steps": "Este documento não exige etapas de ação específicas. Vá para a aba Resumo para a explicação completa.",
   "compare_original": "Comparar com o original",
-  "source_hint": "Este é o texto exato que o ClearAid leu. Sempre confira as datas e os valores com base nele.",
+  "source_hint": "Este é o texto exato que o ClarityAI leu. Sempre confira as datas e os valores com base nele.",
   "verified_support": "Apoio local verificado",
   "finding_resource": "Procurando uma organização confiável e verificando se é a certa",
   "recommended_resource": "Recurso recomendado",
@@ -71,7 +71,7 @@
   "start_new_document": "Começar um novo documento",
   "your_privacy": "Sua privacidade",
   "your_privacy_hint": "Não armazenamos nada em nossos servidores. A única coisa salva neste dispositivo é o progresso da sua lista, e você pode apagá-lo na hora.",
-  "explains_you_decide": "O ClearAid explica, você decide",
-  "disclaimer_body": "O ClearAid ajuda você a entender e organizar. Ele nunca registra nem envia nada por você e não substitui o aconselhamento de um advogado, médico ou assistente social.",
+  "explains_you_decide": "O ClarityAI explica, você decide",
+  "disclaimer_body": "O ClarityAI ajuda você a entender e organizar. Ele nunca registra nem envia nada por você e não substitui o aconselhamento de um advogado, médico ou assistente social.",
   "tts_english_only": "A leitura em voz alta é reproduzida em inglês."
 }

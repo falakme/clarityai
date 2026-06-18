@@ -1,4 +1,4 @@
-"""ClearAid FastAPI application entrypoint.
+"""ClarityAI FastAPI application entrypoint.
 
 Direction A: Crisis-to-Action Translator. A stateless service that turns
 dense administrative, legal, and financial documents into a structured,
@@ -17,7 +17,7 @@ from app.routers import health, translate, tts
 settings = get_settings()
 
 app = FastAPI(
-    title="ClearAid API",
+    title="ClarityAI API",
     description=(
         "Crisis-to-Action translator backend. Stateless: it stores nothing. "
         "Documents are processed in memory and never persisted."
@@ -46,4 +46,4 @@ app.include_router(tts.router)
 
 @app.get("/", tags=["system"])
 def root() -> dict[str, str]:
-    return {"service": "clearaid-backend", "docs": "/docs"}
+    return {"service": "clarityai-backend", "docs": "/docs"}

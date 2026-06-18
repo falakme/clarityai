@@ -1,7 +1,7 @@
 {
   "tagline": "Libre · Pribado · Simpleng wika",
   "headline": "Unawain ang anumang nakakalitong sulat sa ilang segundo.",
-  "subhead": "I-paste ang teksto, kumuha ng litrato, o magsalita lang. Ipinaliliwanag ito ng ClearAid sa simpleng wika, ipinapakita kung ano mismo ang gagawin, at itinuturo ka sa mapagkakatiwalaang lokal na tulong.",
+  "subhead": "I-paste ang teksto, kumuha ng litrato, o magsalita lang. Ipinaliliwanag ito ng ClarityAI sa simpleng wika, ipinapakita kung ano mismo ang gagawin, at itinuturo ka sa mapagkakatiwalaang lokal na tulong.",
   "trust_docs": "Nagbabasa ng PDF at litrato",
   "trust_langs": "15 wika + pagbasa nang malakas",
   "trust_private": "Walang itinatago sa aming mga server",
@@ -26,7 +26,7 @@
   "file_ready": "handa nang isalin",
   "remove_file": "Alisin ang file",
   "submit": "Ipaliwanag ito sa akin",
-  "footer": "Pribado sa disenyo. Hindi kailanman naghahain o nagsusumite ang ClearAid para sa iyo.",
+  "footer": "Pribado sa disenyo. Hindi kailanman naghahain o nagsusumite ang ClarityAI para sa iyo.",
   "voice_unsupported": "Hindi suportado ang voice input sa browser na ito. Subukang mag-type na lang.",
   "back_to_keyboard": "Lumipat sa keyboard",
   "speak_situation": "Ikwento ang iyong sitwasyon",
@@ -51,7 +51,7 @@
   "done": "tapos",
   "no_action_steps": "Hindi nangangailangan ng partikular na hakbang ang dokumentong ito. Pumunta sa tab na Buod para sa buong paliwanag.",
   "compare_original": "Ihambing sa orihinal",
-  "source_hint": "Ito ang eksaktong tekstong binasa ng ClearAid. Palaging itsek ang mga petsa at halaga laban dito.",
+  "source_hint": "Ito ang eksaktong tekstong binasa ng ClarityAI. Palaging itsek ang mga petsa at halaga laban dito.",
   "verified_support": "Na-verify na lokal na tulong",
   "finding_resource": "Naghahanap ng mapagkakatiwalaang organisasyon at tinitiyak na ito ang tama",
   "recommended_resource": "Inirerekomendang mapagkukunan",
@@ -71,7 +71,7 @@
   "start_new_document": "Magsimula ng bagong dokumento",
   "your_privacy": "Ang iyong privacy",
   "your_privacy_hint": "Wala kaming itinatago sa aming mga server. Ang tanging naka-save sa device na ito ay ang progreso ng iyong listahan, at maaari mo itong burahin agad.",
-  "explains_you_decide": "Nagpapaliwanag ang ClearAid, ikaw ang magdedesisyon",
-  "disclaimer_body": "Tinutulungan ka ng ClearAid na umunawa at mag-organisa. Hindi ito kailanman naghahain o nagsusumite para sa iyo, at hindi ito kapalit ng payo mula sa abogado, doktor, o caseworker.",
+  "explains_you_decide": "Nagpapaliwanag ang ClarityAI, ikaw ang magdedesisyon",
+  "disclaimer_body": "Tinutulungan ka ng ClarityAI na umunawa at mag-organisa. Hindi ito kailanman naghahain o nagsusumite para sa iyo, at hindi ito kapalit ng payo mula sa abogado, doktor, o caseworker.",
   "tts_english_only": "Nasa Ingles ang pagbasa nang malakas."
 }

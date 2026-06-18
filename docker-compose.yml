@@ -1,5 +1,5 @@
-# ClearAid — Coolify-compatible stack
-# Runs the Next.js frontend and the FastAPI backend. ClearAid is stateless:
+# ClarityAI — Coolify-compatible stack
+# Runs the Next.js frontend and the FastAPI backend. ClarityAI is stateless:
 # there is no database. Documents are processed in memory and never persisted.
 #
 # On Coolify: point the app at this compose file. Coolify injects the
@@ -11,7 +11,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: clearaid-backend
+    container_name: clarityai-backend
     restart: unless-stopped
     environment:
       NVIDIA_API_KEY: ${NVIDIA_API_KEY}
@@ -36,7 +36,7 @@ services:
         # content). Only set this to a full https URL if you want the browser
         # to hit the backend directly.
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
-    container_name: clearaid-frontend
+    container_name: clarityai-frontend
     restart: unless-stopped
     environment:
       # Internal URL the Next.js server uses to reach the backend container.

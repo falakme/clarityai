@@ -1,7 +1,7 @@
 {
   "tagline": "Gratuit · Privé · Langage clair",
   "headline": "Comprenez n'importe quelle lettre déroutante en quelques secondes.",
-  "subhead": "Collez le texte, prenez une photo ou parlez simplement. ClearAid vous l'explique en langage clair, vous indique exactement quoi faire et vous oriente vers une aide locale fiable.",
+  "subhead": "Collez le texte, prenez une photo ou parlez simplement. ClarityAI vous l'explique en langage clair, vous indique exactement quoi faire et vous oriente vers une aide locale fiable.",
   "trust_docs": "Lit les PDF et les photos",
   "trust_langs": "15 langues + lecture à voix haute",
   "trust_private": "Rien n'est stocké sur nos serveurs",
@@ -26,7 +26,7 @@
   "file_ready": "prêt à traduire",
   "remove_file": "Retirer le fichier",
   "submit": "Expliquez-moi ceci",
-  "footer": "Privé par conception. ClearAid ne dépose ni n'envoie jamais rien à votre place.",
+  "footer": "Privé par conception. ClarityAI ne dépose ni n'envoie jamais rien à votre place.",
   "voice_unsupported": "La saisie vocale n'est pas prise en charge par ce navigateur. Essayez d'écrire.",
   "back_to_keyboard": "Passer au clavier",
   "speak_situation": "Décrivez votre situation",
@@ -51,7 +51,7 @@
   "done": "faites",
   "no_action_steps": "Ce document n'exige aucune action particulière. Allez dans l'onglet Résumé pour l'explication complète.",
   "compare_original": "Comparer avec l'original",
-  "source_hint": "Voici le texte exact que ClearAid a lu. Vérifiez toujours les dates et les montants par rapport à celui-ci.",
+  "source_hint": "Voici le texte exact que ClarityAI a lu. Vérifiez toujours les dates et les montants par rapport à celui-ci.",
   "verified_support": "Soutien local vérifié",
   "finding_resource": "Recherche d'une organisation fiable et vérification de sa pertinence",
   "recommended_resource": "Ressource recommandée",
@@ -71,7 +71,7 @@
   "start_new_document": "Commencer un nouveau document",
   "your_privacy": "Votre vie privée",
   "your_privacy_hint": "Nous ne stockons rien sur nos serveurs. La seule chose enregistrée sur cet appareil est la progression de votre liste, et vous pouvez l'effacer instantanément.",
-  "explains_you_decide": "ClearAid explique, vous décidez",
-  "disclaimer_body": "ClearAid vous aide à comprendre et à organiser. Il ne dépose ni n'envoie jamais rien à votre place, et ne remplace pas l'avis d'un avocat, d'un médecin ou d'un travailleur social.",
+  "explains_you_decide": "ClarityAI explique, vous décidez",
+  "disclaimer_body": "ClarityAI vous aide à comprendre et à organiser. Il ne dépose ni n'envoie jamais rien à votre place, et ne remplace pas l'avis d'un avocat, d'un médecin ou d'un travailleur social.",
   "tts_english_only": "La lecture à voix haute se fait en anglais."
 }

@@ -62,7 +62,7 @@ export function DashboardView({
 }) {
   const [activeTab, setActiveTab] = useState<TabKey>("summary");
   const t = createTranslator(language);
-  const hasResource = Boolean(result.recommended_resource_url);
+  const hasResource = Boolean(result.local_support_resources && result.local_support_resources.length > 0);
   const attention = { resources: hasResource && !acknowledged };
 
   const print = () => window.print();

@@ -18,6 +18,7 @@ Neither endpoint ever submits anything on the user's behalf.
 from typing import Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+import httpx
 
 from app.config import get_settings
 from app.schemas import RecommendRequest, TranslateResponse, VerifiedResource
@@ -44,7 +45,8 @@ async def translate(
     doc_type: str = Form(default="general"),
     eli5: bool = Form(default=False),
     language: str = Form(default=""),
-    file: Optional[UploadFile] = File(default=None),
+    client_ip: Optional[str] = Form(default=None),
+    files: list[UploadFile] = File(default=[]),
 ) -> TranslateResponse:
     """Translate dense paperwork into an actionable, multi-capability workspace.
 
@@ -60,20 +62,23 @@ async def translate(
     user_context = (text or "").strip()
     document_text = ""
 
-    if file is not None:
-        data = await file.read()
-        max_bytes = settings.max_upload_mb * 1024 * 1024
-        if len(data) == 0:
-            raise HTTPException(status_code=422, detail="The uploaded file is empty.")
-        if len(data) > max_bytes:
-            raise HTTPException(
-                status_code=413,
-                detail=f"File too large. Max {settings.max_upload_mb} MB.",
-            )
-        try:
-            document_text = extract_text(file.filename, file.content_type, data)
-        except ExtractionError as exc:
-            raise HTTPException(status_code=422, detail=str(exc)) from exc
+    # Multi-Doc Context
+    if files:
+        for file in files:
+            data = await file.read()
+            if len(data) == 0:
+                continue
+            max_bytes = settings.max_upload_mb * 1024 * 1024
+            if len(data) > max_bytes:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"File too large. Max {settings.max_upload_mb} MB.",
+                )
+            try:
+                extracted = extract_text(file.filename, file.content_type, data)
+                document_text += f"\n--- {file.filename} ---\n{extracted}\n"
+            except ExtractionError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     if not user_context and not document_text:
         raise HTTPException(
@@ -81,11 +86,42 @@ async def translate(
             detail="Tell us what you need help with, or upload a document to translate.",
         )
 
+    # 1. IP Geolocation (Location-Aware Agentic Intake)
+    detected_location = ""
+    if client_ip and client_ip not in ("127.0.0.1", "::1"):
+        try:
+            async with httpx.AsyncClient(timeout=3.0) as client:
+                ip_resp = await client.get(f"http://ip-api.com/json/{client_ip}")
+                if ip_resp.status_code == 200:
+                    ip_data = ip_resp.json()
+                    if ip_data.get("status") == "success":
+                        city = ip_data.get("city", "")
+                        region = ip_data.get("regionName", "")
+                        country = ip_data.get("countryCode", "")
+                        parts = [p for p in (city, region, country) if p]
+                        detected_location = ", ".join(parts)
+        except Exception:
+            pass
+
     # PII REDACTION LAYER: strip SSNs, emails, and phone numbers before anything is sent
     # to the model. Runs on BOTH the typed context and the extracted document.
     user_context, count_user = redact_pii(user_context)
     document_text, count_doc = redact_pii(document_text)
     pii_redacted_count = count_user + count_doc
+
+    # 2. Autonomous Intent Research
+    # Pre-fetch Brave search results if a text prompt is provided.
+    if user_context:
+        try:
+            query = brave.build_recommendation_query(doc_type, detected_location)
+            hits = await brave.search(query, count=4)
+            if hits:
+                search_context = "\n\nLOCAL SEARCH RESULTS:\n" + "\n".join(
+                    f"- {h.title} ({h.url}): {h.description}" for h in hits
+                )
+                user_context += search_context
+        except Exception:
+            pass
 
     # AI step — classify + summarize + extract (single call, kept fast).
     try:
@@ -104,6 +140,10 @@ async def translate(
         raise HTTPException(status_code=422, detail="blur_detected")
 
     result.pii_redacted_count = pii_redacted_count
+    # If the AI did not confidently detect a location, fallback to IP location.
+    if not result.detected_location and detected_location:
+        result.detected_location = detected_location
+    
     return result
 
 

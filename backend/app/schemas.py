@@ -9,6 +9,7 @@ class TaskItem(BaseModel):
 
     id: int
     task: str
+    description: str = ""
 
 
 class TableData(BaseModel):
@@ -86,7 +87,7 @@ class TranslateResponse(BaseModel):
     plain_language_brief: str = ""
 
     # Extraction.
-    plain_language_explanation_markdown: str
+    plain_language_explanation_markdown: str = ""
     task_list: list[TaskItem] = Field(default_factory=list)
     table_data: TableData = Field(default_factory=TableData)
     diagram_steps: list[DiagramStep] = Field(default_factory=list)
@@ -96,6 +97,7 @@ class TranslateResponse(BaseModel):
     confidence_percent: int = Field(default=85, ge=0, le=100)
 
     # Agentic resource recommendation ("Verified Local Support").
+    local_support_resources: list[str] = Field(default_factory=list)
     recommended_resource_name: str = ""
     recommended_resource_url: str = ""
     ai_reasoning_for_recommendation: str = ""
@@ -113,7 +115,7 @@ class TranslateResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     status: str = "ok"
-    service: str = "clearaid-backend"
+    service: str = "clarityai-backend"
     version: str
     nvidia_configured: bool
     nvidia_model: str = ""

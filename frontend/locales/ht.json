@@ -1,7 +1,7 @@
 {
   "tagline": "Gratis · Prive · Lang senp",
   "headline": "Konprann nenpòt lèt ki konfizan an kèk segond.",
-  "subhead": "Kole tèks la, pran yon foto, oswa annik pale. ClearAid esplike l an lang senp, montre w egzakteman sa pou w fè, epi mennen w jwenn èd lokal ou ka fè konfyans.",
+  "subhead": "Kole tèks la, pran yon foto, oswa annik pale. ClarityAI esplike l an lang senp, montre w egzakteman sa pou w fè, epi mennen w jwenn èd lokal ou ka fè konfyans.",
   "trust_docs": "Li PDF ak foto",
   "trust_langs": "15 lang + li awotvwa",
   "trust_private": "Nou pa estoke anyen sou sèvè nou yo",
@@ -26,7 +26,7 @@
   "file_ready": "pare pou tradui",
   "remove_file": "Retire fichye a",
   "submit": "Esplike m sa",
-  "footer": "Prive depi nan konsepsyon. ClearAid pa janm depoze ni voye anyen pou ou.",
+  "footer": "Prive depi nan konsepsyon. ClarityAI pa janm depoze ni voye anyen pou ou.",
   "voice_unsupported": "Antre vokal pa sipòte nan navigatè sa a. Eseye tape pito.",
   "back_to_keyboard": "Chanje pou klavye",
   "speak_situation": "Rakonte sitiyasyon ou",
@@ -51,7 +51,7 @@
   "done": "fini",
   "no_action_steps": "Dokiman sa a pa mande okenn etap aksyon espesifik. Ale nan onglè Rezime a pou esplikasyon konplè a.",
   "compare_original": "Konpare ak orijinal la",
-  "source_hint": "Sa a se tèks egzak ClearAid li a. Toujou tcheke dat ak montan yo kont li.",
+  "source_hint": "Sa a se tèks egzak ClarityAI li a. Toujou tcheke dat ak montan yo kont li.",
   "verified_support": "Sipò lokal verifye",
   "finding_resource": "N ap chèche yon òganizasyon ou ka fè konfyans epi verifye si li bon",
   "recommended_resource": "Resous rekòmande",
@@ -71,7 +71,7 @@
   "start_new_document": "Kòmanse yon nouvo dokiman",
   "your_privacy": "Vi prive ou",
   "your_privacy_hint": "Nou pa estoke anyen sou sèvè nou yo. Sèl bagay ki sove sou aparèy sa a se pwogrè lis ou a, epi ou ka efase l touswit.",
-  "explains_you_decide": "ClearAid esplike, ou deside",
-  "disclaimer_body": "ClearAid ede w konprann epi òganize. Li pa janm depoze ni voye anyen pou ou, epi li pa ranplase konsèy yon avoka, yon doktè, oswa yon travayè sosyal.",
+  "explains_you_decide": "ClarityAI esplike, ou deside",
+  "disclaimer_body": "ClarityAI ede w konprann epi òganize. Li pa janm depoze ni voye anyen pou ou, epi li pa ranplase konsèy yon avoka, yon doktè, oswa yon travayè sosyal.",
   "tts_english_only": "Lekti awotvwa a jwe an anglè."
 }

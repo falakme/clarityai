@@ -1,7 +1,7 @@
 {
   "tagline": "免费 · 私密 · 通俗易懂",
   "headline": "几秒钟看懂任何令人困惑的信件。",
-  "subhead": "粘贴文字、拍张照片，或直接说出来。ClearAid 用通俗的语言为你解释，告诉你具体该怎么做，并为你推荐值得信赖的本地帮助。",
+  "subhead": "粘贴文字、拍张照片，或直接说出来。ClarityAI 用通俗的语言为你解释，告诉你具体该怎么做，并为你推荐值得信赖的本地帮助。",
   "trust_docs": "可读取 PDF 和照片",
   "trust_langs": "15 种语言 + 朗读",
   "trust_private": "我们的服务器不存储任何内容",
@@ -26,7 +26,7 @@
   "file_ready": "已准备好翻译",
   "remove_file": "移除文件",
   "submit": "帮我解释一下",
-  "footer": "从设计上保护隐私。ClearAid 绝不会替你提交或递交任何内容。",
+  "footer": "从设计上保护隐私。ClarityAI 绝不会替你提交或递交任何内容。",
   "voice_unsupported": "此浏览器不支持语音输入，请改用打字。",
   "back_to_keyboard": "切换到键盘",
   "speak_situation": "说说你的情况",
@@ -51,7 +51,7 @@
   "done": "已完成",
   "no_action_steps": "本文档不需要具体的行动步骤。请前往“摘要”标签查看完整说明。",
   "compare_original": "与原文对照",
-  "source_hint": "这是 ClearAid 读取的确切文本。请务必据此核对日期和金额。",
+  "source_hint": "这是 ClarityAI 读取的确切文本。请务必据此核对日期和金额。",
   "verified_support": "已验证的本地支持",
   "finding_resource": "正在寻找值得信赖的机构并确认是否合适",
   "recommended_resource": "推荐资源",
@@ -71,7 +71,7 @@
   "start_new_document": "开始一份新文档",
   "your_privacy": "你的隐私",
   "your_privacy_hint": "我们的服务器不存储任何内容。本设备上唯一保存的是你的清单进度，你可以随时清除。",
-  "explains_you_decide": "ClearAid 负责解释，你来决定",
-  "disclaimer_body": "ClearAid 帮助你理解和整理。它绝不会替你提交或递交任何内容，也不能替代律师、医生或社工的建议。",
+  "explains_you_decide": "ClarityAI 负责解释，你来决定",
+  "disclaimer_body": "ClarityAI 帮助你理解和整理。它绝不会替你提交或递交任何内容，也不能替代律师、医生或社工的建议。",
   "tts_english_only": "朗读以英语播放。"
 }
