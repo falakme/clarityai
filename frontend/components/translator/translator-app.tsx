@@ -126,7 +126,9 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
               : e.status === 502
                 ? "ClearAid had trouble reading that. Please try again."
                 : e.status === 422 || e.status === 413
-                  ? e.message
+                  ? e.message === "blur_detected"
+                    ? "This photo is a bit too blurry for us to read accurately. To ensure we give you the right guidance, please take another photo with good lighting."
+                    : e.message
                   : `Translation failed (${e.status}). Please try again.`
             : "Something went wrong reaching the translator.";
         setError(msg);

@@ -57,6 +57,8 @@ export interface TranslateResult {
   detected_location: string;
   /** Backend-attached provenance (exact extracted/source text). */
   source_text: string;
+  /** Count of sensitive PII entities redacted before AI processing. */
+  pii_redacted_count: number;
 }
 
 /** Backend health/status payload (GET /api/health). */

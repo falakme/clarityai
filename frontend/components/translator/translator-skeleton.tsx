@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { Loader2, ShieldCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 /** Calming skeleton state shown while the AI translates. */
@@ -9,7 +9,15 @@ export function TranslatorSkeleton() {
         <Loader2 className="h-6 w-6 animate-spin" />
         <p className="text-xl font-semibold">Reading your document</p>
       </div>
-      <p className="mt-2 text-base text-muted-foreground">
+
+      <div className="mt-3 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/50 p-2.5 text-emerald-800">
+        <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600 animate-pulse" />
+        <span className="text-xs font-semibold">
+          Privacy Protected: Redacting sensitive PII before AI processing...
+        </span>
+      </div>
+
+      <p className="mt-4 text-base text-muted-foreground">
         Pulling out the deadlines, the costs, and exactly what to do next. This takes a few
         seconds.
       </p>

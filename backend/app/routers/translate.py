@@ -25,6 +25,7 @@ from app.services import brave
 from app.services.extract import ExtractionError, extract_text
 from app.services.pii import redact_pii
 from app.services.nvidia import (
+    BlurDetectedError,
     NvidiaConfigError,
     NvidiaUpstreamError,
     evaluate_resources,
@@ -80,10 +81,11 @@ async def translate(
             detail="Tell us what you need help with, or upload a document to translate.",
         )
 
-    # PII REDACTION LAYER: strip SSNs (and future PII) before anything is sent
+    # PII REDACTION LAYER: strip SSNs, emails, and phone numbers before anything is sent
     # to the model. Runs on BOTH the typed context and the extracted document.
-    user_context = redact_pii(user_context)
-    document_text = redact_pii(document_text)
+    user_context, count_user = redact_pii(user_context)
+    document_text, count_doc = redact_pii(document_text)
+    pii_redacted_count = count_user + count_doc
 
     # AI step — classify + summarize + extract (single call, kept fast).
     try:
@@ -98,8 +100,12 @@ async def translate(
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except NvidiaUpstreamError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except BlurDetectedError as exc:
+        raise HTTPException(status_code=422, detail="blur_detected")
 
+    result.pii_redacted_count = pii_redacted_count
     return result
+
 
 
 @router.post("/api/recommend", response_model=VerifiedResource)

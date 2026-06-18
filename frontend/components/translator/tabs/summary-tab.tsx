@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { BookOpenText } from "lucide-react";
+import { BookOpenText, ShieldCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Markdown } from "@/components/ui/markdown";
 import { ListenButton } from "@/components/listen-button";
@@ -28,6 +28,17 @@ export function SummaryTab({ result, t }: { result: TranslateResult; t: Translat
 
   return (
     <Stagger className="space-y-5">
+      {result.pii_redacted_count > 0 && (
+        <Item>
+          <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/50 p-3 text-emerald-800">
+            <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-600" />
+            <span className="text-sm font-semibold">
+              Privacy Protected: {result.pii_redacted_count} sensitive item{result.pii_redacted_count > 1 ? "s were" : " was"} redacted before AI processing.
+            </span>
+          </div>
+        </Item>
+      )}
+
       {/* Urgency classification banner */}
       <Item>
         <UrgencyBanner tier={result.urgency_tier} brief={result.plain_language_brief} t={t} />

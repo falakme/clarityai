@@ -106,6 +106,10 @@ class TranslateResponse(BaseModel):
     # Backend-attached provenance (the exact extracted/source text).
     source_text: str = ""
 
+    # Count of sensitive PII items redacted during intake.
+    pii_redacted_count: int = 0
+
+
 
 class HealthResponse(BaseModel):
     status: str = "ok"

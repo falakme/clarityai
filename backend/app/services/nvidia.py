@@ -36,7 +36,15 @@ from app.schemas import (
 SYSTEM_PROMPT = """You are a crisis-to-action document translator. Your user is a stressed individual who needs to understand a complex administrative, legal, medical, or financial document immediately.
 Your ONLY job is to analyze the document text and output a single, highly structured JSON object. Do not include markdown code fences (like ```json), and do NOT use any emojis anywhere in your response.
 
-Follow this exact JSON schema strictly:
+CRITICAL LEGIBILITY CHECK:
+Before doing anything else, analyze the provided document text for legibility and coherence. If the text is largely garbled, illegible, or contains completely incoherent nonsense (often indicating a blurry image upload or failed OCR), you must immediately return EXACTLY this JSON response and nothing else:
+{
+  "error": "blur_detected",
+  "message": "The document text is too unclear to process safely."
+}
+Do not attempt to hallucinate an explanation, tasks, table data, or diagram steps if the text is illegible. Otherwise, proceed with the standard JSON schema.
+
+Follow this exact JSON schema strictly for legible documents:
 {
   "urgency_tier": "Urgent Action Required",
   "document_category": "eviction",
@@ -71,8 +79,8 @@ FIELD RULES:
 Always populate urgency_tier, document_category, plain_language_brief, the markdown explanation, the task_list, the diagram_steps, the detected_location, and the ai_confidence_score."""
 
 RETRY_INSTRUCTION = (
-    "Your previous reply was not valid JSON. Reply again with ONLY the raw JSON "
-    "object matching the schema exactly — no markdown code fences, no commentary, "
+    "Your previous reply was not valid JSON or was missing required fields. Reply again with ONLY the raw JSON "
+    "object matching the schema exactly (or the blur_detected error JSON if the text is completely illegible) — no markdown code fences, no commentary, "
     "and no emojis."
 )
 
@@ -132,6 +140,11 @@ class NvidiaConfigError(RuntimeError):
 
 class NvidiaUpstreamError(RuntimeError):
     """Raised when the NVIDIA API returns an error or unparsable output."""
+
+
+class BlurDetectedError(RuntimeError):
+    """Raised when the AI detects that the document text is illegible or blurry."""
+
 
 
 def _first_json_object(s: str) -> str | None:
@@ -416,6 +429,9 @@ async def translate_form(
 
     if data is None:
         raise NvidiaUpstreamError("The AI returned malformed output. Please try again.")
+
+    if isinstance(data, dict) and data.get("error") == "blur_detected":
+        raise BlurDetectedError(data.get("message") or "The document text is too unclear to process safely.")
 
     return _normalize(data, source_text)
 
