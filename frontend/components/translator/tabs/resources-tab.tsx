@@ -13,6 +13,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Item, Stagger } from "@/components/motion";
+import type { Translator } from "@/lib/i18n";
 import type { TranslateResult } from "@/lib/types";
 import { buildShareText } from "./shared";
 
@@ -29,11 +30,13 @@ export function ResourcesTab({
   recommendationLoading,
   acknowledged,
   onAcknowledgedChange,
+  t,
 }: {
   result: TranslateResult;
   recommendationLoading: boolean;
   acknowledged: boolean;
   onAcknowledgedChange: (next: boolean) => void;
+  t: Translator;
 }) {
   const [shareMsg, setShareMsg] = useState("");
   const hasResource = Boolean(result.recommended_resource_url);
@@ -48,7 +51,7 @@ export function ResourcesTab({
       }
       if (typeof navigator !== "undefined" && navigator.clipboard) {
         await navigator.clipboard.writeText(textToShare);
-        setShareMsg("Copied to clipboard.");
+        setShareMsg(t("copied"));
         setTimeout(() => setShareMsg(""), 2500);
       }
     } catch {
@@ -63,26 +66,26 @@ export function ResourcesTab({
         {recommendationLoading && !hasResource ? (
           <Card className="border border-emerald-200 bg-emerald-50/40">
             <h2 className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
-              <BadgeCheck className="h-4 w-4" /> Verified local support
+              <BadgeCheck className="h-4 w-4" /> {t("verified_support")}
             </h2>
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
-              Finding a trustworthy organization and checking it&apos;s the right fit
+              {t("finding_resource")}
             </p>
           </Card>
         ) : hasResource ? (
           <Card className="border border-emerald-200 bg-emerald-50/40">
             <h2 className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
-              <BadgeCheck className="h-4 w-4" /> Verified local support
+              <BadgeCheck className="h-4 w-4" /> {t("verified_support")}
             </h2>
             <p className="text-base font-bold text-foreground">
-              {result.recommended_resource_name || "Recommended resource"}
+              {result.recommended_resource_name || t("recommended_resource")}
             </p>
             {result.ai_reasoning_for_recommendation && (
               <p className="mt-2 flex items-start gap-2 rounded-md bg-card/70 p-3 text-xs text-muted-foreground">
                 <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
                 <span>
-                  <span className="font-semibold text-emerald-700">Why this one: </span>
+                  <span className="font-semibold text-emerald-700">{t("why_this_one")} </span>
                   {result.ai_reasoning_for_recommendation}
                 </span>
               </p>
@@ -94,13 +97,9 @@ export function ResourcesTab({
         ) : (
           <Card>
             <h2 className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
-              <BadgeCheck className="h-4 w-4" /> Verified local support
+              <BadgeCheck className="h-4 w-4" /> {t("verified_support")}
             </h2>
-            <p className="text-sm text-muted-foreground">
-              We couldn&apos;t pin down a specific local organization for this one. The
-              steps in your plan still apply, and 211.org or your local legal aid or
-              benefits office can point you to help nearby.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("no_resource")}</p>
           </Card>
         )}
       </Item>
@@ -109,13 +108,15 @@ export function ResourcesTab({
       <Item>
         <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4">
           <h2 className="flex items-center gap-2 text-sm font-bold text-amber-900">
-            <ShieldCheck className="h-4 w-4" /> Responsible AI &amp; human-in-the-loop
+            <ShieldCheck className="h-4 w-4" /> {t("responsible_ai")}
           </h2>
 
           {/* Confidence indicator */}
           <div className="mt-2 rounded-md bg-card/70 p-3">
             <div className="flex items-center justify-between text-xs font-semibold text-amber-900">
-              <span>Confidence: {result.confidence_percent}% based on source text anchoring</span>
+              <span>
+                {t("confidence_label")}: {result.confidence_percent}% {t("confidence_anchoring")}
+              </span>
               <span>{result.ai_confidence_score}</span>
             </div>
             <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-amber-200/70">
@@ -133,16 +134,14 @@ export function ResourcesTab({
               checked={acknowledged}
               onCheckedChange={onAcknowledgedChange}
               labelClassName="text-xs leading-relaxed"
-              label="I verify that I will use this AI summary strictly as an organizational guide and understand that it does not provide official medical or legal decisions."
+              label={t("ack_label")}
             />
           </div>
 
           {/* Gated external actions — disabled until the box is ticked */}
           <div className="mt-3 space-y-2">
             {!acknowledged && (
-              <p className="text-xs font-medium text-amber-800">
-                Tick the box above to unlock the buttons below.
-              </p>
+              <p className="text-xs font-medium text-amber-800">{t("unlock_hint")}</p>
             )}
 
             {hasResource &&
@@ -153,11 +152,11 @@ export function ResourcesTab({
                   rel="noopener noreferrer"
                   className={buttonVariants({ size: "sm", className: "w-full" })}
                 >
-                  <ExternalLink className="h-4 w-4" /> Open verified resource
+                  <ExternalLink className="h-4 w-4" /> {t("open_resource")}
                 </a>
               ) : (
                 <Button size="sm" className="w-full" disabled>
-                  <ExternalLink className="h-4 w-4" /> Open verified resource
+                  <ExternalLink className="h-4 w-4" /> {t("open_resource")}
                 </Button>
               ))}
 
@@ -170,7 +169,7 @@ export function ResourcesTab({
                   onClick={sharePlan}
                   disabled={!acknowledged}
                 >
-                  <Share2 className="h-4 w-4" /> Share plan
+                  <Share2 className="h-4 w-4" /> {t("share_plan")}
                 </Button>
                 {shareMsg && <p className="text-center text-xs text-emerald-700">{shareMsg}</p>}
               </>

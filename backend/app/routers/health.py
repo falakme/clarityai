@@ -17,4 +17,5 @@ def health() -> HealthResponse:
         nvidia_configured=bool(settings.nvidia_api_key),
         nvidia_model=settings.nvidia_model,
         brave_configured=bool(settings.brave_api_key),
+        azure_tts_configured=bool(settings.azure_tts_key),
     )

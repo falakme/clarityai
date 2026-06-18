@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Check, Languages, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LANGUAGES } from "@/lib/languages";
@@ -63,38 +64,45 @@ export function LanguageMenu({
         )}
       </button>
 
-      {open && (
-        <div
-          role="menu"
-          aria-label="Output language"
-          className="absolute right-0 top-[calc(100%+0.5rem)] z-50 max-h-72 w-44 overflow-y-auto rounded-md border border-white/70 bg-card p-1.5 shadow-clay-lg"
-        >
-          {LANGUAGES.map((l) => {
-            const active = l === value;
-            return (
-              <button
-                key={l}
-                type="button"
-                role="menuitemradio"
-                aria-checked={active}
-                onClick={() => {
-                  onChange(l);
-                  setOpen(false);
-                }}
-                className={cn(
-                  "flex w-full items-center justify-between gap-2 rounded-sm px-3 py-2 text-left text-sm font-semibold transition-colors",
-                  active
-                    ? "bg-primary/10 text-primary"
-                    : "text-foreground hover:bg-muted/60",
-                )}
-              >
-                <span className="truncate">{l}</span>
-                {active && <Check className="h-4 w-4 shrink-0" />}
-              </button>
-            );
-          })}
-        </div>
-      )}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            role="menu"
+            aria-label="Output language"
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.14, ease: [0.22, 1, 0.36, 1] }}
+            style={{ transformOrigin: "top right" }}
+            className="absolute right-0 top-[calc(100%+0.5rem)] z-50 max-h-72 w-44 overflow-y-auto rounded-md border border-white/70 bg-card p-1.5 shadow-clay-lg"
+          >
+            {LANGUAGES.map((l) => {
+              const active = l === value;
+              return (
+                <button
+                  key={l}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={active}
+                  onClick={() => {
+                    onChange(l);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    "flex w-full items-center justify-between gap-2 rounded-sm px-3 py-2 text-left text-sm font-semibold transition-colors",
+                    active
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground hover:bg-muted/60",
+                  )}
+                >
+                  <span className="truncate">{l}</span>
+                  {active && <Check className="h-4 w-4 shrink-0" />}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

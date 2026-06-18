@@ -2,14 +2,15 @@
 
 import { CheckSquare, FileText, Link as LinkIcon, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { Translator, UiKey } from "@/lib/i18n";
 
 export type TabKey = "summary" | "tasks" | "resources" | "settings";
 
-export const TABS: { key: TabKey; label: string; icon: typeof FileText }[] = [
-  { key: "summary", label: "Summary", icon: FileText },
-  { key: "tasks", label: "Tasks", icon: CheckSquare },
-  { key: "resources", label: "Resources", icon: LinkIcon },
-  { key: "settings", label: "Settings", icon: Settings },
+export const TABS: { key: TabKey; labelKey: UiKey; icon: typeof FileText }[] = [
+  { key: "summary", labelKey: "nav_summary", icon: FileText },
+  { key: "tasks", labelKey: "nav_tasks", icon: CheckSquare },
+  { key: "resources", labelKey: "nav_resources", icon: LinkIcon },
+  { key: "settings", labelKey: "nav_settings", icon: Settings },
 ];
 
 type Attention = Partial<Record<TabKey, boolean>>;
@@ -23,10 +24,12 @@ export function BottomNav({
   active,
   onChange,
   attention,
+  t,
 }: {
   active: TabKey;
   onChange: (key: TabKey) => void;
   attention?: Attention;
+  t: Translator;
 }) {
   return (
     <nav
@@ -35,7 +38,7 @@ export function BottomNav({
     >
       <div className="pointer-events-auto mx-auto max-w-md px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="flex items-stretch justify-around gap-1 rounded-2xl border border-white/60 bg-white/80 p-1.5 shadow-clay backdrop-blur-lg">
-          {TABS.map(({ key, label, icon: Icon }) => {
+          {TABS.map(({ key, labelKey, icon: Icon }) => {
             const isActive = active === key;
             return (
               <button
@@ -56,7 +59,7 @@ export function BottomNav({
                     <span className="absolute -right-1.5 -top-1 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-white" />
                   )}
                 </span>
-                {label}
+                {t(labelKey)}
               </button>
             );
           })}
@@ -74,14 +77,16 @@ export function SideNav({
   active,
   onChange,
   attention,
+  t,
 }: {
   active: TabKey;
   onChange: (key: TabKey) => void;
   attention?: Attention;
+  t: Translator;
 }) {
   return (
     <nav aria-label="Sections" className="flex flex-col gap-1.5">
-      {TABS.map(({ key, label, icon: Icon }) => {
+      {TABS.map(({ key, labelKey, icon: Icon }) => {
         const isActive = active === key;
         return (
           <button
@@ -102,7 +107,7 @@ export function SideNav({
                 <span className="absolute -right-1.5 -top-1 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-white" />
               )}
             </span>
-            {label}
+            {t(labelKey)}
           </button>
         );
       })}

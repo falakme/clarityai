@@ -3,39 +3,50 @@
 import { AlertOctagon, Clock, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { stripEmoji } from "@/lib/text";
+import type { Translator, UiKey } from "@/lib/i18n";
 import type { TranslateResult, UrgencyTier } from "@/lib/types";
 
 /** Classification banner — color + icon driven by the AI's urgency tier. */
 const URGENCY_STYLE: Record<
   UrgencyTier,
-  { wrap: string; icon: typeof AlertOctagon; label: string }
+  { wrap: string; icon: typeof AlertOctagon; labelKey: UiKey }
 > = {
   "Urgent Action Required": {
     wrap: "border-red-200 bg-red-50/50 text-red-800",
     icon: AlertOctagon,
-    label: "Urgent action required",
+    labelKey: "urgency_urgent",
   },
   "Time Sensitive": {
     wrap: "border-amber-100 bg-amber-50/40 text-amber-900",
     icon: Clock,
-    label: "Time sensitive",
+    labelKey: "urgency_time",
   },
   "Informational Only": {
     wrap: "border-primary/20 bg-primary/5 text-primary",
     icon: Info,
-    label: "Informational only",
+    labelKey: "urgency_info",
   },
 };
 
-export function UrgencyBanner({ tier, brief }: { tier: UrgencyTier; brief: string }) {
+export function UrgencyBanner({
+  tier,
+  brief,
+  t,
+}: {
+  tier: UrgencyTier;
+  brief: string;
+  t: Translator;
+}) {
   const style = URGENCY_STYLE[tier] ?? URGENCY_STYLE["Informational Only"];
   const Icon = style.icon;
   return (
     <div className={cn("flex items-start gap-3 rounded-xl border p-3", style.wrap)}>
       <Icon className="mt-0.5 h-5 w-5 shrink-0" />
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-wide opacity-80">AI classification</p>
-        <p className="text-base font-bold leading-tight">{style.label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wide opacity-80">
+          {t("ai_classification")}
+        </p>
+        <p className="text-base font-bold leading-tight">{t(style.labelKey)}</p>
         {brief && <p className="mt-1 text-sm font-medium opacity-90">{brief}</p>}
       </div>
     </div>
@@ -43,7 +54,15 @@ export function UrgencyBanner({ tier, brief }: { tier: UrgencyTier; brief: strin
 }
 
 /** Compact urgency pill for the dashboard header. */
-export function UrgencyPill({ tier, className }: { tier: UrgencyTier; className?: string }) {
+export function UrgencyPill({
+  tier,
+  t,
+  className,
+}: {
+  tier: UrgencyTier;
+  t: Translator;
+  className?: string;
+}) {
   const style = URGENCY_STYLE[tier] ?? URGENCY_STYLE["Informational Only"];
   const Icon = style.icon;
   return (
@@ -55,19 +74,25 @@ export function UrgencyPill({ tier, className }: { tier: UrgencyTier; className?
       )}
     >
       <Icon className="h-3.5 w-3.5" />
-      {style.label}
+      {t(style.labelKey)}
     </span>
   );
 }
 
 /** Compact pill for the AI's self-reported extraction confidence. */
-export function ConfidenceBadge({ score }: { score: TranslateResult["ai_confidence_score"] }) {
+export function ConfidenceBadge({
+  score,
+  t,
+}: {
+  score: TranslateResult["ai_confidence_score"];
+  t: Translator;
+}) {
   return (
     <span
       className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700"
       title="How confident the AI is in the extracted details (including deadlines). Always verify against the original."
     >
-      AI confidence: {score}
+      {t("ai_confidence")}: {score}
     </span>
   );
 }

@@ -114,3 +114,14 @@ class HealthResponse(BaseModel):
     nvidia_configured: bool
     nvidia_model: str = ""
     brave_configured: bool = False
+    azure_tts_configured: bool = False
+
+
+class TtsRequest(BaseModel):
+    """Input for the Azure Cognitive Services text-to-speech proxy.
+
+    Read-aloud is English-only by product decision, so callers do not pass a
+    language; the backend always synthesizes with a neutral English voice.
+    """
+
+    text: str = Field(min_length=1, max_length=6000)
