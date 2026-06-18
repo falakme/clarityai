@@ -2,16 +2,18 @@
 export const LANGUAGES = [
   "English",
   "Spanish",
+  "French",
   "Arabic",
   "Chinese (Simplified)",
-  "French",
   "Hindi",
+  "German",
   "Portuguese",
-  "Bengali",
-  "Russian",
-  "Urdu",
   "Vietnamese",
   "Tagalog",
+  "Korean",
+  "Urdu",
+  "Bengali",
+  "Russian",
   "Haitian Creole",
 ] as const;
 

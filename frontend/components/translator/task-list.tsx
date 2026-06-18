@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { stripEmoji } from "@/lib/text";
+import type { Translator } from "@/lib/i18n";
 import type { TaskItem } from "@/lib/types";
 
 /**
@@ -21,39 +22,42 @@ export function TaskList({
   checked,
   onToggle,
   storageKey,
+  t,
 }: {
   tasks: TaskItem[];
   checked: Record<string, boolean>;
   onToggle: (id: string, value: boolean) => void;
   /** Used only to namespace the checkbox element ids. */
   storageKey: string;
+  t: Translator;
 }) {
   if (!tasks || tasks.length === 0) return null;
 
-  const doneCount = tasks.filter((t) => checked[String(t.id)]).length;
+  const doneCount = tasks.filter((task) => checked[String(task.id)]).length;
   const pct = (doneCount / tasks.length) * 100;
 
   return (
     <Card>
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-primary">
-          <ListChecks className="h-4 w-4" /> Action checklist
+        <h2 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
+          <ListChecks className="h-4 w-4" /> {t("action_checklist")}
         </h2>
-        <span className="text-base font-semibold text-muted-foreground">
-          {doneCount}/{tasks.length} done
+        <span className="text-xs font-semibold text-muted-foreground">
+          {doneCount}/{tasks.length} {t("done")}
         </span>
       </div>
 
-      <Progress value={pct} className="mb-4" />
+      <Progress value={pct} className="mb-3" />
 
-      <div className="space-y-2">
-        {tasks.map((t) => {
-          const key = String(t.id);
+      <div className="space-y-1.5">
+        {tasks.map((task) => {
+          const key = String(task.id);
           return (
             <Checkbox
               key={key}
               id={`task-${storageKey}-${key}`}
-              label={stripEmoji(t.task)}
+              label={stripEmoji(task.task)}
+              labelClassName="text-sm"
               checked={!!checked[key]}
               onCheckedChange={(v) => onToggle(key, v)}
             />

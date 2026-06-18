@@ -6,6 +6,7 @@ import { ChevronDown, FileSearch } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Item, Stagger } from "@/components/motion";
 import { cn } from "@/lib/utils";
+import type { Translator } from "@/lib/i18n";
 import type { TranslateResult } from "@/lib/types";
 import { ProcessDiagram } from "../process-diagram";
 import { TaskList } from "../task-list";
@@ -22,12 +23,14 @@ export function TasksTab({
   onToggle,
   storageKey,
   sourceText,
+  t,
 }: {
   result: TranslateResult;
   checked: Record<string, boolean>;
   onToggle: (id: string, value: boolean) => void;
   storageKey: string;
   sourceText: string;
+  t: Translator;
 }) {
   const [showSource, setShowSource] = useState(false);
   const hasTasks = result.task_list.length > 0;
@@ -35,29 +38,27 @@ export function TasksTab({
   const twoCol = hasTasks && hasSteps;
 
   return (
-    <Stagger className={cn("grid gap-5", twoCol && "lg:grid-cols-2 lg:items-start")}>
+    <Stagger className={cn("grid gap-4", twoCol && "lg:grid-cols-2 lg:items-start")}>
       {hasSteps && (
         <Item>
-          <ProcessDiagram steps={result.diagram_steps} />
+          <ProcessDiagram steps={result.diagram_steps} t={t} />
         </Item>
       )}
 
-      <Item className="space-y-5">
+      <Item className="space-y-4">
         {hasTasks && (
           <TaskList
             tasks={result.task_list}
             checked={checked}
             onToggle={onToggle}
             storageKey={storageKey}
+            t={t}
           />
         )}
 
         {!hasTasks && !hasSteps && (
           <Card>
-            <p className="text-sm text-muted-foreground">
-              This document doesn&apos;t call for specific action steps. Head to the
-              Summary tab for the full explanation.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("no_action_steps")}</p>
           </Card>
         )}
 
@@ -69,7 +70,7 @@ export function TasksTab({
             aria-expanded={showSource}
           >
             <span className="flex items-center gap-2">
-              <FileSearch className="h-5 w-5" /> Compare with the original
+              <FileSearch className="h-5 w-5" /> {t("compare_original")}
             </span>
             <ChevronDown
               className={"h-5 w-5 transition-transform " + (showSource ? "rotate-180" : "")}
@@ -85,10 +86,7 @@ export function TasksTab({
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 className="overflow-hidden"
               >
-                <p className="mb-2 mt-3 text-xs text-muted-foreground">
-                  This is the exact text ClearAid read. Always check dates and dollar
-                  amounts against it.
-                </p>
+                <p className="mb-2 mt-3 text-xs text-muted-foreground">{t("source_hint")}</p>
                 <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-words rounded-md bg-muted/60 p-4 text-xs text-muted-foreground">
                   {sourceText}
                 </pre>

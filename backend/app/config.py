@@ -29,6 +29,16 @@ class Settings(BaseSettings):
     brave_api_key: str = ""
     brave_base_url: str = "https://api.search.brave.com/res/v1/web/search"
 
+    # Microsoft Azure Cognitive Services — Text-to-Speech (neural voices).
+    # When empty, the frontend gracefully falls back to the browser's built-in
+    # Web Speech synthesis, so read-aloud always works.
+    azure_tts_key: str = ""
+    azure_tts_endpoint: str = (
+        "https://centralindia.api.cognitive.microsoft.com/cognitiveservices/v1"
+    )
+    # A premium, natural-sounding neutral English voice. Read-aloud is English-only.
+    azure_tts_voice: str = "en-US-JennyNeural"
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

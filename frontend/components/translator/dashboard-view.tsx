@@ -6,6 +6,7 @@ import { Printer, RotateCcw } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { LanguageMenu } from "@/components/language-menu";
+import { createTranslator, type Translator } from "@/lib/i18n";
 import type { TranslateResult } from "@/lib/types";
 import { BottomNav, SideNav, type TabKey } from "./bottom-nav";
 import { UrgencyPill } from "./tabs/shared";
@@ -14,11 +15,11 @@ import { TasksTab } from "./tabs/tasks-tab";
 import { ResourcesTab } from "./tabs/resources-tab";
 import { SettingsTab } from "./tabs/settings-tab";
 
-const TAB_TITLE: Record<TabKey, string> = {
-  summary: "Summary",
-  tasks: "Your action plan",
-  resources: "Get help",
-  settings: "Settings",
+const TAB_TITLE: Record<TabKey, Parameters<Translator>[0]> = {
+  summary: "nav_summary",
+  tasks: "title_action_plan",
+  resources: "title_get_help",
+  settings: "nav_settings",
 };
 
 /**
@@ -60,6 +61,7 @@ export function DashboardView({
   onReset: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<TabKey>("summary");
+  const t = createTranslator(language);
   const hasResource = Boolean(result.recommended_resource_url);
   const attention = { resources: hasResource && !acknowledged };
 
@@ -71,14 +73,14 @@ export function DashboardView({
       <aside className="hidden w-72 shrink-0 flex-col border-r border-white/50 px-5 py-6 lg:flex">
         <Brand href="/" />
         <div className="mt-8 flex-1">
-          <SideNav active={activeTab} onChange={setActiveTab} attention={attention} />
+          <SideNav active={activeTab} onChange={setActiveTab} attention={attention} t={t} />
         </div>
         <div className="space-y-2 border-t border-white/50 pt-4">
           <Button variant="outline" size="sm" className="w-full" onClick={print}>
-            <Printer className="h-5 w-5" /> Print plan
+            <Printer className="h-5 w-5" /> {t("print_plan")}
           </Button>
           <Button variant="ghost" size="sm" className="w-full" onClick={onReset}>
-            <RotateCcw className="h-5 w-5" /> New document
+            <RotateCcw className="h-5 w-5" /> {t("new_document")}
           </Button>
         </div>
       </aside>
@@ -89,16 +91,16 @@ export function DashboardView({
           <div className="flex min-w-0 items-center gap-3">
             <Brand href="/" className="lg:hidden" />
             <h1 className="hidden text-lg font-bold tracking-tight lg:block">
-              {TAB_TITLE[activeTab]}
+              {t(TAB_TITLE[activeTab])}
             </h1>
-            <UrgencyPill tier={result.urgency_tier} className="hidden sm:inline-flex lg:ml-1" />
+            <UrgencyPill tier={result.urgency_tier} t={t} className="hidden sm:inline-flex lg:ml-1" />
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <LanguageMenu value={language} onChange={onLanguageChange} busy={refreshing} />
             <button
               type="button"
               onClick={print}
-              aria-label="Print plan"
+              aria-label={t("print_plan")}
               className="flex min-h-tap min-w-tap items-center justify-center rounded-md bg-card text-foreground shadow-clay-sm active:translate-y-0.5 lg:hidden"
             >
               <Printer className="h-5 w-5" />
@@ -111,12 +113,12 @@ export function DashboardView({
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.18, ease: "easeOut" }}
+                initial={{ opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -16 }}
+                transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               >
-                {activeTab === "summary" && <SummaryTab result={result} />}
+                {activeTab === "summary" && <SummaryTab result={result} t={t} />}
                 {activeTab === "tasks" && (
                   <TasksTab
                     result={result}
@@ -124,6 +126,7 @@ export function DashboardView({
                     onToggle={onToggleTask}
                     storageKey={storageKey}
                     sourceText={sourceText}
+                    t={t}
                   />
                 )}
                 {activeTab === "resources" && (
@@ -132,15 +135,16 @@ export function DashboardView({
                     recommendationLoading={recommendationLoading}
                     acknowledged={acknowledged}
                     onAcknowledgedChange={onAcknowledgedChange}
+                    t={t}
                   />
                 )}
-                {activeTab === "settings" && <SettingsTab onReset={onReset} />}
+                {activeTab === "settings" && <SettingsTab onReset={onReset} t={t} />}
               </motion.div>
             </AnimatePresence>
           </div>
         </main>
 
-        <BottomNav active={activeTab} onChange={setActiveTab} attention={attention} />
+        <BottomNav active={activeTab} onChange={setActiveTab} attention={attention} t={t} />
       </div>
     </div>
   );

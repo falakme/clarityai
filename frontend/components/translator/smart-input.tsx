@@ -373,23 +373,24 @@ function VoicePanel({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-      className="relative overflow-hidden rounded-lg p-5 text-primary-foreground shadow-clay-primary"
+      className="relative overflow-hidden rounded-lg bg-slate-900 p-5 text-white shadow-clay-primary"
     >
-      {/* Primary gradient fade backdrop */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary via-primary to-primary/60" />
+      {/* Decorative glows — explicit positive layering on the dark card so the
+          panel never renders white-on-white (a -z-10 backdrop could disappear
+          behind the surrounding light card). */}
       <motion.div
-        className="absolute -right-10 -top-10 -z-10 h-44 w-44 rounded-full bg-white/25 blur-3xl"
+        className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-primary/40 blur-3xl"
         animate={{ scale: 1 + energy * 0.6, opacity: 0.35 + energy * 0.4 }}
         transition={{ type: "spring", stiffness: 110, damping: 18 }}
       />
       <motion.div
-        className="absolute -bottom-12 -left-8 -z-10 h-40 w-40 rounded-full bg-white/15 blur-3xl"
+        className="pointer-events-none absolute -bottom-12 -left-8 h-40 w-40 rounded-full bg-primary/25 blur-3xl"
         animate={{ scale: 1 + energy * 0.4 }}
         transition={{ type: "spring", stiffness: 90, damping: 20 }}
       />
 
       {/* Top bar: keyboard button (top-left) + close */}
-      <div className="flex items-center justify-between">
+      <div className="relative flex items-center justify-between">
         <button
           type="button"
           onClick={backToKeyboard}
@@ -410,7 +411,7 @@ function VoicePanel({
       </div>
 
       {/* Visualizer */}
-      <div className="mt-4 flex items-center justify-center" dir="ltr">
+      <div className="relative mt-4 flex items-center justify-center" dir="ltr">
         <div className="flex h-20 items-center justify-center gap-[3px]">
           {levels.map((l, i) => (
             <span
@@ -426,27 +427,27 @@ function VoicePanel({
         </div>
       </div>
 
-      <div className="mt-1 flex items-center justify-center gap-2 text-sm font-semibold text-white/85">
+      <div className="relative mt-1 flex items-center justify-center gap-2 text-sm font-semibold text-blue-200">
         <Mic className="h-4 w-4" /> {t("listening")}
       </div>
 
       {/* Transcript */}
-      <div className="mt-4 min-h-[64px] rounded-md bg-white/10 p-3 text-center backdrop-blur-sm">
+      <div className="relative mt-4 min-h-[64px] rounded-md bg-white/10 p-3 text-center backdrop-blur-sm">
         {shown ? (
-          <p className="text-lg font-medium leading-snug">
-            {transcript} <span className="text-white/60">{interim}</span>
+          <p className="text-lg font-medium leading-snug text-white">
+            {transcript} <span className="text-blue-200/70">{interim}</span>
           </p>
         ) : (
-          <p className="text-base font-medium leading-snug text-white/60">{t("voice_prompt")}</p>
+          <p className="text-base font-medium leading-snug text-blue-200/80">{t("voice_prompt")}</p>
         )}
       </div>
 
       {/* Controls */}
-      <div className="mt-4 flex items-center justify-end gap-2">
+      <div className="relative mt-4 flex items-center justify-end gap-2">
         <button
           type="button"
           onClick={cancel}
-          className="rounded-md px-4 py-3 text-base font-bold text-white/80 transition-colors hover:text-white"
+          className="rounded-md px-4 py-3 text-base font-bold text-blue-200 transition-colors hover:text-white"
         >
           {t("cancel")}
         </button>
@@ -454,14 +455,14 @@ function VoicePanel({
           type="button"
           onClick={commit}
           disabled={!shown}
-          className="flex items-center gap-2 rounded-md bg-white px-5 py-3 text-base font-extrabold text-primary shadow-clay transition-all active:translate-y-0.5 disabled:opacity-40"
+          className="flex items-center gap-2 rounded-md bg-white px-5 py-3 text-base font-extrabold text-slate-900 shadow-clay transition-all active:translate-y-0.5 disabled:opacity-40"
         >
           <Check className="h-5 w-5" /> {t("use_this")}
         </button>
       </div>
 
       {existing.trim() && (
-        <p className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold text-white/70">
+        <p className="relative mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold text-blue-200/70">
           <Sparkles className="h-3.5 w-3.5" /> {t("speak_situation")}
         </p>
       )}

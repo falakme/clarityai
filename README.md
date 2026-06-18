@@ -5,7 +5,8 @@ administrative, legal, medical, and financial documents into a structured,
 interactive workspace: an urgency classification, a plain-language brief, a
 full Markdown explanation, a stateful task list, a conditional data table, a
 step-by-step process visualizer, and an AI-evaluated "Verified Local Support"
-recommendation — all behind a Responsible-AI, human-in-the-loop gate.
+recommendation — all behind a Responsible-AI, human-in-the-loop gate, and all
+fully localizable into 15 languages.
 
 ClearAid is **stateless and frictionless**: no login, no onboarding, no
 location tracking, and no database. Documents are processed in memory for the
@@ -21,10 +22,12 @@ and backend are independently buildable and communicate over HTTP/JSON.
 
 | Layer | Technology | Responsibility |
 | ----- | ---------- | -------------- |
-| **Frontend** | Next.js 14 (App Router), TypeScript, Tailwind CSS, Shadcn-style UI | Multimodal intake, dynamic component hydration, client state. PWA app shell + offline translation caching. |
-| **Backend API** | Python, FastAPI, Pydantic | Async routing, MIME routing, OCR/text extraction, two-step inference orchestration, strict schema validation. |
-| **Cognitive Engine** | NVIDIA Build API — `google/gemma-3n-e4b-it` | OpenAI-compatible `/chat/completions`; used twice per request (extraction + resource evaluation). |
+| **Frontend** | Next.js 14 (App Router), TypeScript, Tailwind CSS, Shadcn-style UI, Framer Motion | Multimodal intake, dynamic component hydration, client state, 15-language UI localization, fluid micro-interactions. PWA app shell + offline translation caching. |
+| **Backend API** | Python, FastAPI, Pydantic | Async routing, MIME routing, OCR/text extraction, two-step inference orchestration, TTS proxy, strict schema validation. |
+| **Cognitive Engine** | NVIDIA Build API — `google/gemma-3n-e4b-it` | OpenAI-compatible `/chat/completions`; used twice per request (extraction + resource evaluation), with the active output language injected into the prompt. |
 | **Retrieval** | Brave Search API | Live retrieval for the agentic recommendation engine (optional). |
+| **Speech (TTS)** | Microsoft Azure Cognitive Services (neural voices) | Premium English read-aloud, proxied server-side; falls back to the browser Web Speech engine when unconfigured. |
+| **Speech (STT)** | Browser Web Speech API + Web Audio | Client-side voice intake with a live audio visualizer (offline, no upload). |
 
 ### Service topology
 
@@ -32,13 +35,16 @@ and backend are independently buildable and communicate over HTTP/JSON.
 ┌────────────────────────────┐        ┌────────────────────────────┐
 │ frontend  (Next.js :3000)  │  HTTP  │ backend  (FastAPI :8000)   │
 │  - App Router / PWA / SW   │ ─────▶ │  - /api/translate-form     │
-│  - same-origin /api proxy  │ files  │  - /api/health             │
+│  - same-origin /api proxy  │ files  │  - /api/recommend          │
+│  - 15-language i18n        │  JSON  │  - /api/tts (Azure proxy)  │
+│  - Framer Motion           │ audio  │  - /api/health             │
 └────────────────────────────┘        └─────────────┬──────────────┘
                                                      │ OpenAI-compatible POST
-                                          ┌──────────┴───────────┐
-                                          ▼                      ▼
-                       NVIDIA · gemma-3n-e4b-it        Brave Search API
-                       (extract + evaluate)            (retrieval)
+                                  ┌──────────────────┼───────────────────┐
+                                  ▼                   ▼                   ▼
+               NVIDIA · gemma-3n-e4b-it       Brave Search API     Azure Cognitive
+               (extract + evaluate,           (retrieval)          Services TTS
+                language-aware)                                    (neural voice)
 ```
 
 There is no database service. The app persists nothing.
@@ -50,8 +56,12 @@ There is no database service. The app persists nothing.
 ### Step 1 — Multimodal Intake
 The intake screen (`components/translator/intake-view.tsx`) accepts pasted/typed
 text, a **PDF** upload, an **image** upload (PNG/JPG/WEBP), or a **mobile camera
-capture**. An optional **location** field scopes the resource recommendation.
-The payload is packaged as `multipart/form-data` and POSTed to
+capture**, plus a **voice intake** mode. The voice panel
+(`components/translator/smart-input.tsx`) transcribes with the browser Web
+Speech API and renders a live Web-Audio visualizer; its modal uses an explicit
+dark (`bg-slate-900`) surface with high-contrast white/`blue-200` text so it is
+always legible. An optional **location** field scopes the resource
+recommendation. The payload is packaged as `multipart/form-data` and POSTed to
 `POST /api/translate-form`.
 
 ### Step 2 — Format Routing & OCR Extraction
@@ -68,10 +78,16 @@ A 10 MB ceiling is enforced; unsupported/empty/unreadable inputs return a clean
 **HTTP 422**. SSNs are redacted (`app/services/pii.py`) before anything leaves
 the backend.
 
-### Step 3 — Inference (multi-capability extraction)
+### Step 3 — Inference (multi-capability, language-aware extraction)
 `app/services/nvidia.py` composes a strict system prompt and calls
-`gemma-3n-e4b-it` (`temperature=0.2`, `top_p=0.7`, `max_tokens=2048`). The model
-returns a single JSON object that demonstrates four capabilities:
+`gemma-3n-e4b-it` (`temperature=0.2`, `top_p=0.7`, `max_tokens=2048`). When the
+user has selected a non-English output language, an additional system message
+instructs the model to translate **every human-readable value** — the brief,
+the Markdown explanation, every task, the table headers/cells, and the diagram
+titles/descriptions — into that language, while keeping machine fields
+(`urgency_tier`, `document_category`, `detected_location`,
+`ai_confidence_score`) in English. The model returns a single JSON object that
+demonstrates four capabilities:
 
 - **Classification** — `urgency_tier` (`Urgent Action Required` |
   `Time Sensitive` | `Informational Only`) and a `document_category`.
@@ -85,16 +101,26 @@ retries once before failing with a clean **HTTP 502**.
 
 ### Step 4 — Agentic Resource Recommendation (Retrieval-Augmented Evaluation)
 1. **Retrieval** — `app/services/brave.py` builds a query from the classified
-   `document_category` + location (e.g. `site:211.org tenant legal aid {loc}`,
-   `Feeding America local food pantry SNAP {loc}`) and fetches live results.
+   `document_category` + location and fetches live results.
 2. **AI evaluation** — the raw search hits (title, url, description) are fed
    back into `gemma-3n-e4b-it`, which selects the **single** most relevant and
    trustworthy resource and explains why. This populates
    `recommended_resource_name`, `recommended_resource_url`, and
    `ai_reasoning_for_recommendation`. The chosen URL is validated against the
-   retrieved set. This step is best-effort — failure never breaks the response.
+   retrieved set. This step runs as a separate `POST /api/recommend` request,
+   is best-effort, and never breaks the response.
 
-### Step 5 — Dynamic UI Hydration
+### Step 5 — Read-Aloud (Azure Neural TTS, English)
+The Summary tab's **Listen** control (`components/listen-button.tsx`) POSTs the
+plain-language summary to `POST /api/tts`. The backend
+(`app/services/azure_tts.py`) wraps the text in SSML and proxies it to Azure
+Cognitive Services, streaming back MP3 audio with a premium neutral English
+neural voice (`en-US-JennyNeural` by default). Read-aloud is **English-only** by
+design. When `AZURE_TTS_KEY` is not configured the endpoint returns **HTTP 503**
+and the client transparently falls back to the browser's Web Speech synthesis,
+so read-aloud always works.
+
+### Step 6 — Dynamic UI Hydration
 The client conditionally hydrates Shadcn-style modules from the populated
 fields. External actions are gated behind the Responsible-AI checkbox (§5).
 
@@ -122,8 +148,10 @@ The serialized API response additionally carries backend-attached
 
 | Method | Route | Auth | Purpose |
 | ------ | ----- | ---- | ------- |
-| `POST` | `/api/translate-form` | none | Multimodal intake → structured translation + recommendation |
-| `GET`  | `/api/health` | none | Liveness + NVIDIA/Brave configuration status |
+| `POST` | `/api/translate-form` | none | Multimodal intake → structured, language-aware translation |
+| `POST` | `/api/recommend` | none | Agentic "Verified Local Support" (Brave retrieval + AI evaluation) |
+| `POST` | `/api/tts` | none | Azure neural TTS proxy → streams MP3 (English; 503 when unconfigured) |
+| `GET`  | `/api/health` | none | Liveness + NVIDIA/Brave/Azure-TTS configuration status |
 
 ---
 
@@ -158,32 +186,64 @@ the four tabs:
 
 | Tab | View | Modules |
 | --- | ---- | ------- |
-| **Summary** | `tabs/summary-tab.tsx` | ELI5/language controls, urgency banner (`urgency_tier` + `plain_language_brief`), Markdown explanation (`ui/markdown.tsx`), conditional breakdown table (`translator/data-table.tsx`). |
-| **Tasks** | `tabs/tasks-tab.tsx` | Process visualizer (`translator/process-diagram.tsx`), interactive checklist (`translator/task-list.tsx`, controlled), and the Source Transparency toggle. |
-| **Resources** | `tabs/resources-tab.tsx` | Agentic "Verified Local Support" card and the Responsible AI & Human-in-the-Loop block; the gated "Open verified resource" action. |
-| **Settings** | `tabs/settings-tab.tsx` | "Translate another document" (reset to State 0), "Erase my data" (localStorage clear), disclaimers. |
+| **Summary** | `tabs/summary-tab.tsx` | Urgency banner (soft `rounded-xl` card), compact Markdown explanation (`ui/markdown.tsx`), AI-confidence pill, Listen (Azure TTS) control, conditional breakdown table (`translator/data-table.tsx`). |
+| **Tasks** | `tabs/tasks-tab.tsx` | Compact process visualizer (`translator/process-diagram.tsx`, small numbered badges + thin connector), interactive checklist (`translator/task-list.tsx`, controlled), and the Source Transparency toggle. |
+| **Resources** | `tabs/resources-tab.tsx` | Agentic "Verified Local Support" card and the Responsible AI & Human-in-the-Loop block; the gated "Open verified resource" action. Condensed to fit a single mobile viewport. |
+| **Settings** | `tabs/settings-tab.tsx` | "Print / save as PDF", "Start a new document" (reset to State 0), "Erase my data" (localStorage clear), disclaimers. |
 
 State is lifted into the orchestrator and the checklist (`translator/task-list.tsx`)
 is a **controlled** component, so switching tabs never wipes progress.
 
 **Responsive shell.** The dashboard adapts to the viewport: phones and tablets
 get the floating bottom nav with a single content column; desktops (`lg+`) get
-a persistent left sidebar, a wider centred column, and two-column tab layouts
-(path beside checklist, resource beside safeguards). The intake screen is a
-two-column hero on desktop and a single stack on mobile.
+a persistent left sidebar, a wider centred column, and two-column tab layouts.
+The intake screen is a two-column hero on desktop and a single stack on mobile.
 
-**Extra capabilities.** Read-aloud of the plain-language summary
-(`components/listen-button.tsx`, Web Speech Synthesis), one-tap **Print / Save
-as PDF** of a clean takeaway sheet (`translator/printable-plan.tsx` + print
-stylesheet), an **offline** indicator (`components/offline-badge.tsx`), and the
-installable PWA shell with offline translation caching.
+**Compact type scale & safe areas.** Typography is tuned tight for small
+viewports (compact headers, `text-xs`/`text-sm` body). The header pads with
+`env(safe-area-inset-top)` and the floating bottom nav pads with
+`env(safe-area-inset-bottom)`; the document sets `viewport-fit=cover` so insets
+resolve on notched iOS/Android devices.
+
+**Fluid micro-interactions (Framer Motion).** Tab switches animate with a subtle
+horizontal slide-and-fade; the collapsed language menu scales smoothly into view
+(`scale 0.95 → 1`, opacity fade); process-diagram steps stagger in; and the
+intake/voice panels morph between states.
+
+**Read-aloud, print, offline, install.** Read-aloud of the plain-language
+summary via Azure neural TTS with a Web Speech fallback
+(`components/listen-button.tsx`), one-tap **Print / Save as PDF** of a clean
+takeaway sheet (`translator/printable-plan.tsx` + print stylesheet), an
+**offline** indicator (`components/offline-badge.tsx`), and the installable PWA
+shell with offline translation caching.
+
+### Localization engine (15 languages)
+
+Every static UI string — intake screen **and** dashboard chrome (tab names,
+section headers, buttons, disclaimers) — is translated client-side from bundled
+per-language dictionaries:
+
+- **Dictionaries** — `frontend/locales/<code>.json`, one flat key→string map per
+  language. Covered languages: English, Spanish, French, Arabic,
+  Chinese (Simplified), Hindi, German, Portuguese, Vietnamese, Tagalog, Korean,
+  Urdu, Bengali, Russian, and Haitian Creole.
+- **Runtime** — `lib/i18n.ts` assembles the dictionaries into a lookup table and
+  exposes `createTranslator(language)` (key → localized string, falling back to
+  English then the raw key), `isRTL()` (Arabic/Urdu get `dir="rtl"`), and
+  `speechLocale()` (BCP-47 locale for STT). The selector lives in
+  `lib/languages.ts`; the header uses a compact icon-only popover
+  (`components/language-menu.tsx`).
+- **LLM output** — the same language is passed to the backend and injected into
+  the gemma prompt (§2, Step 3), so the **generated** content (explanation,
+  tasks, table, diagram) is translated server-side. Changing the language on the
+  dashboard re-runs the translation in place. (Read-aloud audio remains English.)
 
 ---
 
 ## 5. Responsible AI Protocols
 
-- **Source Transparency Engine.** The result view exposes the exact source
-  string (`source_text`) the explanation was derived from, so every claim can be
+- **Source Transparency Engine.** The Tasks tab exposes the exact source string
+  (`source_text`) the explanation was derived from, so every claim can be
   verified against the original document.
 - **Responsible AI & Human-in-the-Loop gateway.** A distinct amber-bordered
   container shows an AI confidence indicator (`confidence_percent`) and a
@@ -210,27 +270,42 @@ clearaid/
 │   └── app/
 │       ├── main.py             # FastAPI app, CORS, router mounts
 │       ├── config.py           # pydantic-settings (env)
-│       ├── schemas.py          # Pydantic: TranslateResponse, Health
+│       ├── schemas.py          # Pydantic: TranslateResponse, Tts, Health
 │       ├── routers/
 │       │   ├── translate.py    # intake + MIME routing + recommendation
+│       │   ├── tts.py          # Azure TTS proxy (MP3 stream)
 │       │   └── health.py       # status probe
 │       └── services/
 │           ├── extract.py      # pypdf / pytesseract text extraction
 │           ├── pii.py          # SSN redaction
 │           ├── brave.py        # retrieval (Brave Search)
-│           └── nvidia.py       # prompts, inference, JSON repair, evaluation
+│           ├── azure_tts.py    # SSML build + Azure Cognitive Services call
+│           └── nvidia.py       # prompts, language-aware inference, JSON repair
 └── frontend/
     ├── Dockerfile              # multi-stage Next.js standalone
-    ├── app/                    # App Router page + /api proxies
-    ├── components/             # ui/, translator/, motion
-    ├── lib/                    # api, types, demo-docs, storage, text, motion
+    ├── app/                    # App Router page + /api proxies (health, recommend, translate-form, tts)
+    ├── components/             # ui/, translator/, language-menu, listen-button, motion
+    ├── lib/                    # api, types, demo-docs, storage, text, motion, i18n, languages
+    ├── locales/                # 15 per-language UI dictionaries (<code>.json)
     └── public/                 # manifest.json, sw.js, icons
 ```
+
+### Environment variables
+
+| Variable | Required | Purpose |
+| -------- | -------- | ------- |
+| `NVIDIA_API_KEY` | yes | Cognitive engine (extraction + evaluation). |
+| `NVIDIA_BASE_URL` / `NVIDIA_MODEL` | no | Override the NVIDIA endpoint / model. |
+| `BRAVE_API_KEY` | no | Enables the "Verified Local Support" recommendation. |
+| `AZURE_TTS_KEY` | no | Enables Azure neural read-aloud; falls back to Web Speech when empty. |
+| `AZURE_TTS_ENDPOINT` / `AZURE_TTS_VOICE` | no | Override the Azure region endpoint / neural voice. |
+| `CORS_ORIGINS`, `MAX_UPLOAD_MB` | no | Backend service config. |
+| `NEXT_PUBLIC_API_BASE_URL`, `BACKEND_INTERNAL_URL` | no | Frontend ↔ backend wiring (default: same-origin proxy). |
 
 ### Run the full stack (Docker)
 
 ```bash
-cp .env.example .env            # then set NVIDIA_API_KEY (and optionally BRAVE_API_KEY)
+cp .env.example .env            # set NVIDIA_API_KEY (and optionally BRAVE_API_KEY, AZURE_TTS_KEY)
 docker compose up -d --build    # frontend :3000 · backend :8000
 ```
 
