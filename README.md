@@ -259,27 +259,42 @@ clarityai/
 ├── docker-compose.yml          # 2-service orchestration (frontend, backend)
 ├── .env.example                # all environment variables
 ├── backend/
-│   ├── Dockerfile              # python:3.12-slim + tesseract-ocr
+│   ├── Dockerfile              # python:3.12-slim + tesseract-ocr, non-root user
 │   ├── requirements.txt
 │   └── app/
-│       ├── main.py             # FastAPI app, CORS, router mounts
+│       ├── main.py             # FastAPI app, CORS, rate-limiter, router mounts
 │       ├── config.py           # pydantic-settings (env)
 │       ├── schemas.py          # Pydantic: TranslateResponse, Tts, Health
+│       ├── ratelimit.py        # shared slowapi limiter instance
 │       ├── routers/
 │       │   ├── translate.py    # intake + MIME routing + recommendation
 │       │   ├── tts.py          # Azure TTS proxy (MP3 stream)
 │       │   └── health.py       # status probe
 │       └── services/
-│           ├── extract.py      # pypdf / pytesseract text extraction
+│           ├── extract.py      # pypdf / pytesseract text extraction (threadpool)
 │           ├── pii.py          # SSN redaction
 │           ├── brave.py        # retrieval (Brave Search)
 │           ├── azure_tts.py    # SSML build + Azure Cognitive Services call
-│           └── nvidia.py       # prompts, language-aware inference, JSON repair
+│           ├── geolocation.py  # IP geolocation with validation
+│           ├── prompts.py      # system prompts and per-domain hints
+│           ├── parsing.py      # JSON repair, normalization, emoji strip
+│           └── nvidia.py       # language-aware inference orchestrator
 └── frontend/
     ├── Dockerfile              # multi-stage Next.js standalone
     ├── app/                    # App Router page + /api proxies (health, recommend, translate-form, tts)
     ├── components/             # ui/, translator/, language-menu, listen-button, motion
-    ├── lib/                    # api, types, demo-docs, storage, text, motion, i18n, languages
+    ├── lib/
+    │   ├── api.ts              # typed fetch helpers
+    │   ├── types.ts            # shared TypeScript types
+    │   ├── demo-docs.ts        # judge demo documents
+    │   ├── storage.ts          # localStorage hooks
+    │   ├── text.ts             # text utilities
+    │   ├── motion.ts           # Framer Motion variants
+    │   ├── i18n.ts             # translator + RTL + speech locale
+    │   ├── languages.ts        # language list + native display names
+    │   ├── use-speech-recognition.ts  # Web Speech API hook
+    │   ├── use-audio-levels.ts        # Web Audio visualizer hook
+    │   └── utils.ts            # cn(), isSafeHttpUrl()
     ├── locales/                # 15 per-language UI dictionaries (<code>.json)
     └── public/                 # manifest.json, sw.js, icons
 ```
@@ -292,9 +307,13 @@ clarityai/
 | `NVIDIA_BASE_URL` / `NVIDIA_MODEL` | no | Override the NVIDIA endpoint / model. |
 | `BRAVE_API_KEY` | no | Enables the "Verified Local Support" recommendation. |
 | `AZURE_TTS_KEY` | no | Enables Azure neural read-aloud; falls back to Web Speech when empty. |
-| `AZURE_TTS_ENDPOINT` / `AZURE_TTS_VOICE` | no | Override the Azure region endpoint / neural voice. |
-| `CORS_ORIGINS`, `MAX_UPLOAD_MB` | no | Backend service config. |
-| `NEXT_PUBLIC_API_BASE_URL`, `BACKEND_INTERNAL_URL` | no | Frontend ↔ backend wiring (default: same-origin proxy). |
+| `AZURE_TTS_ENDPOINT` | no | Azure TTS REST endpoint. Must use the `tts.speech.microsoft.com` domain: `https://<region>.tts.speech.microsoft.com/cognitiveservices/v1`. The general `api.cognitive.microsoft.com` hostname returns 404. |
+| `AZURE_TTS_VOICE` | no | Neural voice name (default: `en-US-JennyNeural`). |
+| `CORS_ORIGINS` | no | Comma-separated list of allowed origins. Set to your frontend domain in production (e.g. `https://clarityai.yourdomain.com`). |
+| `MAX_UPLOAD_MB` | no | Per-file upload ceiling (default: `10`). |
+| `NEXT_PUBLIC_API_BASE_URL` | no | Leave empty to use the same-origin `/api/*` proxy (recommended for Coolify). |
+| `BACKEND_INTERNAL_URL` | no | Internal URL the Next.js server uses to reach the backend (default: `http://backend:8000`). |
+| `KEEP_ALIVE_TIMEOUT` | no | Node.js HTTP keep-alive timeout in **milliseconds** (default: `100000`). Must exceed Traefik's keep-alive (90 s) to prevent force-refresh 504s. |
 
 ### Run the full stack (Docker)
 
@@ -324,7 +343,132 @@ npm run dev                     # http://localhost:3000
 
 ### Deployment (Coolify)
 
-1. Create a **Docker Compose** resource pointing at this repository.
-2. Populate the environment variables from `.env.example` in the Coolify UI.
-   `NEXT_PUBLIC_*` values are baked into the browser bundle at build time.
-3. Deploy. The backend image provisions the `tesseract-ocr` binary for OCR.
+1. **New Resource** → **Docker Compose** → **Public Repository** → enter
+   `https://github.com/falakme/clearaid`, branch `main`,
+   compose file `/docker-compose.yml`.
+2. **Domains** — set "Domains for frontend" to `https://yourdomain.com` (no
+   port suffix). Leave "Domains for backend" empty — the backend is internal
+   only and the frontend proxies to it.
+3. **Environment Variables** — add at minimum:
+   ```
+   NVIDIA_API_KEY=nvapi-...
+   CORS_ORIGINS=https://yourdomain.com
+   BACKEND_INTERNAL_URL=http://backend:8000
+   ```
+   Optionally add `BRAVE_API_KEY`, `AZURE_TTS_KEY`, and
+   `AZURE_TTS_ENDPOINT=https://<region>.tts.speech.microsoft.com/cognitiveservices/v1`.
+4. **Auto Deploy** — enable in Configuration → Advanced so every push to
+   `main` triggers a rebuild. With the GitHub App connected no manual webhook
+   setup is needed.
+5. **Deploy.** The backend image provisions `tesseract-ocr` for OCR and runs
+   as a non-root user. The frontend container joins the `coolify` proxy network
+   (declared in `docker-compose.yml`) so Traefik can route to it.
+
+> **Note on Azure TTS endpoint:** The Azure portal shows a general
+> `https://<region>.api.cognitive.microsoft.com/` endpoint. The TTS REST API
+> lives at a different hostname: `https://<region>.tts.speech.microsoft.com/cognitiveservices/v1`.
+> Using the portal's endpoint returns 404.
+
+---
+
+## 7. Security & Hardening
+
+The following hardening measures are in place as of the current version:
+
+| Area | Measure |
+| ---- | ------- |
+| **Rate limiting** | `slowapi` per-IP limits on all paid-upstream endpoints: `POST /api/translate-form` (20/min), `POST /api/recommend` (30/min), `POST /api/tts` (30/min). |
+| **Upload bounds** | Max 5 files per request; per-file ceiling enforced (`MAX_UPLOAD_MB`, default 10 MB). |
+| **OCR blocking** | `pytesseract` and `pypdf` run in a `ThreadPoolExecutor` via `run_in_threadpool` so CPU-bound work never blocks the async event loop. |
+| **PII redaction** | SSNs, email addresses, and phone numbers are stripped from both typed context and extracted document text before anything is sent to the model. |
+| **IP validation** | The `client_ip` header is validated as a public, globally-routable IP address (`ipaddress` module) before being used in geolocation — prevents path injection and private-address leaks. |
+| **URL allowlisting** | Model-provided resource URLs are restricted to `http(s)` on both the backend (`parsing.py`) and frontend (`isSafeHttpUrl`) before being rendered as links — blocks `javascript:`, `data:`, and other dangerous schemes. |
+| **Error hygiene** | Upstream provider error details (NVIDIA, Azure) are logged server-side only; clients receive a generic message. |
+| **Security headers** | Next.js serves `Content-Security-Policy`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, and `Permissions-Policy` on all routes. |
+| **CORS** | `allow_credentials=False`, methods scoped to `GET, POST, OPTIONS`, headers scoped to `Content-Type`. |
+| **Non-root container** | The backend Dockerfile adds an `appuser` and drops to it before `EXPOSE`. |
+| **Data purge** | "Erase my data" clears `localStorage`, `sessionStorage`, all Cache Storage caches, and unregisters the service worker — so cached document translations don't survive an explicit wipe. |
+| **XSS** | `react-markdown` is used without `rehype-raw`, so model output cannot inject HTML. SSML text is XML-escaped in `azure_tts.py`. |
+
+
+---
+
+## 8. Changelog
+
+### Session — 2026-06-19
+
+#### Correctness
+- **Extraction prompt/schema sync** — the system prompt previously only
+  requested ~4 fields while the parser and UI expected ~10. Rebuilt to request
+  the full documented schema (`plain_language_explanation_markdown`, `table_data`,
+  `diagram_steps`, `document_category`, `ai_confidence_score`, etc.), so all
+  dashboard tabs now populate correctly.
+- **Agentic recommendation wired up** — the Resources tab was rendering the raw
+  `local_support_resources` array instead of the AI-evaluated
+  `recommended_resource_*` fields produced by `/api/recommend`. Fixed to show
+  the verified resource name, link, and the model's one-line reasoning.
+- **`blur_detected` scoped to uploads** — the blur error was firing for plain
+  typed text, showing a "take another photo" message when no photo was uploaded.
+  The prompt and backend now restrict `blur_detected` to OCR'd documents only.
+
+#### Performance & Scalability
+- **Threadpool OCR** — `pytesseract` and `pypdf` now run via `run_in_threadpool`
+  so CPU-bound extraction never blocks the async event loop.
+- **Upload cap** — requests are bounded to 5 files; size check happens before
+  the file is processed.
+- **No duplicate Brave search** — the autonomous research step was running on
+  both the fast `/translate-form` path and the slow `/recommend` path. Brave is
+  now queried exactly once, on `/recommend` only.
+- **Language change debounce** — changing the output language on the dashboard
+  fires one NVIDIA call per selection. Arrow-key browsing through the `<select>`
+  was triggering a call per keypress, exhausting the rate limit. An 800 ms
+  debounce collapses rapid changes into a single call.
+- **Force-refresh 504 fix** — Node.js closes keep-alive connections after 5 s
+  idle by default; Traefik's default is 90 s. The race caused 504s on hard
+  refresh. `KEEP_ALIVE_TIMEOUT=100000` (ms) in the frontend environment ensures
+  Node.js outlasts Traefik.
+
+#### Security & Privacy (see §7 for full table)
+- Per-IP rate limiting via `slowapi` on all three paid-upstream endpoints.
+- IP address validated before geolocation (blocks path/URL injection).
+- Model-provided URLs allowlisted to `http(s)` on both server and client.
+- Upstream provider errors logged server-side only; generic messages to clients.
+- CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`,
+  `Permissions-Policy` headers added via `next.config.mjs`.
+- CORS tightened: `allow_credentials=False`, scoped methods and headers.
+- Backend container now runs as a non-root `appuser`.
+- "Erase my data" now clears Cache Storage and unregisters the service worker
+  in addition to `localStorage` (cached document translations were surviving).
+
+#### Refactors
+- `backend/app/services/nvidia.py` (473 lines) split into three focused modules:
+  `prompts.py` (system prompts + per-domain hints), `parsing.py` (JSON repair,
+  normalization, emoji stripping, URL validation), and a slim orchestrator.
+- `geolocation.py` extracted as a standalone best-effort service with IP
+  validation.
+- `ratelimit.py` provides the shared `slowapi` limiter instance to avoid
+  circular imports.
+- `useSpeechRecognition` and `useAudioLevels` extracted from the 471-line
+  `smart-input.tsx` into standalone hooks in `lib/`.
+
+#### UX
+- Language selector now displays each language's name in its own script:
+  Español, Français, عربي, 中文, हिन्दी, Deutsch, Português, Tiếng Việt,
+  Filipino, 한국어, اردو, বাংলা, Русский, Kreyòl. The API value remains the
+  English name so the backend prompt contract is unchanged.
+- Brand renamed from ClearAid → **ClarityAI** everywhere in source
+  (`brand.tsx`, `package.json`, `package-lock.json`).
+
+#### Deployment (Coolify)
+- Frontend container joins the `coolify` external Docker network so Traefik can
+  route to it; backend stays on the internal compose network only.
+- `SERVICE_URL_BACKEND` removed from all Next.js proxy routes — Coolify injects
+  this variable without a port number, causing 502s on every proxied call.
+  Routes now use `BACKEND_INTERNAL_URL` (default: `http://backend:8000`).
+- Azure TTS endpoint corrected from `api.cognitive.microsoft.com` to
+  `tts.speech.microsoft.com` (the general domain returns 404 for TTS requests).
+- Backend healthcheck added to `docker-compose.yml` using stdlib
+  `urllib.request` (no extra dependencies).
+- Frontend Dockerfile healthcheck removed — it used `wget --spider` which is a
+  GNU-only flag not available in Alpine/busybox, causing the container to be
+  permanently marked unhealthy and excluded from Traefik routing.
