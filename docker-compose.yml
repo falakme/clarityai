@@ -11,7 +11,6 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: clarityai-backend
     restart: unless-stopped
     environment:
       NVIDIA_API_KEY: ${NVIDIA_API_KEY}
@@ -24,28 +23,25 @@ services:
       MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-10}
     expose:
       - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        # Baked into the browser bundle at build time. Empty = call the
-        # frontend's own origin (/api/*), which proxies to the backend over
-        # the internal network. Recommended for Coolify (no CORS / mixed
-        # content). Only set this to a full https URL if you want the browser
-        # to hit the backend directly.
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
-    container_name: clarityai-frontend
     restart: unless-stopped
+    ports:
+      - "3000:3000"
     environment:
       # Internal URL the Next.js server uses to reach the backend container.
       BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL:-http://backend:8000}
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-}
     depends_on:
-      # Wait for the backend to pass its healthcheck before starting, so the
-      # first proxied request can't race a not-yet-ready backend.
-      backend:
-        condition: service_healthy
-    expose:
-      - "3000"
+      - backend
