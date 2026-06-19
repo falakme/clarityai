@@ -144,9 +144,17 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
   );
 
   // Output language: changing it re-translates in place while on the dashboard.
+  // Debounced so arrow-key browsing through the <select> doesn't fire a new
+  // API call for every intermediate option (which would exhaust the rate limit).
+  const langDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   function handleLanguage(next: string) {
     setLanguage(next);
-    if (phase === "result") runTranslate({ language: next, refresh: true });
+    if (phase === "result") {
+      if (langDebounceRef.current) clearTimeout(langDebounceRef.current);
+      langDebounceRef.current = setTimeout(() => {
+        runTranslate({ language: next, refresh: true });
+      }, 800);
+    }
   }
 
   function handleToggleTask(id: string, value: boolean) {
