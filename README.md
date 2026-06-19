@@ -1,4 +1,4 @@
-# ClarityAI — Engineering Blueprint
+# ClarityAI
 
 **Direction A: Crisis-to-Action Translator.** ClarityAI converts unstructured
 administrative, legal, medical, and financial documents into a structured,
