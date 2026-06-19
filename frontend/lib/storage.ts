@@ -41,3 +41,117 @@ export function useLocalStorage<T>(key: string, initial: T) {
 
   return [value, update, loaded] as const;
 }
+
+
+// ---------------------------------------------------------------------------
+// Session persistence & history
+// ---------------------------------------------------------------------------
+
+import type { HistoryEntry, TranslateResult } from "@/lib/types";
+
+const CURRENT_KEY = "clarityai.current";
+const HISTORY_KEY = "clarityai.history";
+const MAX_HISTORY = 30;
+
+// --- Current result (survives refresh) -------------------------------------
+
+export function saveCurrentResult(
+  result: TranslateResult,
+  checkedTasks: Record<string, boolean>,
+): void {
+  try {
+    localStorage.setItem(CURRENT_KEY, JSON.stringify({ result, checkedTasks }));
+  } catch {
+    /* ignore quota errors */
+  }
+}
+
+export function loadCurrentSession(): {
+  result: TranslateResult;
+  checkedTasks: Record<string, boolean>;
+} | null {
+  try {
+    const raw = localStorage.getItem(CURRENT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    // Validate minimal shape
+    if (parsed?.result?.urgency_tier) return parsed;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearCurrentSession(): void {
+  try {
+    localStorage.removeItem(CURRENT_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+// --- History array ---------------------------------------------------------
+
+export function getHistory(): HistoryEntry[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Prepend a new entry and return its generated ID. */
+export function addToHistory(
+  result: TranslateResult,
+  checkedTasks: Record<string, boolean>,
+): string {
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  const entry: HistoryEntry = { id, timestamp: Date.now(), result, checkedTasks };
+  try {
+    const history = getHistory();
+    history.unshift(entry);
+    history.splice(MAX_HISTORY); // cap at 30 entries
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch {
+    /* ignore */
+  }
+  return id;
+}
+
+/** Overwrite an existing entry's result and checkedTasks (e.g. after recommendation). */
+export function updateHistoryEntry(
+  id: string,
+  result: TranslateResult,
+  checkedTasks: Record<string, boolean>,
+): void {
+  try {
+    const history = getHistory();
+    const idx = history.findIndex((e) => e.id === id);
+    if (idx !== -1) {
+      history[idx] = { ...history[idx], result, checkedTasks };
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+export function deleteHistoryEntry(id: string): void {
+  try {
+    const history = getHistory().filter((e) => e.id !== id);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function clearHistory(): void {
+  try {
+    localStorage.removeItem(HISTORY_KEY);
+  } catch {
+    /* ignore */
+  }
+}

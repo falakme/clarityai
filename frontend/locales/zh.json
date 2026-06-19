@@ -33,6 +33,7 @@
   "nav_summary": "摘要",
   "nav_tasks": "任务",
   "nav_resources": "资源",
+  "nav_history": "历史记录",
   "nav_settings": "设置",
   "title_action_plan": "你的行动计划",
   "title_get_help": "获取帮助",
@@ -73,5 +74,11 @@
   "explains_you_decide": "ClarityAI 负责解释，你来决定",
   "disclaimer_body": "ClarityAI 帮助你理解和整理。它绝不会替你提交或递交任何内容，也不能替代律师、医生或社工的建议。",
   "tts_english_only": "朗读以英语播放。",
-  "confidence_hint": "源文本支持该分析的清晰程度，根据模型评估。"
+  "confidence_hint": "源文本支持该分析的清晰程度，根据模型评估。",
+  "history_empty": "No history yet. Translate a document to see it here.",
+  "history_load": "Load",
+  "history_clear_all": "Clear all",
+  "history_confirm_clear": "Tap again to confirm",
+  "history_no_brief": "No summary available.",
+  "history_tasks_done": "tasks done"
 }

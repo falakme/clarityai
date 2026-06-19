@@ -33,6 +33,7 @@
   "nav_summary": "Résumé",
   "nav_tasks": "Tâches",
   "nav_resources": "Ressources",
+  "nav_history": "Historique",
   "nav_settings": "Paramètres",
   "title_action_plan": "Votre plan d'action",
   "title_get_help": "Obtenir de l'aide",
@@ -73,5 +74,11 @@
   "explains_you_decide": "ClarityAI explique, vous décidez",
   "disclaimer_body": "ClarityAI vous aide à comprendre et à organiser. Il ne dépose ni n'envoie jamais rien à votre place, et ne remplace pas l'avis d'un avocat, d'un médecin ou d'un travailleur social.",
   "tts_english_only": "La lecture à voix haute se fait en anglais.",
-  "confidence_hint": "Dans quelle mesure le texte source soutient cette analyse, selon l’évaluation du modèle."
+  "confidence_hint": "Dans quelle mesure le texte source soutient cette analyse, selon l’évaluation du modèle.",
+  "history_empty": "No history yet. Translate a document to see it here.",
+  "history_load": "Load",
+  "history_clear_all": "Clear all",
+  "history_confirm_clear": "Tap again to confirm",
+  "history_no_brief": "No summary available.",
+  "history_tasks_done": "tasks done"
 }

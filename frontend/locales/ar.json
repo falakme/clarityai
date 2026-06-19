@@ -33,6 +33,7 @@
   "nav_summary": "ملخص",
   "nav_tasks": "المهام",
   "nav_resources": "الموارد",
+  "nav_history": "السجل",
   "nav_settings": "الإعدادات",
   "title_action_plan": "خطة عملك",
   "title_get_help": "احصل على مساعدة",
@@ -73,5 +74,11 @@
   "explains_you_decide": "ClarityAI يشرح، وأنت تقرر",
   "disclaimer_body": "يساعدك ClarityAI على الفهم والتنظيم. لا يقدّم أو يرسل أي شيء نيابةً عنك، وهو ليس بديلاً عن نصيحة محامٍ أو طبيب أو أخصائي حالات.",
   "tts_english_only": "تُشغَّل القراءة الصوتية باللغة الإنجليزية.",
-  "confidence_hint": "مدى وضوح النص المصدر في دعم هذا التحليل، وفق تقييم النموذج."
+  "confidence_hint": "مدى وضوح النص المصدر في دعم هذا التحليل، وفق تقييم النموذج.",
+  "history_empty": "No history yet. Translate a document to see it here.",
+  "history_load": "Load",
+  "history_clear_all": "Clear all",
+  "history_confirm_clear": "Tap again to confirm",
+  "history_no_brief": "No summary available.",
+  "history_tasks_done": "tasks done"
 }

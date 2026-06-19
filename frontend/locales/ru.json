@@ -33,6 +33,7 @@
   "nav_summary": "Сводка",
   "nav_tasks": "Задачи",
   "nav_resources": "Ресурсы",
+  "nav_history": "История",
   "nav_settings": "Настройки",
   "title_action_plan": "Ваш план действий",
   "title_get_help": "Получить помощь",
@@ -73,5 +74,11 @@
   "explains_you_decide": "ClarityAI объясняет — решаете вы",
   "disclaimer_body": "ClarityAI помогает понять и организовать. Он никогда ничего не подаёт и не отправляет за вас и не заменяет совет юриста, врача или социального работника.",
   "tts_english_only": "Озвучивание воспроизводится на английском.",
-  "confidence_hint": "Насколько чётко исходный текст подтверждает данный анализ, по оценке модели."
+  "confidence_hint": "Насколько чётко исходный текст подтверждает данный анализ, по оценке модели.",
+  "history_empty": "No history yet. Translate a document to see it here.",
+  "history_load": "Load",
+  "history_clear_all": "Clear all",
+  "history_confirm_clear": "Tap again to confirm",
+  "history_no_brief": "No summary available.",
+  "history_tasks_done": "tasks done"
 }

@@ -29,6 +29,18 @@ export type UrgencyTier =
   | "Time Sensitive"
   | "Informational Only";
 
+/** A persisted entry in the translation history (localStorage). */
+export interface HistoryEntry {
+  /** Unique ID — timestamp + random suffix. */
+  id: string;
+  /** Unix ms when the translation completed. */
+  timestamp: number;
+  /** The full structured result (including recommendation if it arrived). */
+  result: TranslateResult;
+  /** Checklist ticks at the time the session was saved. */
+  checkedTasks: Record<string, boolean>;
+}
+
 /** A supplementary resource from the Brave search results. */
 export interface AdditionalResource {
   name: string;

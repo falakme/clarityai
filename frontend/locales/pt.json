@@ -33,6 +33,7 @@
   "nav_summary": "Resumo",
   "nav_tasks": "Tarefas",
   "nav_resources": "Recursos",
+  "nav_history": "Histórico",
   "nav_settings": "Configurações",
   "title_action_plan": "Seu plano de ação",
   "title_get_help": "Obter ajuda",
@@ -73,5 +74,11 @@
   "explains_you_decide": "O ClarityAI explica, você decide",
   "disclaimer_body": "O ClarityAI ajuda você a entender e organizar. Ele nunca registra nem envia nada por você e não substitui o aconselhamento de um advogado, médico ou assistente social.",
   "tts_english_only": "A leitura em voz alta é reproduzida em inglês.",
-  "confidence_hint": "Quão claramente o texto fonte apoia esta análise, conforme avaliado pelo modelo."
+  "confidence_hint": "Quão claramente o texto fonte apoia esta análise, conforme avaliado pelo modelo.",
+  "history_empty": "No history yet. Translate a document to see it here.",
+  "history_load": "Load",
+  "history_clear_all": "Clear all",
+  "history_confirm_clear": "Tap again to confirm",
+  "history_no_brief": "No summary available.",
+  "history_tasks_done": "tasks done"
 }

@@ -33,6 +33,7 @@
   "nav_summary": "Summary",
   "nav_tasks": "Tasks",
   "nav_resources": "Resources",
+  "nav_history": "History",
   "nav_settings": "Settings",
   "title_action_plan": "Your action plan",
   "title_get_help": "Get help",
@@ -71,8 +72,14 @@
   "print_save_pdf": "Print or save as PDF",
   "start_new_document": "Start a new document",
   "your_privacy": "Your privacy",
-  "your_privacy_hint": "We store nothing on our servers. The only thing saved on this device is your checklist progress, and you can wipe it instantly.",
+  "your_privacy_hint": "We store nothing on our servers. The only thing saved on this device is your session history and checklist progress, and you can wipe it all instantly.",
   "explains_you_decide": "ClarityAI explains, you decide",
   "disclaimer_body": "ClarityAI helps you understand and organize. It never files or submits anything for you, and it isn't a substitute for advice from a lawyer, doctor, or caseworker.",
-  "tts_english_only": "Read-aloud plays in English."
+  "tts_english_only": "Read-aloud plays in English.",
+  "history_empty": "No history yet. Translate a document to see it here.",
+  "history_load": "Load",
+  "history_clear_all": "Clear all",
+  "history_confirm_clear": "Tap again to confirm",
+  "history_no_brief": "No summary available.",
+  "history_tasks_done": "tasks done"
 }

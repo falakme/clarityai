@@ -33,6 +33,7 @@
   "nav_summary": "요약",
   "nav_tasks": "할 일",
   "nav_resources": "자원",
+  "nav_history": "기록",
   "nav_settings": "설정",
   "title_action_plan": "당신의 실행 계획",
   "title_get_help": "도움 받기",
@@ -73,5 +74,11 @@
   "explains_you_decide": "ClarityAI는 설명하고, 결정은 당신이 합니다",
   "disclaimer_body": "ClarityAI는 이해하고 정리하도록 돕습니다. 결코 당신을 대신해 제출하거나 신청하지 않으며, 변호사, 의사 또는 사회복지사의 조언을 대신하지 않습니다.",
   "tts_english_only": "소리내어 읽기는 영어로 재생됩니다.",
-  "confidence_hint": "원본 텍스트가 이 분석을 얼마나 명확하게 뒷받침하는지, 모델의 평가에 따른 것입니다."
+  "confidence_hint": "원본 텍스트가 이 분석을 얼마나 명확하게 뒷받침하는지, 모델의 평가에 따른 것입니다.",
+  "history_empty": "No history yet. Translate a document to see it here.",
+  "history_load": "Load",
+  "history_clear_all": "Clear all",
+  "history_confirm_clear": "Tap again to confirm",
+  "history_no_brief": "No summary available.",
+  "history_tasks_done": "tasks done"
 }

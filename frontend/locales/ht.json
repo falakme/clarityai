@@ -33,6 +33,7 @@
   "nav_summary": "Rezime",
   "nav_tasks": "Travay",
   "nav_resources": "Resous",
+  "nav_history": "Istwa",
   "nav_settings": "Paramèt",
   "title_action_plan": "Plan aksyon ou",
   "title_get_help": "Jwenn èd",
@@ -73,5 +74,11 @@
   "explains_you_decide": "ClarityAI esplike, ou deside",
   "disclaimer_body": "ClarityAI ede w konprann epi òganize. Li pa janm depoze ni voye anyen pou ou, epi li pa ranplase konsèy yon avoka, yon doktè, oswa yon travayè sosyal.",
   "tts_english_only": "Lekti awotvwa a jwe an anglè.",
-  "confidence_hint": "Nan ki pwen tèks sous la sipòte analiz sa a, dapre evalyasyon modèl la."
+  "confidence_hint": "Nan ki pwen tèks sous la sipòte analiz sa a, dapre evalyasyon modèl la.",
+  "history_empty": "No history yet. Translate a document to see it here.",
+  "history_load": "Load",
+  "history_clear_all": "Clear all",
+  "history_confirm_clear": "Tap again to confirm",
+  "history_no_brief": "No summary available.",
+  "history_tasks_done": "tasks done"
 }

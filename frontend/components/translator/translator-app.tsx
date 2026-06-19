@@ -1,11 +1,18 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ThemeMode } from "@/components/theme";
 import { translateForm, recommend, ApiError } from "@/lib/api";
 import { useLocalStorage } from "@/lib/storage";
-import type { TranslateResult } from "@/lib/types";
+import {
+  addToHistory,
+  clearCurrentSession,
+  loadCurrentSession,
+  saveCurrentResult,
+  updateHistoryEntry,
+} from "@/lib/storage";
+import type { HistoryEntry, TranslateResult } from "@/lib/types";
 import type { DemoDoc } from "@/lib/demo-docs";
 import { phaseFade } from "@/lib/motion";
 import { IntakeView } from "./intake-view";
@@ -20,26 +27,11 @@ interface Props {
   storageKey?: string;
 }
 
-/**
- * Top-level orchestrator for the two-state PWA.
- *
- *   State 0 (input/error) -> <IntakeView>      full-viewport start screen
- *   State 1 (result)      -> <DashboardView>   tabbed dashboard
- *   (loading)             -> a calming skeleton between the two
- *
- * It owns ALL shared, progress-bearing state — the translation result, the
- * output language, the checklist ticks (localStorage-backed), and the
- * Responsible-AI acknowledgement — and passes it down. Because this state lives
- * above the tab router, switching dashboard tabs never wipes the user's
- * progress.
- */
 export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "home" }: Props) {
-  // Intake inputs.
   const [files, setFiles] = useState<File[]>([]);
   const [text, setText] = useState("");
   const [docType, setDocType] = useState<"emergency" | "general">(docTypeProp);
 
-  // Pipeline state.
   const [phase, setPhase] = useState<Phase>("input");
   const [result, setResult] = useState<TranslateResult | null>(null);
   const [error, setError] = useState("");
@@ -47,13 +39,32 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
   const [refreshing, setRefreshing] = useState(false);
   const runIdRef = useRef(0);
 
-  // Lifted UI controls / progress.
+  // ID of the current history entry so we can update it when recommendation arrives.
+  const currentHistoryIdRef = useRef<string | null>(null);
+
   const [language, setLanguage] = useState("English");
   const [acknowledged, setAcknowledged] = useState(false);
   const [checkedTasks, setCheckedTasks] = useLocalStorage<Record<string, boolean>>(
     `clarityai.tasks.${storageKey}`,
     {},
   );
+
+  // ── Restore the last session on mount ──────────────────────────────────────
+  useEffect(() => {
+    const saved = loadCurrentSession();
+    if (saved) {
+      setResult(saved.result);
+      setCheckedTasks(saved.checkedTasks ?? {});
+      setPhase("result");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keep the current-session snapshot up-to-date whenever tasks are ticked.
+  useEffect(() => {
+    if (result) saveCurrentResult(result, checkedTasks);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkedTasks]);
 
   const canSubmit = files.length > 0 || text.trim().length > 0;
 
@@ -63,7 +74,6 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
       text?: string;
       files?: File[];
       docType?: "emergency" | "general";
-      /** In-dashboard re-fetch (control change) — stay on the dashboard. */
       refresh?: boolean;
     }) => {
       const submitText = opts?.text ?? text;
@@ -88,18 +98,23 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
           docType: opts?.docType ?? docType,
           language: opts?.language ?? language,
         });
-        if (runId !== runIdRef.current) return; // superseded by a newer run
+        if (runId !== runIdRef.current) return;
 
         setResult(res);
+        saveCurrentResult(res, checkedTasks);
 
         if (!isRefresh) {
-          // Fresh document: enter the dashboard with a clean slate.
+          // Fresh document — clean slate for tasks + acknowledgement.
+          const freshTasks = {};
           setAcknowledged(false);
-          setCheckedTasks({});
+          setCheckedTasks(freshTasks);
           setPhase("result");
 
-          // Fire-and-forget the agentic recommendation; merge it in when ready.
-          // Location is taken from whatever the model detected in the document.
+          // Save to history immediately (recommendation merges in later).
+          const historyId = addToHistory(res, freshTasks);
+          currentHistoryIdRef.current = historyId;
+
+          // Fire-and-forget agentic recommendation.
           setRecLoading(true);
           recommend({
             document_category: res.document_category,
@@ -108,17 +123,32 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
           })
             .then((rec) => {
               if (runId !== runIdRef.current) return;
-              setResult((prev) => (prev ? { ...prev, ...rec } : prev));
+              setResult((prev) => {
+                if (!prev) return prev;
+                const updated = { ...prev, ...rec };
+                // Persist the enriched result.
+                saveCurrentResult(updated, freshTasks);
+                // Update the history entry with the recommendation.
+                if (currentHistoryIdRef.current) {
+                  updateHistoryEntry(currentHistoryIdRef.current, updated, freshTasks);
+                }
+                return updated;
+              });
             })
-            .catch(() => {
-              /* recommendations are best-effort */
-            })
+            .catch(() => {})
             .finally(() => {
               if (runId === runIdRef.current) setRecLoading(false);
             });
+        } else {
+          // Refresh (language change etc.) — update history entry in place.
+          saveCurrentResult(res, checkedTasks);
+          if (currentHistoryIdRef.current) {
+            updateHistoryEntry(currentHistoryIdRef.current, res, checkedTasks);
+          }
         }
       } catch (e) {
         if (runId !== runIdRef.current) return;
+        const submitFilesLocal = opts?.files !== undefined ? opts.files : files;
         const msg =
           e instanceof ApiError
             ? e.status === 503
@@ -127,25 +157,22 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
                 ? "ClarityAI had trouble reading that. Please try again."
                 : e.status === 422 || e.status === 413
                   ? e.message === "blur_detected"
-                    ? submitFiles.length > 0
+                    ? submitFilesLocal.length > 0
                       ? "This photo is a bit too blurry for us to read accurately. To ensure we give you the right guidance, please take another photo with good lighting."
                       : "We couldn't quite make sense of that. Please add a little more detail about your situation."
                     : e.message
                   : `Translation failed (${e.status}). Please try again.`
             : "Something went wrong reaching the translator.";
         setError(msg);
-        // A failed in-dashboard refresh keeps the existing result on screen.
         if (!isRefresh) setPhase("error");
       } finally {
         if (runId === runIdRef.current && isRefresh) setRefreshing(false);
       }
     },
-    [files, text, docType, language, result, setCheckedTasks],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [files, text, docType, language, result, checkedTasks],
   );
 
-  // Output language: changing it re-translates in place while on the dashboard.
-  // Debounced so arrow-key browsing through the <select> doesn't fire a new
-  // API call for every intermediate option (which would exhaust the rate limit).
   const langDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   function handleLanguage(next: string) {
     setLanguage(next);
@@ -168,8 +195,22 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
     runTranslate({ text: doc.text, files: [], docType: doc.docType });
   }
 
+  function handleLoadHistory(entry: HistoryEntry) {
+    runIdRef.current++; // cancel any in-flight run
+    setResult(entry.result);
+    setCheckedTasks(entry.checkedTasks ?? {});
+    saveCurrentResult(entry.result, entry.checkedTasks ?? {});
+    currentHistoryIdRef.current = entry.id;
+    setAcknowledged(false);
+    setRecLoading(false);
+    setRefreshing(false);
+    setPhase("result");
+  }
+
   function handleReset() {
-    runIdRef.current++; // cancel any in-flight run/recommendation
+    runIdRef.current++;
+    clearCurrentSession();
+    currentHistoryIdRef.current = null;
     setPhase("input");
     setResult(null);
     setError("");
@@ -180,9 +221,10 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
     setRefreshing(false);
   }
 
-  const originalText = files.length > 0
-    ? `${text ? text + "\n\n" : ""}Uploaded documents: ${files.map(f => f.name).join(", ")}`
-    : text;
+  const originalText =
+    files.length > 0
+      ? `${text ? text + "\n\n" : ""}Uploaded documents: ${files.map((f) => f.name).join(", ")}`
+      : text;
   const sourceText = result?.source_text || originalText;
 
   return (
@@ -215,8 +257,8 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
               storageKey={storageKey}
               sourceText={sourceText}
               onReset={handleReset}
+              onLoadHistory={handleLoadHistory}
             />
-            {/* Hidden on screen; rendered cleanly when the user prints. */}
             <PrintablePlan result={result} checked={checkedTasks} />
           </motion.div>
         ) : (

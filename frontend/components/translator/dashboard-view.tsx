@@ -7,8 +7,9 @@ import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { LanguageMenu } from "@/components/language-menu";
 import { createTranslator, type Translator } from "@/lib/i18n";
-import type { TranslateResult } from "@/lib/types";
+import type { HistoryEntry, TranslateResult } from "@/lib/types";
 import { BottomNav, SideNav, type TabKey } from "./bottom-nav";
+import { HistoryView } from "./history-view";
 import { UrgencyPill } from "./tabs/shared";
 import { SummaryTab } from "./tabs/summary-tab";
 import { TasksTab } from "./tabs/tasks-tab";
@@ -16,10 +17,11 @@ import { ResourcesTab } from "./tabs/resources-tab";
 import { SettingsTab } from "./tabs/settings-tab";
 
 const TAB_TITLE: Record<TabKey, Parameters<Translator>[0]> = {
-  summary: "nav_summary",
-  tasks: "title_action_plan",
+  summary:   "nav_summary",
+  tasks:     "title_action_plan",
   resources: "title_get_help",
-  settings: "nav_settings",
+  history:   "nav_history",
+  settings:  "nav_settings",
 };
 
 /**
@@ -46,6 +48,7 @@ export function DashboardView({
   storageKey,
   sourceText,
   onReset,
+  onLoadHistory,
 }: {
   result: TranslateResult;
   recommendationLoading: boolean;
@@ -59,6 +62,7 @@ export function DashboardView({
   storageKey: string;
   sourceText: string;
   onReset: () => void;
+  onLoadHistory: (entry: HistoryEntry) => void;
 }) {
   const [activeTab, setActiveTab] = useState<TabKey>("summary");
   const t = createTranslator(language);
@@ -136,6 +140,15 @@ export function DashboardView({
                     acknowledged={acknowledged}
                     onAcknowledgedChange={onAcknowledgedChange}
                     t={t}
+                  />
+                )}
+                {activeTab === "history" && (
+                  <HistoryView
+                    language={language}
+                    onLoad={(entry) => {
+                      onLoadHistory(entry);
+                      setActiveTab("summary");
+                    }}
                   />
                 )}
                 {activeTab === "settings" && <SettingsTab onReset={onReset} t={t} />}
