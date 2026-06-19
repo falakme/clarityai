@@ -9,7 +9,7 @@ export function Brand({ className, href = "/" }: { className?: string; href?: st
         <ShieldCheck className="h-6 w-6" strokeWidth={2.5} />
       </span>
       <span className="text-2xl font-extrabold tracking-tight text-foreground">
-        Clear<span className="text-primary">Aid</span>
+        Clarity<span className="text-primary">AI</span>
       </span>
     </Link>
   );
