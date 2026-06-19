@@ -27,10 +27,9 @@ phone — and within seconds receive:
 - A **verified local support resource** — a real government agency or nonprofit — matched to your specific situation and location
 - A **follow-up chat interface** anchored to your document so you can ask questions and get grounded answers
 
-Everything is available in **15 languages** (English, Spanish, French, Arabic,
-Chinese, Hindi, German, Portuguese, Vietnamese, Tagalog, Korean, Urdu, Bengali,
-Russian, and Haitian Creole) with native-script labels, RTL support for Arabic and
-Urdu, and multilingual read-aloud via Azure Neural TTS.
+Everything is available in **6 languages** (English, Spanish, French, Arabic,
+Chinese (Simplified), and Hindi) with native-script labels, right-to-left (RTL)
+support for Arabic, and multilingual read-aloud via Azure Neural TTS in all six.
 
 The app is anonymous, frictionless, and stateless — no login, no tracking, no
 database. Documents are processed in memory and never stored. It is deployed as a
@@ -61,7 +60,7 @@ Users provide one or more of:
 - **Images** (PNG / JPG / WEBP) — including mobile camera captures — of physical documents
 - **Voice** transcribed client-side via the browser Web Speech API (no audio upload)
 
-An optional language selector (15 languages) and an implicit IP-based geolocation
+An optional language selector (6 languages) and an implicit IP-based geolocation
 (used only for resource matching, never stored) complete the input surface.
 
 ### (2) AI Capabilities Used
@@ -309,6 +308,7 @@ server side.
 4. The full pipeline runs automatically and navigates to the dashboard
 
 **Languages:** Use the language selector (top right) on the dashboard to see
-real-time multilingual output. Arabic and Urdu switch the interface to RTL.
+real-time multilingual output across the 6 supported languages. Arabic switches
+the interface to RTL.
 
 **Source code:** `https://github.com/falakme/clarityai`
