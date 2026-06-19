@@ -8,9 +8,12 @@ import { useLocalStorage } from "@/lib/storage";
 import {
   addToHistory,
   clearCurrentSession,
+  clearCurrentHistoryId,
   getHistory,
   loadCurrentSession,
+  loadCurrentHistoryId,
   saveCurrentResult,
+  saveCurrentHistoryId,
   updateHistoryEntry,
 } from "@/lib/storage";
 import type { HistoryEntry, TranslateResult } from "@/lib/types";
@@ -57,6 +60,14 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
     {},
   );
 
+  /**
+   * Per-document chat key. Each history entry gets its own isolated chat
+   * stored at `clarityai.chat.<historyId>`. This is separate from the
+   * `storageKey` prop (which drives the tasks localStorage key and stays
+   * fixed as "home") so changing documents never mixes up chat histories.
+   */
+  const [chatKey, setChatKey] = useState("home");
+
   // ── Restore the last session + persisted language on mount ─────────────────
   const [recentEntry, setRecentEntry] = useState<HistoryEntry | null>(null);
 
@@ -69,6 +80,9 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
       setResult(saved.result);
       setCheckedTasks(saved.checkedTasks ?? {});
       setRoute("dashboard");
+      // Restore the per-doc chat key so the correct chat loads after refresh.
+      const savedId = loadCurrentHistoryId();
+      if (savedId) setChatKey(savedId);
     } else {
       // No active session — check history so the intake screen can show a Resume card.
       const history = getHistory();
@@ -131,6 +145,9 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
           // Save to history immediately (recommendation merges in later).
           const historyId = addToHistory(res, freshTasks);
           currentHistoryIdRef.current = historyId;
+          // Give this document its own isolated chat history.
+          setChatKey(historyId);
+          saveCurrentHistoryId(historyId);
 
           // Fire-and-forget agentic recommendation.
           setRecLoading(true);
@@ -224,15 +241,12 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
     setCheckedTasks(entry.checkedTasks ?? {});
     saveCurrentResult(entry.result, entry.checkedTasks ?? {});
     currentHistoryIdRef.current = entry.id;
+    // Switch to this document's own chat — do NOT wipe it.
+    setChatKey(entry.id);
+    saveCurrentHistoryId(entry.id);
     setAcknowledged(false);
     setRecLoading(false);
     setRefreshing(false);
-    // A loaded entry is a different document — start its follow-up chat fresh.
-    try {
-      localStorage.removeItem(`clarityai.chat.${storageKey}`);
-    } catch {
-      /* ignore */
-    }
     setPhase("idle");
     setRoute("dashboard");
   }
@@ -240,12 +254,9 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
   function handleReset() {
     runIdRef.current++;
     clearCurrentSession();
+    clearCurrentHistoryId();
     currentHistoryIdRef.current = null;
-    try {
-      localStorage.removeItem(`clarityai.chat.${storageKey}`);
-    } catch {
-      /* ignore */
-    }
+    setChatKey("home");
     setResult(null);
     setError("");
     setFiles([]);
@@ -305,7 +316,7 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
               onToggleTask={handleToggleTask}
               acknowledged={acknowledged}
               onAcknowledgedChange={setAcknowledged}
-              storageKey={storageKey}
+              storageKey={chatKey}
               sourceText={sourceText}
               onReset={handleReset}
               onHome={handleGoHome}

@@ -90,6 +90,22 @@ export function clearCurrentSession(): void {
   }
 }
 
+// --- Current history-entry ID (survives refresh, drives per-doc chat key) ----
+
+const CURRENT_ID_KEY = "clarityai.current.id";
+
+export function saveCurrentHistoryId(id: string): void {
+  try { localStorage.setItem(CURRENT_ID_KEY, id); } catch { /* ignore */ }
+}
+
+export function loadCurrentHistoryId(): string | null {
+  try { return localStorage.getItem(CURRENT_ID_KEY); } catch { return null; }
+}
+
+export function clearCurrentHistoryId(): void {
+  try { localStorage.removeItem(CURRENT_ID_KEY); } catch { /* ignore */ }
+}
+
 // --- History array ---------------------------------------------------------
 
 export function getHistory(): HistoryEntry[] {
