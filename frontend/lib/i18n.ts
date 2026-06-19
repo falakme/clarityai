@@ -9,7 +9,10 @@
  *
  * The LLM-generated content itself (the plain-language explanation, tasks,
  * table, and diagram) is translated server-side by passing the chosen language
- * into the gemma prompt — see backend `app/services/nvidia.py`.
+ * into the model prompt — see backend `app/services/nvidia.py`.
+ *
+ * The set of languages here MUST stay in sync with the selector in
+ * `lib/languages.ts` and the Azure TTS voices in backend `azure_tts.py`.
  */
 import en from "../locales/en.json";
 import es from "../locales/es.json";
@@ -17,15 +20,6 @@ import ar from "../locales/ar.json";
 import zh from "../locales/zh.json";
 import fr from "../locales/fr.json";
 import hi from "../locales/hi.json";
-import pt from "../locales/pt.json";
-import bn from "../locales/bn.json";
-import ru from "../locales/ru.json";
-import ur from "../locales/ur.json";
-import vi from "../locales/vi.json";
-import tl from "../locales/tl.json";
-import ht from "../locales/ht.json";
-import de from "../locales/de.json";
-import ko from "../locales/ko.json";
 
 /** Maps a human-readable language name to its dictionary code. */
 export const LANG_CODES: Record<string, string> = {
@@ -35,19 +29,10 @@ export const LANG_CODES: Record<string, string> = {
   "Chinese (Simplified)": "zh",
   French: "fr",
   Hindi: "hi",
-  German: "de",
-  Portuguese: "pt",
-  Bengali: "bn",
-  Russian: "ru",
-  Urdu: "ur",
-  Vietnamese: "vi",
-  Tagalog: "tl",
-  Korean: "ko",
-  "Haitian Creole": "ht",
 };
 
 /** Right-to-left scripts that need `dir="rtl"`. */
-const RTL_CODES = new Set(["ar", "ur"]);
+const RTL_CODES = new Set(["ar"]);
 
 /** BCP-47 locales for the Web Speech API (STT), keyed by dictionary code. */
 const SPEECH_LOCALES: Record<string, string> = {
@@ -57,15 +42,6 @@ const SPEECH_LOCALES: Record<string, string> = {
   zh: "zh-CN",
   fr: "fr-FR",
   hi: "hi-IN",
-  de: "de-DE",
-  pt: "pt-BR",
-  bn: "bn-BD",
-  ru: "ru-RU",
-  ur: "ur-PK",
-  vi: "vi-VN",
-  tl: "fil-PH",
-  ko: "ko-KR",
-  ht: "ht-HT",
 };
 
 /** Best-effort speech-recognition locale for the chosen language. */
@@ -82,15 +58,6 @@ const TABLE: Record<string, Dictionary> = {
   zh,
   fr,
   hi,
-  de,
-  pt,
-  bn,
-  ru,
-  ur,
-  vi,
-  tl,
-  ko,
-  ht,
 };
 
 const EN = TABLE.en;
