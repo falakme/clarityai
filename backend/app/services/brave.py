@@ -13,10 +13,28 @@ errors — recommendations are an enhancement, never a hard dependency.
 
 from __future__ import annotations
 
+import html
+import re
+
 import httpx
 
 from app.config import get_settings
 from app.schemas import SearchResult
+
+# Brave highlights matched query terms by wrapping them in HTML (e.g.
+# "<strong>free legal aid</strong>") inside the title and description fields.
+# Those tags are meaningless to us — and would render as literal text in the
+# UI and pollute the prompt sent to the model — so we strip them to plain text.
+_TAG_RE = re.compile(r"<[^>]+>")
+
+
+def _strip_html(value: str) -> str:
+    """Remove HTML tags and decode entities, returning clean plain text."""
+    if not value:
+        return ""
+    text = _TAG_RE.sub("", value)
+    text = html.unescape(text)
+    return re.sub(r"\s+", " ", text).strip()
 
 # Per-category query templates. "{loc}" is replaced with the detected location.
 # Designed to return diverse, trustworthy results — not locked to a single site.
@@ -65,14 +83,14 @@ async def search(query: str, count: int = 8) -> list[SearchResult]:
     results: list[SearchResult] = []
     for item in (body.get("web", {}) or {}).get("results", []) or []:
         url = str(item.get("url", "")).strip()
-        title = str(item.get("title", "")).strip()
+        title = _strip_html(str(item.get("title", "")))
         if not url or not title:
             continue
         results.append(
             SearchResult(
                 title=title,
                 url=url,
-                description=str(item.get("description", "")).strip(),
+                description=_strip_html(str(item.get("description", ""))),
             )
         )
         if len(results) >= count:
