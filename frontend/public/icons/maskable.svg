@@ -1,5 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="ClarityAI">
-  <rect width="512" height="512" fill="#2563EB"/>
-  <path d="M256 136c-52 20-94 25-94 25v94c0 75 50 113 94 132 44-19 94-57 94-132v-94s-42-5-94-25z" fill="#FFFFFF"/>
-  <path d="M222 256l26 26 56-64" fill="none" stroke="#2563EB" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000" fill="none">
+<rect width="1000" height="1000" fill="#2463EB"/>
+<circle cx="590.5" cy="343.5" r="180.5" fill="#EAEEFB" fill-opacity="0.6"/>
+<circle cx="590.5" cy="655.5" r="180.5" fill="#EAEEFB" fill-opacity="0.6"/>
+<circle cx="410.5" cy="655.5" r="180.5" fill="#EAEEFB" fill-opacity="0.6"/>
+<circle cx="319.5" cy="499.5" r="180.5" fill="#EAEEFB" fill-opacity="0.6"/>
+<circle cx="409.5" cy="343.5" r="180.5" fill="#EAEEFB" fill-opacity="0.6"/>
+<circle cx="680.5" cy="499.5" r="180.5" fill="#EAEEFB" fill-opacity="0.6"/>
 </svg>
