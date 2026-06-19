@@ -21,7 +21,7 @@ from __future__ import annotations
 import httpx
 
 from app.config import get_settings
-from app.schemas import SearchResult, VerifiedResource
+from app.schemas import AdditionalResource, SearchResult, VerifiedResource
 from app.services.parsing import normalize, strip_emoji, try_parse
 from app.services.prompts import (
     EVALUATOR_PROMPT,
@@ -240,8 +240,16 @@ async def evaluate_resources(
     if not url:
         return VerifiedResource()
 
+    # Include the remaining Brave hits (up to 4) as supplementary resources.
+    additional = [
+        AdditionalResource(name=r.title, url=r.url, description=r.description)
+        for r in results
+        if r.url.rstrip("/") != url.rstrip("/") and r.url.strip()
+    ][:4]
+
     return VerifiedResource(
         recommended_resource_name=name,
         recommended_resource_url=url,
         ai_reasoning_for_recommendation=reasoning,
+        additional_resources=additional,
     )

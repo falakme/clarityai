@@ -50,11 +50,12 @@ const config: Config = {
         "5xl": ["3rem", { lineHeight: "1.1" }],
       },
       borderRadius: {
-        // Very rounded — the puffy clay silhouette.
-        xl: "2.25rem",
-        lg: "1.75rem",
-        md: "1.25rem",
-        sm: "0.875rem",
+        // Reduced one step from the original claymorphism values —
+        // still friendly and modern but less bubble-like.
+        xl: "1.75rem",
+        lg: "1.25rem",
+        md: "0.75rem",
+        sm: "0.375rem",
       },
       boxShadow: {
         // Signature clay: soft outer drop + inner top highlight + inner bottom shade.

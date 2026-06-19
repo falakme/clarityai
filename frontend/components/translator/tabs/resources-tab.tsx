@@ -13,20 +13,10 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Item, Stagger } from "@/components/motion";
 import type { Translator } from "@/lib/i18n";
-import type { TranslateResult } from "@/lib/types";
+import type { AdditionalResource, TranslateResult } from "@/lib/types";
 import { isSafeHttpUrl } from "@/lib/utils";
 import { buildShareText } from "./shared";
 
-/**
- * Tab 3 — Resources.
- * The agentic "Verified Local Support" card and the Responsible AI &
- * Human-in-the-Loop block sit side by side on desktop. The card renders the
- * SINGLE AI-evaluated resource (recommended_resource_*) selected by the
- * /api/recommend step, including the model's one-line reasoning. The "Open
- * verified resource" and "Share plan" actions stay disabled until the user
- * ticks the acknowledgement checkbox. `acknowledged` is owned by the
- * orchestrator so it survives tab switches.
- */
 export function ResourcesTab({
   result,
   recommendationLoading,
@@ -42,12 +32,16 @@ export function ResourcesTab({
 }) {
   const [shareMsg, setShareMsg] = useState("");
 
-  // Only trust an http(s) URL the backend already validated against live hits.
   const resourceUrl = (result.recommended_resource_url || "").trim();
   const hasResource = isSafeHttpUrl(resourceUrl);
   const resourceName = (result.recommended_resource_name || "").trim() || resourceUrl;
   const reasoning = (result.ai_reasoning_for_recommendation || "").trim();
   const hasTasks = result.task_list.length > 0;
+
+  // Additional resources — filter to safe http(s) URLs only (S3).
+  const extras: AdditionalResource[] = (result.additional_resources || []).filter(
+    (r) => isSafeHttpUrl(r.url),
+  );
 
   async function sharePlan() {
     const textToShare = buildShareText(result);
@@ -67,8 +61,9 @@ export function ResourcesTab({
   }
 
   return (
-    <Stagger className="grid gap-4 lg:grid-cols-2 lg:items-start">
-      {/* Verified Local Support — agentic recommendation (AI-evaluated) */}
+    <Stagger className="space-y-4">
+
+      {/* ── Verified Local Support ──────────────────────────────────────── */}
       <Item>
         {recommendationLoading && !hasResource ? (
           <Card className="border border-emerald-200 bg-emerald-50/40">
@@ -82,38 +77,89 @@ export function ResourcesTab({
           </Card>
         ) : hasResource ? (
           <Card className="border border-emerald-200 bg-emerald-50/40">
-            <h2 className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
-              <BadgeCheck className="h-4 w-4" /> {t("verified_support")}
-            </h2>
-            <div className="mt-2 space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700/80">
-                {t("recommended_resource")}
-              </p>
-              <p className="break-words text-base font-bold text-foreground">
-                <a href={resourceUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                  {resourceName}
-                </a>
-              </p>
-              {reasoning && (
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  <span className="font-semibold text-foreground">{t("why_this_one")}</span> {reasoning}
-                </p>
-              )}
+            <div className="flex items-start justify-between gap-2">
+              <h2 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                <BadgeCheck className="h-4 w-4" /> {t("verified_support")}
+              </h2>
+              <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
+                Best match
+              </span>
             </div>
+            <p className="mt-2 break-words text-base font-bold text-foreground">
+              <a href={resourceUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                {resourceName}
+              </a>
+            </p>
+            {reasoning && (
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                <span className="font-semibold text-foreground">{t("why_this_one")}</span> {reasoning}
+              </p>
+            )}
+            {acknowledged && (
+              <a
+                href={resourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={buttonVariants({ size: "sm", className: "mt-3 w-full" })}
+              >
+                <ExternalLink className="h-4 w-4" /> {t("open_resource")}
+              </a>
+            )}
           </Card>
-        ) : (
+        ) : !recommendationLoading ? (
           <Card>
             <h2 className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
               <BadgeCheck className="h-4 w-4" /> {t("verified_support")}
             </h2>
             <p className="text-sm text-muted-foreground">{t("no_resource")}</p>
           </Card>
-        )}
+        ) : null}
       </Item>
 
-      {/* Responsible AI & Human-in-the-Loop Safeguards (amber gateway) */}
+      {/* ── Additional Resources ─────────────────────────────────────────── */}
+      {extras.length > 0 && (
+        <Item>
+          <div className="space-y-2">
+            <h3 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t("more_resources")}
+            </h3>
+            <div className="space-y-2">
+              {extras.map((r, i) => (
+                <div
+                  key={i}
+                  className="flex items-start justify-between gap-3 rounded-md border border-border bg-card/60 p-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-foreground">
+                      <a href={r.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                        {r.name || new URL(r.url).hostname}
+                      </a>
+                    </p>
+                    {r.description && (
+                      <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{r.description}</p>
+                    )}
+                  </div>
+                  {acknowledged && (
+                    <a
+                      href={r.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 rounded-md border border-border bg-card p-2 text-muted-foreground shadow-clay-sm transition-colors hover:text-primary"
+                      aria-label={`Open ${r.name || r.url}`}
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </Item>
+      )}
+
+      {/* ── Responsible AI & Human-in-the-Loop ──────────────────────────── */}
       <Item>
-        <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4">
+        <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-4">
           <h2 className="flex items-center gap-2 text-sm font-bold text-amber-900">
             <ShieldCheck className="h-4 w-4" /> {t("responsible_ai")}
           </h2>
@@ -165,27 +211,10 @@ export function ResourcesTab({
             />
           </div>
 
-          {/* Gated external actions — disabled until the box is ticked */}
-          <div className="mt-3 space-y-2">
-            {!acknowledged && (
+          <div className="space-y-2">
+            {!acknowledged && (hasResource || extras.length > 0) && (
               <p className="text-xs font-medium text-amber-800">{t("unlock_hint")}</p>
             )}
-
-            {hasResource &&
-              (acknowledged ? (
-                <a
-                  href={resourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={buttonVariants({ size: "sm", className: "w-full" })}
-                >
-                  <ExternalLink className="h-4 w-4" /> {t("open_resource")}
-                </a>
-              ) : (
-                <Button size="sm" className="w-full" disabled>
-                  <ExternalLink className="h-4 w-4" /> {t("open_resource")}
-                </Button>
-              ))}
 
             {hasTasks && (
               <>
@@ -204,6 +233,7 @@ export function ResourcesTab({
           </div>
         </div>
       </Item>
+
     </Stagger>
   );
 }

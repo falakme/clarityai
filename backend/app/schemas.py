@@ -36,12 +36,21 @@ class SearchResult(BaseModel):
     description: str = ""
 
 
+class AdditionalResource(BaseModel):
+    """A supplementary resource from the Brave search hits."""
+
+    name: str = ""
+    url: str = ""
+    description: str = ""
+
+
 class VerifiedResource(BaseModel):
-    """The single trustworthy resource the AI selected from the search hits."""
+    """The top AI-selected resource plus supplementary hits from Brave."""
 
     recommended_resource_name: str = ""
     recommended_resource_url: str = ""
     ai_reasoning_for_recommendation: str = ""
+    additional_resources: list[AdditionalResource] = Field(default_factory=list)
 
 
 class RecommendRequest(BaseModel):
@@ -101,6 +110,7 @@ class TranslateResponse(BaseModel):
     recommended_resource_name: str = ""
     recommended_resource_url: str = ""
     ai_reasoning_for_recommendation: str = ""
+    additional_resources: list[AdditionalResource] = Field(default_factory=list)
 
     # Location the model detected in the document (drives the search query).
     detected_location: str = ""

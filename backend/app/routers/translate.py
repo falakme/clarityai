@@ -170,7 +170,7 @@ async def recommend(request: Request, payload: RecommendRequest) -> VerifiedReso
     search_location = (payload.location or "").strip() or (payload.detected_location or "").strip()
     try:
         query = brave.build_recommendation_query(payload.document_category, search_location)
-        hits = await brave.search(query)
+        hits = await brave.search(query, count=8)
         if not hits:
             return VerifiedResource()
         return await evaluate_resources(

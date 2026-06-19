@@ -18,18 +18,19 @@ import httpx
 from app.config import get_settings
 from app.schemas import SearchResult
 
-# Per-category query templates. "{loc}" is replaced with the detected location
-# (or left as a national search when no location is known). Each template is
-# biased toward the authoritative organisation for that kind of crisis.
+# Per-category query templates. "{loc}" is replaced with the detected location.
+# Designed to return diverse, trustworthy results — not locked to a single site.
 _QUERY_TEMPLATES: dict[str, str] = {
-    "eviction": "site:211.org tenant legal aid eviction help {loc}",
-    "housing": "site:211.org housing assistance rental help {loc}",
-    "medical": "hospital financial assistance charity care medical bill help {loc}",
-    "food_assistance": "Feeding America local food pantry SNAP assistance {loc}",
-    "utility": "site:211.org utility bill assistance LIHEAP {loc}",
-    "legal": "legal aid society free legal help {loc}",
-    "benefits": "site:benefits.gov government assistance program {loc}",
-    "general": "site:211.org local assistance program help {loc}",
+    "eviction": "free eviction legal aid tenant rights help {loc}",
+    "housing": "emergency housing assistance rental help nonprofit {loc}",
+    "medical": "hospital patient financial assistance charity care medical bills help {loc}",
+    "food_assistance": "food bank SNAP food pantry assistance {loc}",
+    "utility": "emergency utility bill assistance energy help program {loc}",
+    "legal": "free legal aid lawyer consultation law clinic {loc}",
+    "benefits": "government benefits assistance program eligibility help {loc}",
+    "general": "local crisis support assistance nonprofit program {loc}",
+    "school": "school parent rights education support resource {loc}",
+    "emergency": "emergency crisis assistance hotline shelter {loc}",
 }
 
 
@@ -40,7 +41,7 @@ def build_recommendation_query(category: str, location: str = "") -> str:
     return template.format(loc=loc).replace("  ", " ").strip()
 
 
-async def search(query: str, count: int = 6) -> list[SearchResult]:
+async def search(query: str, count: int = 8) -> list[SearchResult]:
     """Run a Brave web search and return raw hits. Empty list if not configured."""
     settings = get_settings()
     if not settings.brave_api_key or not query:

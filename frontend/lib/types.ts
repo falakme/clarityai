@@ -29,6 +29,13 @@ export type UrgencyTier =
   | "Time Sensitive"
   | "Informational Only";
 
+/** A supplementary resource from the Brave search results. */
+export interface AdditionalResource {
+  name: string;
+  url: string;
+  description?: string;
+}
+
 /**
  * Structured, multi-capability output returned by POST /api/translate-form.
  * Showcases classification, summarization, extraction, and an agentic
@@ -55,6 +62,8 @@ export interface TranslateResult {
   recommended_resource_name?: string;
   recommended_resource_url?: string;
   ai_reasoning_for_recommendation?: string;
+  /** Additional Brave search hits (2-4) beyond the AI-verified top pick. */
+  additional_resources?: AdditionalResource[];
   /** Location the model detected in the document. */
   detected_location: string;
   /** Backend-attached provenance (exact extracted/source text). */

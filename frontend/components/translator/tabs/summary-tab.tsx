@@ -7,6 +7,7 @@ import { Markdown } from "@/components/ui/markdown";
 import { ListenButton } from "@/components/listen-button";
 import { Item, Stagger } from "@/components/motion";
 import { markdownToPlainText } from "@/lib/text";
+import { localizeEmergencyNumbers } from "@/lib/emergency";
 import type { Translator } from "@/lib/i18n";
 import type { TranslateResult } from "@/lib/types";
 import { DataTable } from "../data-table";
@@ -26,6 +27,16 @@ export function SummaryTab({ result, t }: { result: TranslateResult; t: Translat
     [result.plain_language_brief, result.plain_language_explanation_markdown],
   );
 
+  // Localize any "911" references in the AI output to the user's detected location.
+  const localizedMarkdown = useMemo(
+    () => localizeEmergencyNumbers(result.plain_language_explanation_markdown, result.detected_location),
+    [result.plain_language_explanation_markdown, result.detected_location],
+  );
+  const localizedBrief = useMemo(
+    () => localizeEmergencyNumbers(result.plain_language_brief, result.detected_location),
+    [result.plain_language_brief, result.detected_location],
+  );
+
   return (
     <Stagger className="space-y-5">
       {result.pii_redacted_count > 0 && (
@@ -41,7 +52,7 @@ export function SummaryTab({ result, t }: { result: TranslateResult; t: Translat
 
       {/* Urgency classification banner */}
       <Item>
-        <UrgencyBanner tier={result.urgency_tier} brief={result.plain_language_brief} t={t} />
+        <UrgencyBanner tier={result.urgency_tier} brief={localizedBrief} t={t} />
       </Item>
 
       {/* Plain-language explanation */}
@@ -56,7 +67,7 @@ export function SummaryTab({ result, t }: { result: TranslateResult; t: Translat
               <ListenButton text={spoken} label={t("listen")} stopLabel={t("stop")} className="px-3 text-xs" />
             </div>
           </div>
-          <Markdown>{result.plain_language_explanation_markdown}</Markdown>
+          <Markdown>{localizedMarkdown}</Markdown>
         </Card>
       </Item>
 

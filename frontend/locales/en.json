@@ -57,6 +57,7 @@
   "recommended_resource": "Recommended resource",
   "why_this_one": "Why this one:",
   "no_resource": "We couldn't pin down a specific local organization for this one. The steps in your plan still apply, and 211.org or your local legal aid or benefits office can point you to help nearby.",
+  "more_resources": "More options nearby",
   "responsible_ai": "Responsible AI & human-in-the-loop",
   "confidence_label": "AI confidence",
   "confidence_hint": "How clearly the source text supports this analysis, as assessed by the model.",
