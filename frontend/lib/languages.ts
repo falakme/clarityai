@@ -6,15 +6,6 @@ export const LANGUAGES = [
   "Arabic",
   "Chinese (Simplified)",
   "Hindi",
-  "German",
-  "Portuguese",
-  "Vietnamese",
-  "Tagalog",
-  "Korean",
-  "Urdu",
-  "Bengali",
-  "Russian",
-  "Haitian Creole",
 ] as const;
 
 export type Language = (typeof LANGUAGES)[number];
@@ -31,13 +22,4 @@ export const LANGUAGE_NATIVE_NAMES: Record<Language, string> = {
   "Arabic":              "عربي",
   "Chinese (Simplified)":"中文",
   "Hindi":               "हिन्दी",
-  "German":              "Deutsch",
-  "Portuguese":          "Português",
-  "Vietnamese":          "Tiếng Việt",
-  "Tagalog":             "Filipino",
-  "Korean":              "한국어",
-  "Urdu":                "اردو",
-  "Bengali":             "বাংলা",
-  "Russian":             "Русский",
-  "Haitian Creole":      "Kreyòl",
 };

@@ -38,7 +38,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
+        sans: ["var(--font-body)", "Fira Sans", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "Montserrat", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "Fira Code", "monospace"],
       },
       fontSize: {
         base: ["1rem", { lineHeight: "1.6" }],

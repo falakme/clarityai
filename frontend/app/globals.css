@@ -8,6 +8,13 @@
    * The accent is variable-driven so it can be re-tinted in a single place.
    */
   :root {
+    /* Typography tokens — Montserrat for display, Fira Sans for body,
+       Fira Code for monospace. The next/font-optimized families are layered
+       in first, then the named fallbacks. */
+    --font-display: var(--font-montserrat), "Montserrat", sans-serif;
+    --font-body: var(--font-fira-sans), "Fira Sans", sans-serif;
+    --font-mono: var(--font-fira-code), "Fira Code", monospace;
+
     --color-primary: 37 99 235; /* #2563EB trustworthy blue */
     --color-primary-foreground: 255 255 255;
     --color-ring: 37 99 235;
@@ -40,6 +47,7 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
     /* Soft pastel clay blobs floating behind the puffy surfaces. The first
        blob follows the active accent (blue by default, red in emergencies). */
     background-image:
@@ -48,6 +56,16 @@
       radial-gradient(circle at 50% 96%, rgba(99, 102, 241, 0.045), transparent 46%);
     background-attachment: fixed;
     font-size: 16px; /* never below 16px */
+  }
+
+  /* Display headings use Montserrat. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
   }
 
   /* Visible focus ring for accessibility under stress. */

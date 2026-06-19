@@ -1,14 +1,30 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Montserrat, Fira_Sans, Fira_Code } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/service-worker";
 import { InstallPrompt } from "@/components/install-prompt";
 import { OfflineBadge } from "@/components/offline-badge";
 import { Providers } from "@/components/providers";
 
-const inter = Inter({
+// Display headings — Montserrat (--font-display)
+const montserrat = Montserrat({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-montserrat",
+  display: "swap",
+});
+
+// Body copy — Fira Sans (--font-body)
+const firaSans = Fira_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-fira-sans",
+  display: "swap",
+});
+
+// Monospace — Fira Code (--font-mono)
+const firaCode = Fira_Code({
+  subsets: ["latin"],
+  variable: "--font-fira-code",
   display: "swap",
 });
 
@@ -46,7 +62,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${montserrat.variable} ${firaSans.variable} ${firaCode.variable}`}>
       <body className="min-h-screen font-sans">
         <Providers>{children}</Providers>
         <OfflineBadge />

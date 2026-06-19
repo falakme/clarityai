@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Languages, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { LANGUAGES } from "@/lib/languages";
+import { LANGUAGES, LANGUAGE_NATIVE_NAMES } from "@/lib/languages";
 
 /**
  * Compact, icon-only output-language toggle for the dashboard header.
@@ -95,7 +95,7 @@ export function LanguageMenu({
                       : "text-foreground hover:bg-muted/60",
                   )}
                 >
-                  <span className="truncate">{l}</span>
+                  <span className="truncate">{LANGUAGE_NATIVE_NAMES[l]}</span>
                   {active && <Check className="h-4 w-4 shrink-0" />}
                 </button>
               );
