@@ -58,8 +58,7 @@
   "why_this_one": "Pourquoi celle-ci :",
   "no_resource": "Nous n'avons pas pu identifier d'organisation locale précise pour ce cas. Les étapes de votre plan restent valables, et 211.org ou votre bureau local d'aide juridique ou de prestations peut vous orienter vers une aide proche.",
   "responsible_ai": "IA responsable et supervision humaine",
-  "confidence_label": "Confiance",
-  "confidence_anchoring": "selon l'ancrage au texte source",
+  "confidence_label": "Confiance IA",
   "ack_label": "Je confirme que j'utiliserai ce résumé d'IA uniquement comme guide d'organisation et je comprends qu'il ne fournit pas de décisions médicales ou juridiques officielles.",
   "unlock_hint": "Cochez la case ci-dessus pour déverrouiller les boutons ci-dessous.",
   "open_resource": "Ouvrir la ressource vérifiée",
@@ -73,5 +72,6 @@
   "your_privacy_hint": "Nous ne stockons rien sur nos serveurs. La seule chose enregistrée sur cet appareil est la progression de votre liste, et vous pouvez l'effacer instantanément.",
   "explains_you_decide": "ClarityAI explique, vous décidez",
   "disclaimer_body": "ClarityAI vous aide à comprendre et à organiser. Il ne dépose ni n'envoie jamais rien à votre place, et ne remplace pas l'avis d'un avocat, d'un médecin ou d'un travailleur social.",
-  "tts_english_only": "La lecture à voix haute se fait en anglais."
+  "tts_english_only": "La lecture à voix haute se fait en anglais.",
+  "confidence_hint": "Dans quelle mesure le texte source soutient cette analyse, selon l’évaluation du modèle."
 }

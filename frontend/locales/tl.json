@@ -58,8 +58,7 @@
   "why_this_one": "Bakit ito:",
   "no_resource": "Hindi kami makahanap ng partikular na lokal na organisasyon para dito. Nananatiling angkop ang mga hakbang sa iyong plano, at ang 211.org o ang iyong lokal na tanggapan ng legal aid o benepisyo ay makakapagturo sa iyo ng tulong na malapit.",
   "responsible_ai": "Responsableng AI at pangangasiwa ng tao",
-  "confidence_label": "Tiwala",
-  "confidence_anchoring": "batay sa pag-angkla sa pinagmulang teksto",
+  "confidence_label": "Kumpiyansa ng AI",
   "ack_label": "Pinatutunayan kong gagamitin ko ang buod ng AI na ito bilang gabay lamang sa pag-aayos at nauunawaan kong hindi ito nagbibigay ng opisyal na desisyong medikal o legal.",
   "unlock_hint": "Lagyan ng tsek ang kahon sa itaas para i-unlock ang mga button sa ibaba.",
   "open_resource": "Buksan ang na-verify na mapagkukunan",
@@ -73,5 +72,6 @@
   "your_privacy_hint": "Wala kaming itinatago sa aming mga server. Ang tanging naka-save sa device na ito ay ang progreso ng iyong listahan, at maaari mo itong burahin agad.",
   "explains_you_decide": "Nagpapaliwanag ang ClarityAI, ikaw ang magdedesisyon",
   "disclaimer_body": "Tinutulungan ka ng ClarityAI na umunawa at mag-organisa. Hindi ito kailanman naghahain o nagsusumite para sa iyo, at hindi ito kapalit ng payo mula sa abogado, doktor, o caseworker.",
-  "tts_english_only": "Nasa Ingles ang pagbasa nang malakas."
+  "tts_english_only": "Nasa Ingles ang pagbasa nang malakas.",
+  "confidence_hint": "Gaano kalinaw sinusuportahan ng pinagmulang teksto ang pagsusuring ito, ayon sa pagtatasa ng modelo."
 }

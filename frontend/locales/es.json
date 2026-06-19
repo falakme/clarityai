@@ -58,8 +58,7 @@
   "why_this_one": "Por qué este:",
   "no_resource": "No pudimos identificar una organización local específica para esto. Los pasos de tu plan siguen siendo válidos, y 211.org o tu oficina local de ayuda legal o de beneficios pueden orientarte hacia ayuda cercana.",
   "responsible_ai": "IA responsable y supervisión humana",
-  "confidence_label": "Confianza",
-  "confidence_anchoring": "según el anclaje al texto fuente",
+  "confidence_label": "Confianza de IA",
   "ack_label": "Confirmo que usaré este resumen de IA únicamente como guía organizativa y entiendo que no constituye decisiones médicas ni legales oficiales.",
   "unlock_hint": "Marca la casilla de arriba para desbloquear los botones de abajo.",
   "open_resource": "Abrir recurso verificado",
@@ -73,5 +72,6 @@
   "your_privacy_hint": "No guardamos nada en nuestros servidores. Lo único que se guarda en este dispositivo es el progreso de tu lista, y puedes borrarlo al instante.",
   "explains_you_decide": "ClarityAI explica, tú decides",
   "disclaimer_body": "ClarityAI te ayuda a entender y organizar. Nunca presenta ni envía nada por ti, y no sustituye el consejo de un abogado, médico o trabajador social.",
-  "tts_english_only": "La lectura en voz alta se reproduce en inglés."
+  "tts_english_only": "La lectura en voz alta se reproduce en inglés.",
+  "confidence_hint": "Cuán claramente el texto fuente respalda este análisis, según la evaluación del modelo."
 }

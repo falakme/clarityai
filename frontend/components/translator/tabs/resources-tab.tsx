@@ -121,17 +121,37 @@ export function ResourcesTab({
           {/* Confidence indicator */}
           <div className="mt-2 rounded-md bg-card/70 p-3">
             <div className="flex items-center justify-between text-xs font-semibold text-amber-900">
-              <span>
-                {t("confidence_label")}: {result.confidence_percent}% {t("confidence_anchoring")}
+              <span>{t("confidence_label")}</span>
+              <span className={
+                result.ai_confidence_score === "High"
+                  ? "text-emerald-700"
+                  : result.ai_confidence_score === "Low"
+                  ? "text-red-600"
+                  : "text-amber-700"
+              }>
+                {result.ai_confidence_score}
               </span>
-              <span>{result.ai_confidence_score}</span>
             </div>
             <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-amber-200/70">
               <div
-                className="h-full rounded-full bg-amber-500"
-                style={{ width: `${result.confidence_percent}%` }}
+                className={
+                  result.ai_confidence_score === "High"
+                    ? "h-full rounded-full bg-emerald-500"
+                    : result.ai_confidence_score === "Low"
+                    ? "h-full rounded-full bg-red-400"
+                    : "h-full rounded-full bg-amber-500"
+                }
+                style={{
+                  width:
+                    result.ai_confidence_score === "High"
+                      ? "100%"
+                      : result.ai_confidence_score === "Low"
+                      ? "30%"
+                      : "60%",
+                }}
               />
             </div>
+            <p className="mt-1.5 text-xs text-amber-800/70">{t("confidence_hint")}</p>
           </div>
 
           {/* Mandatory human-in-the-loop acknowledgement */}

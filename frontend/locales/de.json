@@ -58,8 +58,7 @@
   "why_this_one": "Warum diese:",
   "no_resource": "Wir konnten für diesen Fall keine bestimmte lokale Organisation finden. Die Schritte in deinem Plan gelten weiterhin, und 211.org oder dein örtliches Büro für Rechtshilfe oder Sozialleistungen kann dich an Hilfe in der Nähe verweisen.",
   "responsible_ai": "Verantwortungsvolle KI mit menschlicher Kontrolle",
-  "confidence_label": "Sicherheit",
-  "confidence_anchoring": "basierend auf der Verankerung im Quelltext",
+  "confidence_label": "KI-Konfidenz",
   "ack_label": "Ich bestätige, dass ich diese KI-Zusammenfassung ausschließlich als Orientierungshilfe nutze, und verstehe, dass sie keine offiziellen medizinischen oder rechtlichen Entscheidungen liefert.",
   "unlock_hint": "Markiere das Kästchen oben, um die Schaltflächen darunter freizuschalten.",
   "open_resource": "Geprüfte Ressource öffnen",
@@ -73,5 +72,6 @@
   "your_privacy_hint": "Wir speichern nichts auf unseren Servern. Das Einzige, was auf diesem Gerät gespeichert wird, ist der Fortschritt deiner Liste, und du kannst ihn sofort löschen.",
   "explains_you_decide": "ClarityAI erklärt, du entscheidest",
   "disclaimer_body": "ClarityAI hilft dir zu verstehen und zu organisieren. Es reicht oder sendet niemals etwas für dich ein und ersetzt nicht den Rat eines Anwalts, Arztes oder Sozialarbeiters.",
-  "tts_english_only": "Das Vorlesen erfolgt auf Englisch."
+  "tts_english_only": "Das Vorlesen erfolgt auf Englisch.",
+  "confidence_hint": "Wie klar der Quelltext diese Analyse stützt, laut Einschätzung des Modells."
 }

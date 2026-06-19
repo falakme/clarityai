@@ -58,8 +58,7 @@
   "why_this_one": "이것을 고른 이유:",
   "no_resource": "이 경우에 맞는 특정 지역 기관을 찾지 못했습니다. 계획의 단계는 여전히 유효하며, 211.org나 지역 법률 지원 또는 복지 사무소가 가까운 도움을 안내해 줄 수 있습니다.",
   "responsible_ai": "책임 있는 AI와 사람의 검토",
-  "confidence_label": "신뢰도",
-  "confidence_anchoring": "원본 텍스트 기반",
+  "confidence_label": "AI 신뢰도",
   "ack_label": "이 AI 요약을 정리용 안내로만 사용할 것이며, 공식적인 의료 또는 법률 결정을 제공하지 않는다는 점을 이해함을 확인합니다.",
   "unlock_hint": "위의 상자를 선택하면 아래 버튼이 잠금 해제됩니다.",
   "open_resource": "검증된 자원 열기",
@@ -73,5 +72,6 @@
   "your_privacy_hint": "우리는 서버에 아무것도 저장하지 않습니다. 이 기기에 저장되는 유일한 것은 체크리스트 진행 상황이며, 즉시 지울 수 있습니다.",
   "explains_you_decide": "ClarityAI는 설명하고, 결정은 당신이 합니다",
   "disclaimer_body": "ClarityAI는 이해하고 정리하도록 돕습니다. 결코 당신을 대신해 제출하거나 신청하지 않으며, 변호사, 의사 또는 사회복지사의 조언을 대신하지 않습니다.",
-  "tts_english_only": "소리내어 읽기는 영어로 재생됩니다."
+  "tts_english_only": "소리내어 읽기는 영어로 재생됩니다.",
+  "confidence_hint": "원본 텍스트가 이 분석을 얼마나 명확하게 뒷받침하는지, 모델의 평가에 따른 것입니다."
 }

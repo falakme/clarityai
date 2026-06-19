@@ -58,8 +58,7 @@
   "why_this_one": "Vì sao chọn nó:",
   "no_resource": "Chúng tôi không thể xác định một tổ chức địa phương cụ thể cho trường hợp này. Các bước trong kế hoạch của bạn vẫn áp dụng, và 211.org hoặc văn phòng trợ giúp pháp lý hay phúc lợi địa phương có thể chỉ cho bạn nơi nhận trợ giúp gần đó.",
   "responsible_ai": "AI có trách nhiệm và có sự giám sát của con người",
-  "confidence_label": "Độ tin cậy",
-  "confidence_anchoring": "dựa trên việc neo vào văn bản nguồn",
+  "confidence_label": "Độ tin cậy AI",
   "ack_label": "Tôi xác nhận rằng tôi sẽ chỉ dùng bản tóm tắt AI này như một hướng dẫn để sắp xếp và hiểu rằng nó không đưa ra quyết định y tế hay pháp lý chính thức.",
   "unlock_hint": "Đánh dấu vào ô ở trên để mở khóa các nút bên dưới.",
   "open_resource": "Mở tài nguyên đã xác minh",
@@ -73,5 +72,6 @@
   "your_privacy_hint": "Chúng tôi không lưu trữ gì trên máy chủ. Thứ duy nhất được lưu trên thiết bị này là tiến độ danh sách của bạn, và bạn có thể xóa ngay lập tức.",
   "explains_you_decide": "ClarityAI giải thích, bạn quyết định",
   "disclaimer_body": "ClarityAI giúp bạn hiểu và sắp xếp. Nó không bao giờ nộp hay gửi bất cứ điều gì thay bạn, và không thay thế lời khuyên của luật sư, bác sĩ hay nhân viên xã hội.",
-  "tts_english_only": "Đọc to phát bằng tiếng Anh."
+  "tts_english_only": "Đọc to phát bằng tiếng Anh.",
+  "confidence_hint": "Văn bản nguồn hỗ trợ phân tích này rõ ràng đến mức nào, theo đánh giá của mô hình."
 }
