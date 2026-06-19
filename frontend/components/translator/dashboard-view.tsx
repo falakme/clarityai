@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { RotateCcw } from "lucide-react";
+import { Home, RotateCcw } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { LanguageMenu } from "@/components/language-menu";
@@ -50,6 +50,7 @@ export function DashboardView({
   storageKey,
   sourceText,
   onReset,
+  onHome,
   onLoadHistory,
 }: {
   result: TranslateResult;
@@ -64,6 +65,7 @@ export function DashboardView({
   storageKey: string;
   sourceText: string;
   onReset: () => void;
+  onHome: () => void;
   onLoadHistory: (entry: HistoryEntry) => void;
 }) {
   const [activeTab, setActiveTab] = useState<TabKey>("summary");
@@ -90,7 +92,10 @@ export function DashboardView({
         <div className="mt-8 flex-1">
           <SideNav active={activeTab} onChange={setActiveTab} attention={attention} t={t} />
         </div>
-        <div className="border-t border-white/50 pt-4">
+        <div className="border-t border-white/50 pt-4 space-y-2">
+          <Button variant="ghost" size="sm" className="w-full" onClick={onHome}>
+            <Home className="h-5 w-5" /> {t("home")}
+          </Button>
           <Button variant="ghost" size="sm" className="w-full" onClick={onReset}>
             <RotateCcw className="h-5 w-5" /> {t("new_document")}
           </Button>
@@ -110,6 +115,15 @@ export function DashboardView({
             )}
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={onHome}
+              aria-label={t("home")}
+              title={t("home")}
+              className="flex min-h-tap min-w-tap items-center justify-center rounded-md bg-card text-foreground shadow-clay-sm transition-all active:translate-y-0.5 lg:hidden"
+            >
+              <Home className="h-5 w-5 text-primary" />
+            </button>
             <LanguageMenu value={language} onChange={onLanguageChange} busy={refreshing} />
           </div>
         </header>
@@ -154,6 +168,7 @@ export function DashboardView({
                       onLoadHistory(entry);
                       setActiveTab("summary");
                     }}
+                    onCreateChat={onHome}
                   />
                 )}
                 {activeTab === "settings" && <SettingsTab onReset={onReset} t={t} />}

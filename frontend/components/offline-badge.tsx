@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { WifiOff } from "lucide-react";
 import { useOnline } from "@/lib/use-online";
+import { useStoredTranslator } from "@/lib/use-language";
 
 /**
  * A small pill that appears when the device goes offline. ClarityAI is a PWA
@@ -11,6 +12,7 @@ import { useOnline } from "@/lib/use-online";
  */
 export function OfflineBadge() {
   const online = useOnline();
+  const { t } = useStoredTranslator();
   return (
     <AnimatePresence>
       {!online && (
@@ -21,7 +23,7 @@ export function OfflineBadge() {
           className="print-hidden fixed inset-x-0 top-3 z-[60] mx-auto flex w-fit items-center gap-2 rounded-full border border-amber-300 bg-amber-50/90 px-4 py-2 text-sm font-bold text-amber-900 shadow-clay-sm backdrop-blur"
           role="status"
         >
-          <WifiOff className="h-4 w-4" /> Offline. Showing your saved plan.
+          <WifiOff className="h-4 w-4" /> {t("offline_badge")}
         </motion.div>
       )}
     </AnimatePresence>

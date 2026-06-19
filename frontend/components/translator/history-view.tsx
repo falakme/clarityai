@@ -1,26 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileText, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createTranslator } from "@/lib/i18n";
+import { createTranslator, type Translator, type UiKey } from "@/lib/i18n";
 import {
   clearHistory,
   deleteHistoryEntry,
   getHistory,
 } from "@/lib/storage";
 import type { HistoryEntry } from "@/lib/types";
+import { EmptyState } from "./empty-workspace";
 
-/** Map doc category to a short display label. */
-const CATEGORY_LABEL: Record<string, string> = {
-  eviction:       "Eviction",
-  housing:        "Housing",
-  medical:        "Medical",
-  food_assistance:"Food",
-  utility:        "Utility",
-  legal:          "Legal",
-  benefits:       "Benefits",
-  general:        "General",
+/** Map a document category to its localized label key. */
+const CATEGORY_KEY: Record<string, UiKey> = {
+  eviction: "cat_eviction",
+  housing: "cat_housing",
+  medical: "cat_medical",
+  food_assistance: "cat_food",
+  utility: "cat_utility",
+  legal: "cat_legal",
+  benefits: "cat_benefits",
+  general: "cat_general",
 };
 
 const CATEGORY_COLOR: Record<string, string> = {
@@ -34,21 +35,24 @@ const CATEGORY_COLOR: Record<string, string> = {
   general:        "bg-gray-100 text-gray-700",
 };
 
-function timeAgo(ts: number): string {
+/** Localized relative time. Falls back to a short date for older entries. */
+function timeAgo(ts: number, t: Translator): string {
   const secs = Math.floor((Date.now() - ts) / 1000);
-  if (secs < 60)     return "Just now";
-  if (secs < 3600)   return `${Math.floor(secs / 60)}m ago`;
-  if (secs < 86400)  return `${Math.floor(secs / 3600)}h ago`;
-  if (secs < 604800) return `${Math.floor(secs / 86400)}d ago`;
+  if (secs < 60)     return t("time_just_now");
+  if (secs < 3600)   return t("time_minutes_ago", { n: Math.floor(secs / 60) });
+  if (secs < 86400)  return t("time_hours_ago", { n: Math.floor(secs / 3600) });
+  if (secs < 604800) return t("time_days_ago", { n: Math.floor(secs / 86400) });
   return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
 export function HistoryView({
   language,
   onLoad,
+  onCreateChat,
 }: {
   language: string;
   onLoad: (entry: HistoryEntry) => void;
+  onCreateChat?: () => void;
 }) {
   const t = createTranslator(language);
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
@@ -96,12 +100,9 @@ export function HistoryView({
         </div>
       )}
 
-      {/* Empty state */}
+      {/* Empty state — skeleton + invitation to create the first chat */}
       {entries.length === 0 && (
-        <div className="flex flex-col items-center gap-3 py-16 text-center text-muted-foreground">
-          <FileText className="h-12 w-12 opacity-20" />
-          <p className="text-sm font-medium">{t("history_empty")}</p>
-        </div>
+        <EmptyState t={t} onCreate={onCreateChat ?? (() => {})} />
       )}
 
       {/* Entry list */}
@@ -126,14 +127,14 @@ export function HistoryView({
                         CATEGORY_COLOR[cat] ?? CATEGORY_COLOR.general
                       }`}
                     >
-                      {CATEGORY_LABEL[cat] ?? cat}
+                      {t(CATEGORY_KEY[cat] ?? "cat_general")}
                     </span>
                     {isUrgent && (
                       <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-red-700">
-                        Urgent
+                        {t("history_urgent")}
                       </span>
                     )}
-                    <span className="text-[10px] text-muted-foreground">{timeAgo(entry.timestamp)}</span>
+                    <span className="text-[10px] text-muted-foreground">{timeAgo(entry.timestamp, t)}</span>
                   </div>
 
                   {/* Brief */}
@@ -162,7 +163,7 @@ export function HistoryView({
                   <button
                     type="button"
                     onClick={() => handleDelete(entry.id)}
-                    aria-label="Delete entry"
+                    aria-label={t("history_delete")}
                     className="opacity-0 transition-opacity group-hover:opacity-100 text-muted-foreground hover:text-red-500"
                   >
                     <Trash2 className="h-3.5 w-3.5" />

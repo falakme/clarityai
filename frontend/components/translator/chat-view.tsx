@@ -78,7 +78,7 @@ export function ChatView({
     } catch (e) {
       const msg =
         e instanceof ApiError && e.status === 503
-          ? "The AI service isn't configured yet."
+          ? t("chat_not_configured")
           : t("chat_error");
       setError(msg);
     } finally {
@@ -132,7 +132,7 @@ export function ChatView({
         {isEmpty && !loading && (
           <div className="rounded-lg border border-dashed border-border bg-card/40 p-4">
             <p className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              <Sparkles className="h-3.5 w-3.5" /> Try asking
+              <Sparkles className="h-3.5 w-3.5" /> {t("chat_try_asking")}
             </p>
             <div className="flex flex-wrap gap-2">
               {suggestions.map((s) => (

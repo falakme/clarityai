@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, Languages, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LANGUAGES, LANGUAGE_NATIVE_NAMES } from "@/lib/languages";
+import { createTranslator } from "@/lib/i18n";
 
 /**
  * Compact, icon-only output-language toggle for the dashboard header.
@@ -27,6 +28,8 @@ export function LanguageMenu({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const t = createTranslator(value);
+  const label = `${t("output_language")}: ${LANGUAGE_NATIVE_NAMES[value as keyof typeof LANGUAGE_NATIVE_NAMES] ?? value}`;
 
   // Close on outside click or Escape.
   useEffect(() => {
@@ -53,8 +56,8 @@ export function LanguageMenu({
         disabled={busy}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label={`Output language: ${value}`}
-        title={`Language: ${value}`}
+        aria-label={label}
+        title={label}
         className="flex min-h-tap min-w-tap items-center justify-center rounded-md bg-card text-foreground shadow-clay-sm transition-all active:translate-y-0.5 disabled:opacity-60"
       >
         {busy ? (
@@ -68,7 +71,7 @@ export function LanguageMenu({
         {open && (
           <motion.div
             role="menu"
-            aria-label="Output language"
+            aria-label={t("output_language")}
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}

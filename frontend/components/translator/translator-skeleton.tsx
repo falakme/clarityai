@@ -1,26 +1,24 @@
 import { Loader2, ShieldCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { createTranslator } from "@/lib/i18n";
 
 /** Calming skeleton state shown while the AI translates. */
-export function TranslatorSkeleton() {
+export function TranslatorSkeleton({ language = "English" }: { language?: string }) {
+  const t = createTranslator(language);
+
   return (
     <Card aria-busy="true" aria-live="polite">
       <div className="flex items-center gap-3 text-primary">
         <Loader2 className="h-6 w-6 animate-spin" />
-        <p className="text-xl font-semibold">Reading your document</p>
+        <p className="text-xl font-semibold">{t("skeleton_reading")}</p>
       </div>
 
       <div className="mt-3 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/50 p-2.5 text-emerald-800">
         <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600 animate-pulse" />
-        <span className="text-xs font-semibold">
-          Privacy Protected: Redacting sensitive PII before AI processing...
-        </span>
+        <span className="text-xs font-semibold">{t("skeleton_privacy")}</span>
       </div>
 
-      <p className="mt-4 text-base text-muted-foreground">
-        Pulling out the deadlines, the costs, and exactly what to do next. This takes a few
-        seconds.
-      </p>
+      <p className="mt-4 text-base text-muted-foreground">{t("skeleton_body")}</p>
 
       <div className="mt-8 space-y-8">
         <div>

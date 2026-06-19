@@ -39,7 +39,11 @@ export function SettingsTab({ onReset, t }: { onReset: () => void; t: Translator
             {t("your_privacy")}
           </h2>
           <p className="mb-4 mt-1 text-sm text-muted-foreground">{t("your_privacy_hint")}</p>
-          <DataPurgeButton className="w-full justify-center rounded-md border border-white/70 bg-card py-3 shadow-clay-sm" />
+          <DataPurgeButton
+            label={t("erase_data")}
+            confirmText={t("erase_confirm")}
+            className="w-full justify-center rounded-md border border-white/70 bg-card py-3 shadow-clay-sm"
+          />
         </Card>
       </Item>
 
@@ -58,7 +62,7 @@ export function SettingsTab({ onReset, t }: { onReset: () => void; t: Translator
               {t("terms_of_service")}
             </Link>
           </nav>
-          <p className="pt-2">USAII Global AI Hackathon · Crisis-to-Action Translator</p>
+          <p className="pt-2">{t("hackathon_credit")}</p>
         </div>
       </Item>
     </Stagger>

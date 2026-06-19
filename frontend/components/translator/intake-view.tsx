@@ -8,6 +8,7 @@ import {
   ChevronDown,
   FlaskConical,
   Globe,
+  LayoutDashboard,
   Paperclip,
   ScanText,
   ShieldCheck,
@@ -16,17 +17,23 @@ import {
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { LanguageSelect } from "@/components/language-select";
+import { LanguageMenu } from "@/components/language-menu";
 import { DEMO_DOCS, type DemoDoc } from "@/lib/demo-docs";
-import { createTranslator, isRTL, speechLocale } from "@/lib/i18n";
+import { createTranslator, isRTL, speechLocale, type UiKey } from "@/lib/i18n";
 import type { HistoryEntry } from "@/lib/types";
 import { FileIntake } from "./file-intake";
 import { SmartInput } from "./smart-input";
 
-const CATEGORY_LABEL: Record<string, string> = {
-  eviction: "Eviction", housing: "Housing", medical: "Medical",
-  food_assistance: "Food", utility: "Utility", legal: "Legal",
-  benefits: "Benefits", general: "General",
+/** Map a document category to its localized label key. */
+const CATEGORY_KEY: Record<string, UiKey> = {
+  eviction: "cat_eviction",
+  housing: "cat_housing",
+  medical: "cat_medical",
+  food_assistance: "cat_food",
+  utility: "cat_utility",
+  legal: "cat_legal",
+  benefits: "cat_benefits",
+  general: "cat_general",
 };
 
 export function IntakeView({
@@ -42,6 +49,8 @@ export function IntakeView({
   onLoadDemo,
   recentEntry,
   onResume,
+  hasSession = false,
+  onOpenDashboard,
 }: {
   text: string;
   onTextChange: (v: string) => void;
@@ -55,6 +64,8 @@ export function IntakeView({
   onLoadDemo: (doc: DemoDoc) => void;
   recentEntry?: HistoryEntry | null;
   onResume?: (entry: HistoryEntry) => void;
+  hasSession?: boolean;
+  onOpenDashboard?: () => void;
 }) {
   const [demoOpen, setDemoOpen] = useState(false);
   const t = createTranslator(language);
@@ -73,7 +84,19 @@ export function IntakeView({
     >
       <header className="flex items-center justify-between gap-3">
         <Brand href="/" />
-        <LanguageSelect value={language} onChange={onLanguageChange} />
+        <div className="flex items-center gap-2">
+          {hasSession && onOpenDashboard && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onOpenDashboard}
+              className="shadow-clay-sm"
+            >
+              <LayoutDashboard className="h-4 w-4" /> {t("open_workspace")}
+            </Button>
+          )}
+          <LanguageMenu value={language} onChange={onLanguageChange} />
+        </div>
       </header>
 
       {/* Resume card — shown when the user has a previous session */}
@@ -85,17 +108,17 @@ export function IntakeView({
         >
           <div className="min-w-0 flex-1">
             <p className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-primary">
-              Resume last session
+              {t("resume_session")}
             </p>
             <p className="truncate text-sm font-medium text-foreground">
-              {recentEntry.result.plain_language_brief || "Tap to continue where you left off"}
+              {recentEntry.result.plain_language_brief || t("resume_hint")}
             </p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              {CATEGORY_LABEL[recentEntry.result.document_category] ?? "General"} ·{" "}
+              {t(CATEGORY_KEY[recentEntry.result.document_category] ?? "cat_general")} ·{" "}
               {recentEntry.result.task_list.length > 0 && (
                 <>
                   {Object.values(recentEntry.checkedTasks).filter(Boolean).length}/
-                  {recentEntry.result.task_list.length} tasks done ·{" "}
+                  {recentEntry.result.task_list.length} {t("history_tasks_done")} ·{" "}
                 </>
               )}
               {new Date(recentEntry.timestamp).toLocaleDateString(undefined, {

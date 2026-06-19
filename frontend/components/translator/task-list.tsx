@@ -200,7 +200,7 @@ export function TaskList({
                       handleAddToCalendar(task, deadline);
                     }}
                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-primary/20 bg-primary/5 text-primary shadow-clay-sm transition-all hover:bg-primary/10 active:translate-y-0.5 ml-auto"
-                    title="Add to Calendar"
+                    title={t("add_to_calendar")}
                   >
                     <Calendar className="h-4 w-4" />
                   </button>

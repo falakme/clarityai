@@ -1,7 +1,14 @@
 "use client";
 
 import { markdownToPlainText, stripEmoji } from "@/lib/text";
-import type { TranslateResult } from "@/lib/types";
+import { createTranslator, type UiKey } from "@/lib/i18n";
+import type { TranslateResult, UrgencyTier } from "@/lib/types";
+
+const TIER_KEY: Record<UrgencyTier, UiKey> = {
+  "Urgent Action Required": "urgency_urgent",
+  "Time Sensitive": "urgency_time",
+  "Informational Only": "urgency_info",
+};
 
 /**
  * A clean, ink-friendly version of the full action plan. Hidden on screen
@@ -11,30 +18,33 @@ import type { TranslateResult } from "@/lib/types";
 export function PrintablePlan({
   result,
   checked,
+  language = "English",
 }: {
   result: TranslateResult;
   checked: Record<string, boolean>;
+  language?: string;
 }) {
+  const t = createTranslator(language);
   const paragraphs = markdownToPlainText(result.plain_language_explanation_markdown)
     .split(/\n{2,}/)
     .filter(Boolean);
+  const tierLabel = t(TIER_KEY[result.urgency_tier] ?? "urgency_info");
 
   return (
     <div className="print-only" aria-hidden>
       <div style={{ borderBottom: "2px solid #000", paddingBottom: "8px", marginBottom: "16px" }}>
-        <h1 style={{ fontSize: "20pt", fontWeight: 800, margin: 0 }}>ClarityAI action plan</h1>
+        <h1 style={{ fontSize: "20pt", fontWeight: 800, margin: 0 }}>{t("print_title")}</h1>
         <p style={{ margin: "4px 0 0", fontSize: "10pt" }}>
-          Generated {new Date().toLocaleDateString()} · A plain-language guide, not legal,
-          medical, or financial advice.
+          {t("print_generated", { date: new Date().toLocaleDateString() })}
         </p>
       </div>
 
-      <p style={{ fontWeight: 700, margin: "0 0 4px" }}>Priority: {result.urgency_tier}</p>
+      <p style={{ fontWeight: 700, margin: "0 0 4px" }}>{t("print_priority", { tier: tierLabel })}</p>
       {result.plain_language_brief && (
         <p style={{ margin: "0 0 16px" }}>{stripEmoji(result.plain_language_brief)}</p>
       )}
 
-      <h2 style={{ fontSize: "13pt", fontWeight: 700, margin: "16px 0 6px" }}>What this means</h2>
+      <h2 style={{ fontSize: "13pt", fontWeight: 700, margin: "16px 0 6px" }}>{t("what_this_means")}</h2>
       {paragraphs.map((p, i) => (
         <p key={i} style={{ margin: "0 0 8px" }}>
           {p}
@@ -44,7 +54,7 @@ export function PrintablePlan({
       {result.diagram_steps.length > 0 && (
         <>
           <h2 style={{ fontSize: "13pt", fontWeight: 700, margin: "16px 0 6px" }}>
-            Step-by-step path
+            {t("print_step_path")}
           </h2>
           <ol style={{ margin: 0, paddingLeft: "20px" }}>
             {result.diagram_steps.map((s, i) => (
@@ -59,13 +69,13 @@ export function PrintablePlan({
       {result.task_list.length > 0 && (
         <>
           <h2 style={{ fontSize: "13pt", fontWeight: 700, margin: "16px 0 6px" }}>
-            Action checklist
+            {t("action_checklist")}
           </h2>
           <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-            {result.task_list.map((t) => (
-              <li key={t.id} style={{ margin: "0 0 6px" }}>
-                {checked[String(t.id)] ? "[x] " : "[ ] "}
-                {stripEmoji(t.task)}
+            {result.task_list.map((task) => (
+              <li key={task.id} style={{ margin: "0 0 6px" }}>
+                {checked[String(task.id)] ? "[x] " : "[ ] "}
+                {stripEmoji(task.task)}
               </li>
             ))}
           </ul>
@@ -75,7 +85,7 @@ export function PrintablePlan({
       {result.local_support_resources && result.local_support_resources.length > 0 && (
         <>
           <h2 style={{ fontSize: "13pt", fontWeight: 700, margin: "16px 0 6px" }}>
-            Verified local support
+            {t("verified_support")}
           </h2>
           <ul style={{ margin: 0, paddingLeft: "20px" }}>
             {result.local_support_resources.map((url, i) => (

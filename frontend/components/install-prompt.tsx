@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Download, X } from "lucide-react";
+import { useStoredTranslator } from "@/lib/use-language";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -19,6 +20,7 @@ const DISMISS_KEY = "clarityai.installDismissed";
 export function InstallPrompt() {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
+  const { t } = useStoredTranslator();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -66,26 +68,26 @@ export function InstallPrompt() {
           transition={{ type: "spring", stiffness: 240, damping: 24 }}
           className="clay-card fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-md items-center gap-3 p-4 sm:left-auto sm:right-4"
           role="dialog"
-          aria-label="Install ClarityAI"
+          aria-label={t("install_title")}
         >
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary shadow-clay-sm">
             <Download className="h-6 w-6" />
           </span>
           <div className="flex-1">
-            <p className="font-bold leading-tight">Install ClarityAI</p>
+            <p className="font-bold leading-tight">{t("install_title")}</p>
             <p className="text-sm text-muted-foreground">
-              Add it to your home screen for quick, offline-friendly access.
+              {t("install_body")}
             </p>
           </div>
           <button
             onClick={install}
             className="min-h-tap rounded-md bg-primary px-4 font-bold text-primary-foreground shadow-clay-primary active:translate-y-0.5"
           >
-            Install
+            {t("install_cta")}
           </button>
           <button
             onClick={dismiss}
-            aria-label="Dismiss"
+            aria-label={t("install_dismiss")}
             className="flex min-h-tap min-w-tap items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
           >
             <X className="h-5 w-5" />

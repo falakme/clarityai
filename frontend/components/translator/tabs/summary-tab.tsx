@@ -44,7 +44,7 @@ export function SummaryTab({ result, t }: { result: TranslateResult; t: Translat
           <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/50 p-3 text-emerald-800">
             <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-600" />
             <span className="text-sm font-semibold">
-              Privacy Protected: {result.pii_redacted_count} sensitive item{result.pii_redacted_count > 1 ? "s were" : " was"} redacted before AI processing.
+              {t("privacy_protected", { n: result.pii_redacted_count })}
             </span>
           </div>
         </Item>
@@ -73,7 +73,7 @@ export function SummaryTab({ result, t }: { result: TranslateResult; t: Translat
 
       {/* Optional breakdown table (renders only when headers exist) */}
       <Item>
-        <DataTable data={result.table_data} />
+        <DataTable data={result.table_data} t={t} />
       </Item>
     </Stagger>
   );

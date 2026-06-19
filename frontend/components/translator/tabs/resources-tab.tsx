@@ -44,10 +44,10 @@ export function ResourcesTab({
   );
 
   async function sharePlan() {
-    const textToShare = buildShareText(result);
+    const textToShare = buildShareText(result, t);
     try {
       if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({ title: "My ClarityAI action plan", text: textToShare });
+        await navigator.share({ title: t("share_title"), text: textToShare });
         return;
       }
       if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -82,7 +82,7 @@ export function ResourcesTab({
                 <BadgeCheck className="h-4 w-4" /> {t("verified_support")}
               </h2>
               <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
-                Best match
+                {t("best_match")}
               </span>
             </div>
             <p className="mt-2 break-words text-base font-bold text-foreground">
@@ -145,7 +145,7 @@ export function ResourcesTab({
                       target="_blank"
                       rel="noopener noreferrer"
                       className="shrink-0 rounded-md border border-border bg-card p-2 text-muted-foreground shadow-clay-sm transition-colors hover:text-primary"
-                      aria-label={`Open ${r.name || r.url}`}
+                      aria-label={t("open_resource")}
                     >
                       <ExternalLink className="h-4 w-4" />
                     </a>

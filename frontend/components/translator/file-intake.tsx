@@ -81,7 +81,7 @@ export function FileIntake({ files, onFilesChange, t }: Props) {
           onClick={() => browseRef.current?.click()}
           className="self-start text-sm font-bold text-primary hover:underline"
         >
-          + Add another document
+          + {t("add_another")}
         </button>
         <input
           ref={browseRef}

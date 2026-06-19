@@ -16,12 +16,18 @@ import {
 import type { HistoryEntry, TranslateResult } from "@/lib/types";
 import type { DemoDoc } from "@/lib/demo-docs";
 import { phaseFade } from "@/lib/motion";
+import { createTranslator, getStoredLanguage } from "@/lib/i18n";
+import { persistLanguage } from "@/lib/use-language";
 import { IntakeView } from "./intake-view";
 import { DashboardView } from "./dashboard-view";
+import { EmptyWorkspace } from "./empty-workspace";
 import { PrintablePlan } from "./printable-plan";
 import { TranslatorSkeleton } from "./translator-skeleton";
 
-type Phase = "input" | "loading" | "result" | "error";
+/** Async status of the translation request (independent of which view shows). */
+type Phase = "idle" | "loading";
+/** Which surface the user is looking at. */
+type Route = "home" | "dashboard";
 
 interface Props {
   docType?: "emergency" | "general";
@@ -33,7 +39,8 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
   const [text, setText] = useState("");
   const [docType, setDocType] = useState<"emergency" | "general">(docTypeProp);
 
-  const [phase, setPhase] = useState<Phase>("input");
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [route, setRoute] = useState<Route>("home");
   const [result, setResult] = useState<TranslateResult | null>(null);
   const [error, setError] = useState("");
   const [recLoading, setRecLoading] = useState(false);
@@ -50,15 +57,18 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
     {},
   );
 
-  // ── Restore the last session on mount ──────────────────────────────────────
+  // ── Restore the last session + persisted language on mount ─────────────────
   const [recentEntry, setRecentEntry] = useState<HistoryEntry | null>(null);
 
   useEffect(() => {
+    // Restore the user's chosen language so the whole UI stays in it.
+    setLanguage(getStoredLanguage());
+
     const saved = loadCurrentSession();
     if (saved) {
       setResult(saved.result);
       setCheckedTasks(saved.checkedTasks ?? {});
-      setPhase("result");
+      setRoute("dashboard");
     } else {
       // No active session — check history so the intake screen can show a Resume card.
       const history = getHistory();
@@ -115,7 +125,8 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
           const freshTasks = {};
           setAcknowledged(false);
           setCheckedTasks(freshTasks);
-          setPhase("result");
+          setPhase("idle");
+          setRoute("dashboard");
 
           // Save to history immediately (recommendation merges in later).
           const historyId = addToHistory(res, freshTasks);
@@ -156,22 +167,26 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
       } catch (e) {
         if (runId !== runIdRef.current) return;
         const submitFilesLocal = opts?.files !== undefined ? opts.files : files;
+        const t = createTranslator(opts?.language ?? language);
         const msg =
           e instanceof ApiError
             ? e.status === 503
-              ? "The AI service isn't configured yet. Add an NVIDIA_API_KEY to the backend."
+              ? t("err_not_configured")
               : e.status === 502
-                ? "ClarityAI had trouble reading that. Please try again."
+                ? t("err_trouble_reading")
                 : e.status === 422 || e.status === 413
                   ? e.message === "blur_detected"
                     ? submitFilesLocal.length > 0
-                      ? "This photo is a bit too blurry for us to read accurately. To ensure we give you the right guidance, please take another photo with good lighting."
-                      : "We couldn't quite make sense of that. Please add a little more detail about your situation."
+                      ? t("err_blur_photo")
+                      : t("err_need_detail")
                     : e.message
-                  : `Translation failed (${e.status}). Please try again.`
-            : "Something went wrong reaching the translator.";
+                  : t("err_failed", { status: e.status })
+            : t("err_unreachable");
         setError(msg);
-        if (!isRefresh) setPhase("error");
+        if (!isRefresh) {
+          setPhase("idle");
+          setRoute("home");
+        }
       } finally {
         if (runId === runIdRef.current && isRefresh) setRefreshing(false);
       }
@@ -183,7 +198,8 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
   const langDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   function handleLanguage(next: string) {
     setLanguage(next);
-    if (phase === "result") {
+    persistLanguage(next);
+    if (result) {
       if (langDebounceRef.current) clearTimeout(langDebounceRef.current);
       langDebounceRef.current = setTimeout(() => {
         runTranslate({ language: next, refresh: true });
@@ -217,7 +233,8 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
     } catch {
       /* ignore */
     }
-    setPhase("result");
+    setPhase("idle");
+    setRoute("dashboard");
   }
 
   function handleReset() {
@@ -229,7 +246,6 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
     } catch {
       /* ignore */
     }
-    setPhase("input");
     setResult(null);
     setError("");
     setFiles([]);
@@ -237,6 +253,19 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
     setAcknowledged(false);
     setRecLoading(false);
     setRefreshing(false);
+    setRecentEntry(getHistory()[0] ?? null);
+    setPhase("idle");
+    setRoute("home");
+  }
+
+  /** Jump to the intake (home) WITHOUT discarding the current session. */
+  function handleGoHome() {
+    setRoute("home");
+  }
+
+  /** Return to the dashboard for the active session. */
+  function handleOpenDashboard() {
+    if (result) setRoute("dashboard");
   }
 
   const originalText =
@@ -244,6 +273,8 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
       ? `${text ? text + "\n\n" : ""}Uploaded documents: ${files.map((f) => f.name).join(", ")}`
       : text;
   const sourceText = result?.source_text || originalText;
+
+  const showDashboard = route === "dashboard";
 
   return (
     <>
@@ -258,9 +289,9 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
             exit="exit"
             className="mx-auto max-w-md px-4 py-8"
           >
-            <TranslatorSkeleton />
+            <TranslatorSkeleton language={language} />
           </motion.div>
-        ) : phase === "result" && result ? (
+        ) : showDashboard && result ? (
           <motion.div key="dashboard" variants={phaseFade} initial="hidden" animate="show" exit="exit">
             <DashboardView
               result={result}
@@ -275,9 +306,18 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
               storageKey={storageKey}
               sourceText={sourceText}
               onReset={handleReset}
+              onHome={handleGoHome}
               onLoadHistory={handleLoadHistory}
             />
-            <PrintablePlan result={result} checked={checkedTasks} />
+            <PrintablePlan result={result} checked={checkedTasks} language={language} />
+          </motion.div>
+        ) : showDashboard ? (
+          <motion.div key="empty" variants={phaseFade} initial="hidden" animate="show" exit="exit">
+            <EmptyWorkspace
+              language={language}
+              onLanguageChange={handleLanguage}
+              onCreate={handleGoHome}
+            />
           </motion.div>
         ) : (
           <motion.div key="intake" variants={phaseFade} initial="hidden" animate="show" exit="exit">
@@ -294,6 +334,8 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
               onLoadDemo={handleLoadDemo}
               recentEntry={recentEntry}
               onResume={handleLoadHistory}
+              hasSession={result !== null}
+              onOpenDashboard={handleOpenDashboard}
             />
           </motion.div>
         )}

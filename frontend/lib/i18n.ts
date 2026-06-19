@@ -109,14 +109,40 @@ export function isRTL(language: string): boolean {
   return RTL_CODES.has(langCode(language));
 }
 
-/** A bound translation function. */
-export type Translator = (key: UiKey) => string;
+/**
+ * A bound translation function. Optionally accepts a `vars` map to fill
+ * `{placeholder}` tokens in the string (e.g. t("err_failed", { status: 502 })).
+ */
+export type Translator = (key: UiKey, vars?: Record<string, string | number>) => string;
+
+/** Replace `{token}` placeholders in a string with provided values. */
+function interpolate(template: string, vars?: Record<string, string | number>): string {
+  if (!vars) return template;
+  return template.replace(/\{(\w+)\}/g, (match, name) =>
+    name in vars ? String(vars[name]) : match,
+  );
+}
 
 /**
  * Build a translator bound to a language. Returns the localized string for a
- * key, falling back to English and finally to the raw key.
+ * key, falling back to English and finally to the raw key. Supports `{token}`
+ * interpolation via the optional second argument.
  */
 export function createTranslator(language: string): Translator {
   const dict = TABLE[langCode(language)] ?? EN;
-  return (key: UiKey) => dict[key] ?? EN[key] ?? String(key);
+  return (key: UiKey, vars?: Record<string, string | number>) =>
+    interpolate(dict[key] ?? EN[key] ?? String(key), vars);
+}
+
+/** localStorage key for the user's chosen output language (persists the choice). */
+export const LANG_STORAGE_KEY = "clarityai.lang";
+
+/** Read the persisted language (defaults to English; safe on the server). */
+export function getStoredLanguage(): string {
+  if (typeof window === "undefined") return "English";
+  try {
+    return window.localStorage.getItem(LANG_STORAGE_KEY) || "English";
+  } catch {
+    return "English";
+  }
 }

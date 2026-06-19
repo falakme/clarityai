@@ -10,9 +10,17 @@ import { Trash2 } from "lucide-react";
  * of the user's documents. Clearing those caches and unregistering the worker
  * is what makes the privacy promise ("nothing persisted") actually hold.
  */
-export function DataPurgeButton({ className = "" }: { className?: string }) {
+export function DataPurgeButton({
+  className = "",
+  label = "Erase my data",
+  confirmText = "Erase all ClarityAI data stored on this device?",
+}: {
+  className?: string;
+  label?: string;
+  confirmText?: string;
+}) {
   async function purge() {
-    if (!confirm("Erase all ClarityAI data stored on this device?")) return;
+    if (!confirm(confirmText)) return;
 
     try {
       localStorage.clear();
@@ -48,7 +56,7 @@ export function DataPurgeButton({ className = "" }: { className?: string }) {
         className
       }
     >
-      <Trash2 className="h-4 w-4" /> Erase my data
+      <Trash2 className="h-4 w-4" /> {label}
     </button>
   );
 }
