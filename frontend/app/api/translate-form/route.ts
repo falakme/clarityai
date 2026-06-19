@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 // The NVIDIA call can take a while; don't cut it short.
 export const maxDuration = 120;
 
-const BACKEND = (process.env.SERVICE_URL_BACKEND || process.env.BACKEND_INTERNAL_URL || "http://backend:8000").replace(/\/$/, "");
+const BACKEND = (process.env.BACKEND_INTERNAL_URL || "http://backend:8000").replace(/\/$/, "");
 
 export async function POST(request: Request) {
   let form: FormData;
