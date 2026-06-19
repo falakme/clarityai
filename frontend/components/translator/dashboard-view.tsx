@@ -9,6 +9,7 @@ import { LanguageMenu } from "@/components/language-menu";
 import { createTranslator, type Translator } from "@/lib/i18n";
 import type { HistoryEntry, TranslateResult } from "@/lib/types";
 import { BottomNav, SideNav, type TabKey } from "./bottom-nav";
+import { ChatView } from "./chat-view";
 import { HistoryView } from "./history-view";
 import { UrgencyPill } from "./tabs/shared";
 import { SummaryTab } from "./tabs/summary-tab";
@@ -19,6 +20,7 @@ import { SettingsTab } from "./tabs/settings-tab";
 const TAB_TITLE: Record<TabKey, Parameters<Translator>[0]> = {
   summary:   "nav_summary",
   tasks:     "title_action_plan",
+  chat:      "title_ask",
   resources: "title_get_help",
   history:   "nav_history",
   settings:  "nav_settings",
@@ -74,7 +76,11 @@ export function DashboardView({
 
   // The urgency pill describes the current document, so it only belongs on the
   // document-specific tabs — not on History or Settings.
-  const showUrgency = activeTab === "summary" || activeTab === "tasks" || activeTab === "resources";
+  const showUrgency =
+    activeTab === "summary" ||
+    activeTab === "tasks" ||
+    activeTab === "chat" ||
+    activeTab === "resources";
 
   return (
     <div className="print-hidden mx-auto flex h-[100dvh] w-full max-w-screen-xl">
@@ -128,6 +134,9 @@ export function DashboardView({
                     sourceText={sourceText}
                     t={t}
                   />
+                )}
+                {activeTab === "chat" && (
+                  <ChatView result={result} language={language} storageKey={storageKey} t={t} />
                 )}
                 {activeTab === "resources" && (
                   <ResourcesTab

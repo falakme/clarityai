@@ -32,6 +32,7 @@
   "speak_situation": "说说你的情况",
   "nav_summary": "摘要",
   "nav_tasks": "任务",
+  "nav_chat": "提问",
   "nav_resources": "资源",
   "nav_history": "历史记录",
   "nav_settings": "设置",
@@ -80,5 +81,7 @@
   "history_clear_all": "Clear all",
   "history_confirm_clear": "Tap again to confirm",
   "history_no_brief": "No summary available.",
-  "history_tasks_done": "tasks done"
+  "history_tasks_done": "tasks done",
+  "privacy_policy": "隐私政策",
+  "terms_of_service": "服务条款"
 }

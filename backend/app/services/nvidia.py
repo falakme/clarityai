@@ -21,9 +21,10 @@ from __future__ import annotations
 import httpx
 
 from app.config import get_settings
-from app.schemas import AdditionalResource, SearchResult, VerifiedResource
+from app.schemas import AdditionalResource, ChatMessage, SearchResult, VerifiedResource
 from app.services.parsing import normalize, strip_emoji, try_parse
 from app.services.prompts import (
+    CHAT_SYSTEM_PROMPT,
     EVALUATOR_PROMPT,
     RETRY_INSTRUCTION,
     SYSTEM_PROMPT,
@@ -35,6 +36,10 @@ from app.services.prompts import (
 # timeout. Generous limits that comfortably hold a multi-page notice.
 MAX_DOC_CHARS = 20000
 MAX_CONTEXT_CHARS = 6000
+
+# Follow-up chat bounds.
+MAX_CHAT_CONTEXT_CHARS = 8000
+MAX_CHAT_HISTORY_TURNS = 10
 
 
 class NvidiaConfigError(RuntimeError):
@@ -253,3 +258,66 @@ async def evaluate_resources(
         ai_reasoning_for_recommendation=reasoning,
         additional_resources=additional,
     )
+
+
+async def chat(
+    question: str,
+    document_brief: str = "",
+    document_explanation: str = "",
+    source_text: str = "",
+    history: list[ChatMessage] | None = None,
+    language: str = "",
+) -> str:
+    """Answer a follow-up question, grounded in the already-analyzed document.
+
+    Stateless: the caller supplies the document context and the prior turns on
+    every request. Returns the assistant's plain-text/Markdown answer.
+    """
+    settings = get_settings()
+    if not settings.nvidia_api_key:
+        raise NvidiaConfigError(
+            "NVIDIA_API_KEY is not set. Add it to the backend environment."
+        )
+
+    # Assemble the grounding context (bounded).
+    context_parts: list[str] = []
+    if document_brief.strip():
+        context_parts.append("SUMMARY:\n" + document_brief.strip())
+    if document_explanation.strip():
+        context_parts.append("EXPLANATION:\n" + document_explanation.strip())
+    if source_text.strip():
+        context_parts.append("ORIGINAL DOCUMENT TEXT:\n" + source_text.strip())
+    context = "\n\n".join(context_parts) if context_parts else "No document context was provided."
+    if len(context) > MAX_CHAT_CONTEXT_CHARS:
+        context = context[:MAX_CHAT_CONTEXT_CHARS] + "\n\n[context truncated]"
+
+    messages: list[dict] = [
+        {"role": "system", "content": CHAT_SYSTEM_PROMPT},
+        {"role": "system", "content": "DOCUMENT CONTEXT FOR THIS CONVERSATION:\n\n" + context},
+    ]
+
+    lang = (language or "").strip()
+    if lang and lang.lower() not in {"english", "en"}:
+        messages.append(
+            {
+                "role": "system",
+                "content": f"Reply in {lang}. Keep proper nouns, amounts, and dates as written in the document.",
+            }
+        )
+
+    # Replay the recent history (bounded to the last N turns).
+    for turn in (history or [])[-MAX_CHAT_HISTORY_TURNS:]:
+        content = (turn.content or "").strip()
+        if content:
+            messages.append({"role": turn.role, "content": content[:MAX_CONTEXT_CHARS]})
+
+    messages.append({"role": "user", "content": question.strip()[:MAX_CONTEXT_CHARS]})
+
+    async with httpx.AsyncClient(timeout=45.0) as client:
+        # A touch warmer than extraction — this is conversational, not structured.
+        content = await _call_model(client, messages, max_tokens=700)
+
+    answer = strip_emoji((content or "").strip())
+    if not answer:
+        raise NvidiaUpstreamError("The AI returned an empty answer.")
+    return answer

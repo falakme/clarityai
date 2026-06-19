@@ -32,6 +32,7 @@
   "speak_situation": "당신의 상황을 말해 주세요",
   "nav_summary": "요약",
   "nav_tasks": "할 일",
+  "nav_chat": "질문",
   "nav_resources": "자원",
   "nav_history": "기록",
   "nav_settings": "설정",
@@ -80,5 +81,7 @@
   "history_clear_all": "Clear all",
   "history_confirm_clear": "Tap again to confirm",
   "history_no_brief": "No summary available.",
-  "history_tasks_done": "tasks done"
+  "history_tasks_done": "tasks done",
+  "privacy_policy": "개인정보 처리방침",
+  "terms_of_service": "서비스 약관"
 }

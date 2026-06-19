@@ -1,17 +1,18 @@
 "use client";
 
-import { CheckSquare, Clock, FileText, Link as LinkIcon, Settings } from "lucide-react";
+import { CheckSquare, Clock, FileText, Link as LinkIcon, MessageCircle, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Translator, UiKey } from "@/lib/i18n";
 
-export type TabKey = "summary" | "tasks" | "resources" | "history" | "settings";
+export type TabKey = "summary" | "tasks" | "chat" | "resources" | "history" | "settings";
 
 export const TABS: { key: TabKey; labelKey: UiKey; icon: typeof FileText }[] = [
-  { key: "summary",   labelKey: "nav_summary",   icon: FileText    },
-  { key: "tasks",     labelKey: "nav_tasks",     icon: CheckSquare },
-  { key: "resources", labelKey: "nav_resources", icon: LinkIcon    },
-  { key: "history",   labelKey: "nav_history",   icon: Clock       },
-  { key: "settings",  labelKey: "nav_settings",  icon: Settings    },
+  { key: "summary",   labelKey: "nav_summary",   icon: FileText      },
+  { key: "tasks",     labelKey: "nav_tasks",     icon: CheckSquare   },
+  { key: "chat",      labelKey: "nav_chat",      icon: MessageCircle },
+  { key: "resources", labelKey: "nav_resources", icon: LinkIcon      },
+  { key: "history",   labelKey: "nav_history",   icon: Clock         },
+  { key: "settings",  labelKey: "nav_settings",  icon: Settings      },
 ];
 
 type Attention = Partial<Record<TabKey, boolean>>;

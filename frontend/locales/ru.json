@@ -32,6 +32,7 @@
   "speak_situation": "Опишите вашу ситуацию",
   "nav_summary": "Сводка",
   "nav_tasks": "Задачи",
+  "nav_chat": "Спросить",
   "nav_resources": "Ресурсы",
   "nav_history": "История",
   "nav_settings": "Настройки",
@@ -80,5 +81,7 @@
   "history_clear_all": "Clear all",
   "history_confirm_clear": "Tap again to confirm",
   "history_no_brief": "No summary available.",
-  "history_tasks_done": "tasks done"
+  "history_tasks_done": "tasks done",
+  "privacy_policy": "Политика конфиденциальности",
+  "terms_of_service": "Условия использования"
 }

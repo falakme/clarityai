@@ -84,6 +84,12 @@ export interface TranslateResult {
   pii_redacted_count: number;
 }
 
+/** A single turn in the follow-up conversation. */
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
 /** Backend health/status payload (GET /api/health). */
 export interface Health {
   status: string;

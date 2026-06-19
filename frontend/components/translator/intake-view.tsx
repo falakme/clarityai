@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
@@ -251,6 +252,11 @@ export function IntakeView({
           <ShieldCheck className="h-4 w-4" /> {t("footer")}
         </span>
       </p>
+      <nav className="mt-3 flex items-center justify-center gap-4 text-xs text-muted-foreground">
+        <Link href="/privacy" className="hover:text-foreground">{t("privacy_policy")}</Link>
+        <span aria-hidden>·</span>
+        <Link href="/terms" className="hover:text-foreground">{t("terms_of_service")}</Link>
+      </nav>
     </main>
   );
 }

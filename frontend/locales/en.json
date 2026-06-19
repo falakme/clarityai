@@ -32,6 +32,7 @@
   "speak_situation": "Speak your situation",
   "nav_summary": "Summary",
   "nav_tasks": "Tasks",
+  "nav_chat": "Ask",
   "nav_resources": "Resources",
   "nav_history": "History",
   "nav_settings": "Settings",
@@ -81,5 +82,18 @@
   "history_clear_all": "Clear all",
   "history_confirm_clear": "Tap again to confirm",
   "history_no_brief": "No summary available.",
-  "history_tasks_done": "tasks done"
+  "history_tasks_done": "tasks done",
+  "title_ask": "Ask a follow-up",
+  "chat_intro": "Ask anything about this document. ClarityAI answers from what it read — your questions stay on this device.",
+  "chat_placeholder": "Ask a follow-up question…",
+  "chat_send": "Send",
+  "chat_thinking": "Thinking…",
+  "chat_error": "Something went wrong. Please try again.",
+  "chat_clear": "Clear chat",
+  "chat_disclaimer": "ClarityAI explains and organizes. It is not a substitute for a lawyer, doctor, or caseworker.",
+  "chat_suggest_1": "What are the most important dates?",
+  "chat_suggest_2": "What happens if I do nothing?",
+  "chat_suggest_3": "Who can I contact for help?",
+  "privacy_policy": "Privacy Policy",
+  "terms_of_service": "Terms of Service"
 }

@@ -32,6 +32,7 @@
   "speak_situation": "Kể về tình huống của bạn",
   "nav_summary": "Tóm tắt",
   "nav_tasks": "Nhiệm vụ",
+  "nav_chat": "Hỏi",
   "nav_resources": "Tài nguyên",
   "nav_history": "Lịch sử",
   "nav_settings": "Cài đặt",
@@ -80,5 +81,7 @@
   "history_clear_all": "Clear all",
   "history_confirm_clear": "Tap again to confirm",
   "history_no_brief": "No summary available.",
-  "history_tasks_done": "tasks done"
+  "history_tasks_done": "tasks done",
+  "privacy_policy": "Chính sách bảo mật",
+  "terms_of_service": "Điều khoản dịch vụ"
 }

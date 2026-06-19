@@ -211,6 +211,12 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
     setAcknowledged(false);
     setRecLoading(false);
     setRefreshing(false);
+    // A loaded entry is a different document — start its follow-up chat fresh.
+    try {
+      localStorage.removeItem(`clarityai.chat.${storageKey}`);
+    } catch {
+      /* ignore */
+    }
     setPhase("result");
   }
 
@@ -218,6 +224,11 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
     runIdRef.current++;
     clearCurrentSession();
     currentHistoryIdRef.current = null;
+    try {
+      localStorage.removeItem(`clarityai.chat.${storageKey}`);
+    } catch {
+      /* ignore */
+    }
     setPhase("input");
     setResult(null);
     setError("");

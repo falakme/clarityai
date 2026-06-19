@@ -32,6 +32,7 @@
   "speak_situation": "Rakonte sitiyasyon ou",
   "nav_summary": "Rezime",
   "nav_tasks": "Travay",
+  "nav_chat": "Mande",
   "nav_resources": "Resous",
   "nav_history": "Istwa",
   "nav_settings": "Paramèt",
@@ -80,5 +81,7 @@
   "history_clear_all": "Clear all",
   "history_confirm_clear": "Tap again to confirm",
   "history_no_brief": "No summary available.",
-  "history_tasks_done": "tasks done"
+  "history_tasks_done": "tasks done",
+  "privacy_policy": "Règleman sou enfòmasyon prive",
+  "terms_of_service": "Kondisyon sèvis"
 }

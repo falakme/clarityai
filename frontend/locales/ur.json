@@ -32,6 +32,7 @@
   "speak_situation": "اپنی صورتحال بتائیں",
   "nav_summary": "خلاصہ",
   "nav_tasks": "کام",
+  "nav_chat": "پوچھیں",
   "nav_resources": "وسائل",
   "nav_history": "تاریخ",
   "nav_settings": "ترتیبات",
@@ -80,5 +81,7 @@
   "history_clear_all": "Clear all",
   "history_confirm_clear": "Tap again to confirm",
   "history_no_brief": "No summary available.",
-  "history_tasks_done": "tasks done"
+  "history_tasks_done": "tasks done",
+  "privacy_policy": "رازداری کی پالیسی",
+  "terms_of_service": "سروس کی شرائط"
 }

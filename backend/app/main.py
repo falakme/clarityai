@@ -15,7 +15,7 @@ from slowapi.errors import RateLimitExceeded
 from app import __version__
 from app.config import get_settings
 from app.ratelimit import limiter
-from app.routers import health, translate, tts
+from app.routers import chat, health, translate, tts
 
 settings = get_settings()
 
@@ -52,6 +52,7 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(translate.router)
 app.include_router(tts.router)
+app.include_router(chat.router)
 
 
 @app.get("/", tags=["system"])

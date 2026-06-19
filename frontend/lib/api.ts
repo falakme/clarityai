@@ -1,4 +1,4 @@
-import type { Health, TranslateResult } from "./types";
+import type { ChatMessage, Health, TranslateResult } from "./types";
 
 /**
  * Base URL the browser uses to reach the API.
@@ -75,7 +75,37 @@ export async function translateForm(input: TranslateInput): Promise<TranslateRes
   return res.json();
 }
 
-/** The single AI-selected support resource (agentic recommendation). */
+export interface ChatInput {
+  question: string;
+  documentBrief?: string;
+  documentExplanation?: string;
+  sourceText?: string;
+  history?: ChatMessage[];
+  language?: string;
+}
+
+/**
+ * Ask a follow-up question about the analyzed document. Stateless: we send the
+ * document context and the prior turns each time. Returns the assistant's
+ * Markdown answer. Never submits anything on the user's behalf.
+ */
+export async function chat(input: ChatInput): Promise<string> {
+  const res = await fetch(`${API_BASE_URL}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      question: input.question,
+      document_brief: input.documentBrief ?? "",
+      document_explanation: input.documentExplanation ?? "",
+      source_text: input.sourceText ?? "",
+      history: input.history ?? [],
+      language: input.language ?? "",
+    }),
+  });
+  if (!res.ok) throw new ApiError(await parseError(res), res.status);
+  const data = await res.json();
+  return (data?.answer ?? "") as string;
+}
 export interface Recommendation {
   recommended_resource_name: string;
   recommended_resource_url: string;

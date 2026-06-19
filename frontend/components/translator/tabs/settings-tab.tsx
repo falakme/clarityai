@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Printer, RotateCcw, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -48,6 +49,15 @@ export function SettingsTab({ onReset, t }: { onReset: () => void; t: Translator
             <ShieldCheck className="h-4 w-4 text-primary" /> {t("explains_you_decide")}
           </p>
           <p>{t("disclaimer_body")}</p>
+          <nav className="flex items-center justify-center gap-4 pt-1 text-xs">
+            <Link href="/privacy" className="font-semibold text-primary hover:underline">
+              {t("privacy_policy")}
+            </Link>
+            <span aria-hidden>·</span>
+            <Link href="/terms" className="font-semibold text-primary hover:underline">
+              {t("terms_of_service")}
+            </Link>
+          </nav>
           <p className="pt-2">USAII Global AI Hackathon · Crisis-to-Action Translator</p>
         </div>
       </Item>

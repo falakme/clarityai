@@ -32,6 +32,7 @@
   "speak_situation": "Ikwento ang iyong sitwasyon",
   "nav_summary": "Buod",
   "nav_tasks": "Mga gawain",
+  "nav_chat": "Magtanong",
   "nav_resources": "Mga mapagkukunan",
   "nav_history": "Kasaysayan",
   "nav_settings": "Mga setting",
@@ -80,5 +81,7 @@
   "history_clear_all": "Clear all",
   "history_confirm_clear": "Tap again to confirm",
   "history_no_brief": "No summary available.",
-  "history_tasks_done": "tasks done"
+  "history_tasks_done": "tasks done",
+  "privacy_policy": "Patakaran sa Privacy",
+  "terms_of_service": "Mga Tuntunin ng Serbisyo"
 }

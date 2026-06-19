@@ -32,6 +32,7 @@
   "speak_situation": "Décrivez votre situation",
   "nav_summary": "Résumé",
   "nav_tasks": "Tâches",
+  "nav_chat": "Demander",
   "nav_resources": "Ressources",
   "nav_history": "Historique",
   "nav_settings": "Paramètres",
@@ -80,5 +81,7 @@
   "history_clear_all": "Clear all",
   "history_confirm_clear": "Tap again to confirm",
   "history_no_brief": "No summary available.",
-  "history_tasks_done": "tasks done"
+  "history_tasks_done": "tasks done",
+  "privacy_policy": "Politique de confidentialité",
+  "terms_of_service": "Conditions d'utilisation"
 }

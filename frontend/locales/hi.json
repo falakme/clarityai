@@ -32,6 +32,7 @@
   "speak_situation": "अपनी स्थिति बताएं",
   "nav_summary": "सारांश",
   "nav_tasks": "कार्य",
+  "nav_chat": "पूछें",
   "nav_resources": "संसाधन",
   "nav_history": "इतिहास",
   "nav_settings": "सेटिंग्स",
@@ -80,5 +81,7 @@
   "history_clear_all": "Clear all",
   "history_confirm_clear": "Tap again to confirm",
   "history_no_brief": "No summary available.",
-  "history_tasks_done": "tasks done"
+  "history_tasks_done": "tasks done",
+  "privacy_policy": "गोपनीयता नीति",
+  "terms_of_service": "सेवा की शर्तें"
 }

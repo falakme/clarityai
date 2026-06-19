@@ -85,6 +85,23 @@
     @apply rounded-lg border border-white/70 bg-card shadow-clay;
   }
 
+  /* Readable prose for the static legal pages (Terms / Privacy). */
+  .legal-prose p {
+    @apply text-foreground/90;
+  }
+  .legal-prose ul {
+    @apply mt-1 list-disc space-y-1.5 pl-5;
+  }
+  .legal-prose li {
+    @apply leading-relaxed;
+  }
+  .legal-prose a {
+    @apply font-semibold text-primary underline underline-offset-2;
+  }
+  .legal-prose strong {
+    @apply font-semibold text-foreground;
+  }
+
   /* Pressed-in clay (used by inputs / wells). */
   .clay-inset {
     @apply rounded-md bg-card shadow-clay-inset;

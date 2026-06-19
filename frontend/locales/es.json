@@ -32,6 +32,7 @@
   "speak_situation": "Cuenta tu situación",
   "nav_summary": "Resumen",
   "nav_tasks": "Tareas",
+  "nav_chat": "Preguntar",
   "nav_resources": "Recursos",
   "nav_history": "Historial",
   "nav_settings": "Ajustes",
@@ -80,5 +81,7 @@
   "history_clear_all": "Clear all",
   "history_confirm_clear": "Tap again to confirm",
   "history_no_brief": "No summary available.",
-  "history_tasks_done": "tasks done"
+  "history_tasks_done": "tasks done",
+  "privacy_policy": "Política de privacidad",
+  "terms_of_service": "Términos del servicio"
 }

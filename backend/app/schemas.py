@@ -141,3 +141,34 @@ class TtsRequest(BaseModel):
     """
 
     text: str = Field(min_length=1, max_length=6000)
+
+
+# --- Follow-up chat ---
+class ChatMessage(BaseModel):
+    """A single turn in the follow-up conversation."""
+
+    role: str = Field(pattern="^(user|assistant)$")
+    content: str = Field(min_length=1, max_length=4000)
+
+
+class ChatRequest(BaseModel):
+    """Input for the stateless follow-up chat.
+
+    The client sends the document context (brief + source text) and the full
+    message history on every turn — the backend keeps no conversation state.
+    """
+
+    question: str = Field(min_length=1, max_length=4000)
+    # Document context the conversation is anchored to.
+    document_brief: str = ""
+    document_explanation: str = ""
+    source_text: str = ""
+    # Prior turns (oldest first), excluding the new `question`.
+    history: list[ChatMessage] = Field(default_factory=list)
+    language: str = ""
+
+
+class ChatResponse(BaseModel):
+    """The assistant's answer to a follow-up question."""
+
+    answer: str = ""

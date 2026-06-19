@@ -32,6 +32,7 @@
   "speak_situation": "আপনার পরিস্থিতি বলুন",
   "nav_summary": "সারসংক্ষেপ",
   "nav_tasks": "কাজ",
+  "nav_chat": "জিজ্ঞাসা",
   "nav_resources": "সম্পদ",
   "nav_history": "ইতিহাস",
   "nav_settings": "সেটিংস",
@@ -80,5 +81,7 @@
   "history_clear_all": "Clear all",
   "history_confirm_clear": "Tap again to confirm",
   "history_no_brief": "No summary available.",
-  "history_tasks_done": "tasks done"
+  "history_tasks_done": "tasks done",
+  "privacy_policy": "গোপনীয়তা নীতি",
+  "terms_of_service": "পরিষেবার শর্তাবলী"
 }
