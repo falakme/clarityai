@@ -38,8 +38,9 @@ export function SmartInput({
   speechLang?: string;
   rtl?: boolean;
 }) {
-  // Start on the textarea if the user already has text (e.g. from a demo load).
-  const [mode, setMode] = useState<Mode>(text.trim() ? "keyboard" : "choice");
+  // Start in keyboard mode by default so users land directly on the textarea.
+  // Voice mode is still available via the mic button in the corner.
+  const [mode, setMode] = useState<Mode>(text.trim() ? "keyboard" : "keyboard");
   const [voiceSupported, setVoiceSupported] = useState(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -49,7 +50,7 @@ export function SmartInput({
     setVoiceSupported(!!SR);
   }, []);
 
-  // If a demo populates text while we're on the chooser, reveal the textarea.
+  // If a demo populates text while on the chooser, reveal the textarea.
   useEffect(() => {
     if (text.trim() && mode === "choice") setMode("keyboard");
     // eslint-disable-next-line react-hooks/exhaustive-deps

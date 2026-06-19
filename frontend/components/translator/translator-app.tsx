@@ -8,6 +8,7 @@ import { useLocalStorage } from "@/lib/storage";
 import {
   addToHistory,
   clearCurrentSession,
+  getHistory,
   loadCurrentSession,
   saveCurrentResult,
   updateHistoryEntry,
@@ -50,12 +51,18 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
   );
 
   // ── Restore the last session on mount ──────────────────────────────────────
+  const [recentEntry, setRecentEntry] = useState<HistoryEntry | null>(null);
+
   useEffect(() => {
     const saved = loadCurrentSession();
     if (saved) {
       setResult(saved.result);
       setCheckedTasks(saved.checkedTasks ?? {});
       setPhase("result");
+    } else {
+      // No active session — check history so the intake screen can show a Resume card.
+      const history = getHistory();
+      if (history.length > 0) setRecentEntry(history[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -274,6 +281,8 @@ export function TranslatorApp({ docType: docTypeProp = "general", storageKey = "
               error={error}
               onSubmit={() => runTranslate()}
               onLoadDemo={handleLoadDemo}
+              recentEntry={recentEntry}
+              onResume={handleLoadHistory}
             />
           </motion.div>
         )}

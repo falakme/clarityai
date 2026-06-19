@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ArrowRight,
   ChevronDown,
   FlaskConical,
   Globe,
@@ -17,20 +18,16 @@ import { Card } from "@/components/ui/card";
 import { LanguageSelect } from "@/components/language-select";
 import { DEMO_DOCS, type DemoDoc } from "@/lib/demo-docs";
 import { createTranslator, isRTL, speechLocale } from "@/lib/i18n";
+import type { HistoryEntry } from "@/lib/types";
 import { FileIntake } from "./file-intake";
 import { SmartInput } from "./smart-input";
 
-/**
- * State 0 — the start screen. Fills the viewport. A language selector sits at
- * the top and re-renders the entire interface offline in the chosen language
- * (RTL-aware). Judge Demo Mode is a collapsible, swipeable carousel. On desktop
- * the pitch and the input form sit side by side; on phones they stack.
- *
- * The input itself is a Gemini-style <SmartInput>: it starts as two big
- * buttons (keyboard / microphone), and morphs into a textarea or an immersive
- * inline voice panel depending on the choice. Inputs are controlled by the
- * orchestrator.
- */
+const CATEGORY_LABEL: Record<string, string> = {
+  eviction: "Eviction", housing: "Housing", medical: "Medical",
+  food_assistance: "Food", utility: "Utility", legal: "Legal",
+  benefits: "Benefits", general: "General",
+};
+
 export function IntakeView({
   text,
   onTextChange,
@@ -42,6 +39,8 @@ export function IntakeView({
   error,
   onSubmit,
   onLoadDemo,
+  recentEntry,
+  onResume,
 }: {
   text: string;
   onTextChange: (v: string) => void;
@@ -53,8 +52,10 @@ export function IntakeView({
   error: string;
   onSubmit: () => void;
   onLoadDemo: (doc: DemoDoc) => void;
+  recentEntry?: HistoryEntry | null;
+  onResume?: (entry: HistoryEntry) => void;
 }) {
-  const [demoOpen, setDemoOpen] = useState(true);
+  const [demoOpen, setDemoOpen] = useState(false);
   const t = createTranslator(language);
   const rtl = isRTL(language);
 
@@ -74,54 +75,39 @@ export function IntakeView({
         <LanguageSelect value={language} onChange={onLanguageChange} />
       </header>
 
-      {/* Judge Demo Mode — collapsible, swipeable carousel */}
-      <section className="mt-5 rounded-md border-2 border-primary/40 bg-primary/5">
+      {/* Resume card — shown when the user has a previous session */}
+      {recentEntry && onResume && (
         <button
           type="button"
-          onClick={() => setDemoOpen((o) => !o)}
-          aria-expanded={demoOpen}
-          className="flex w-full items-center justify-between gap-2 px-4 py-3 text-primary"
+          onClick={() => onResume(recentEntry)}
+          className="mt-4 flex w-full items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-left transition-colors hover:bg-primary/10"
         >
-          <span className="flex items-center gap-2 text-sm font-extrabold uppercase tracking-wide">
-            <FlaskConical className="h-4 w-4" /> {t("demo_title")}
-          </span>
-          <ChevronDown
-            className={"h-5 w-5 transition-transform " + (demoOpen ? "rotate-180" : "")}
-          />
+          <div className="min-w-0 flex-1">
+            <p className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-primary">
+              Resume last session
+            </p>
+            <p className="truncate text-sm font-medium text-foreground">
+              {recentEntry.result.plain_language_brief || "Tap to continue where you left off"}
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {CATEGORY_LABEL[recentEntry.result.document_category] ?? "General"} ·{" "}
+              {recentEntry.result.task_list.length > 0 && (
+                <>
+                  {Object.values(recentEntry.checkedTasks).filter(Boolean).length}/
+                  {recentEntry.result.task_list.length} tasks done ·{" "}
+                </>
+              )}
+              {new Date(recentEntry.timestamp).toLocaleDateString(undefined, {
+                month: "short", day: "numeric",
+              })}
+            </p>
+          </div>
+          <ArrowRight className="h-5 w-5 shrink-0 text-primary" />
         </button>
-        <AnimatePresence initial={false}>
-          {demoOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="overflow-hidden"
-            >
-              <p className="px-4 text-sm text-muted-foreground">{t("demo_subtitle")}</p>
-              <div className="no-scrollbar flex snap-x gap-2 overflow-x-auto px-4 pb-4 pt-3">
-                {DEMO_DOCS.map((doc) => (
-                  <button
-                    key={doc.key}
-                    type="button"
-                    onClick={() => onLoadDemo(doc)}
-                    title={doc.caption}
-                    className="flex min-w-[9rem] shrink-0 snap-start flex-col gap-1 rounded-lg border border-white/70 bg-card p-3 text-start shadow-clay-sm transition-all hover:brightness-[1.02] active:translate-y-0.5"
-                  >
-                    <span className="text-sm font-bold text-foreground">{doc.label}</span>
-                    <span className="text-xs leading-snug text-muted-foreground">
-                      {doc.caption}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </section>
+      )}
 
       {/* Pitch + form */}
-      <div className="mt-8 lg:grid lg:grid-cols-2 lg:items-start lg:gap-12">
+      <div className="mt-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-12">
         {/* Pitch */}
         <div className="lg:pt-6">
           <p className="text-base font-semibold text-primary">{t("tagline")}</p>
@@ -140,6 +126,46 @@ export function IntakeView({
               </li>
             ))}
           </ul>
+
+          {/* Demo mode — collapsed by default, available for testing */}
+          <div className="mt-6 hidden lg:block">
+            <button
+              type="button"
+              onClick={() => setDemoOpen((o) => !o)}
+              aria-expanded={demoOpen}
+              className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground"
+            >
+              <FlaskConical className="h-4 w-4" />
+              {t("demo_title")}
+              <ChevronDown className={"h-4 w-4 transition-transform " + (demoOpen ? "rotate-180" : "")} />
+            </button>
+            <AnimatePresence initial={false}>
+              {demoOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="no-scrollbar flex snap-x gap-2 overflow-x-auto pt-3">
+                    {DEMO_DOCS.map((doc) => (
+                      <button
+                        key={doc.key}
+                        type="button"
+                        onClick={() => onLoadDemo(doc)}
+                        title={doc.caption}
+                        className="flex min-w-[9rem] shrink-0 snap-start flex-col gap-1 rounded-md border border-border bg-card p-3 text-start shadow-clay-sm hover:brightness-[1.02] active:translate-y-0.5"
+                      >
+                        <span className="text-sm font-bold text-foreground">{doc.label}</span>
+                        <span className="text-xs leading-snug text-muted-foreground">{doc.caption}</span>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* Input form */}
@@ -177,6 +203,48 @@ export function IntakeView({
           </Button>
         </Card>
       </div>
+
+      {/* Demo mode — mobile (below the form) */}
+      <section className="mt-5 rounded-md border border-border bg-card/60 lg:hidden">
+        <button
+          type="button"
+          onClick={() => setDemoOpen((o) => !o)}
+          aria-expanded={demoOpen}
+          className="flex w-full items-center justify-between gap-2 px-4 py-3 text-muted-foreground"
+        >
+          <span className="flex items-center gap-2 text-sm font-semibold">
+            <FlaskConical className="h-4 w-4" /> {t("demo_title")}
+          </span>
+          <ChevronDown className={"h-4 w-4 transition-transform " + (demoOpen ? "rotate-180" : "")} />
+        </button>
+        <AnimatePresence initial={false}>
+          {demoOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <p className="px-4 text-sm text-muted-foreground">{t("demo_subtitle")}</p>
+              <div className="no-scrollbar flex snap-x gap-2 overflow-x-auto px-4 pb-4 pt-3">
+                {DEMO_DOCS.map((doc) => (
+                  <button
+                    key={doc.key}
+                    type="button"
+                    onClick={() => onLoadDemo(doc)}
+                    title={doc.caption}
+                    className="flex min-w-[9rem] shrink-0 snap-start flex-col gap-1 rounded-md border border-border bg-card p-3 text-start shadow-clay-sm hover:brightness-[1.02] active:translate-y-0.5"
+                  >
+                    <span className="text-sm font-bold text-foreground">{doc.label}</span>
+                    <span className="text-xs leading-snug text-muted-foreground">{doc.caption}</span>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </section>
 
       <p className="mt-auto pt-8 text-center text-sm text-muted-foreground">
         <span className="flex items-center justify-center gap-1.5">
