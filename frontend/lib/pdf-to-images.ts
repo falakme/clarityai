@@ -47,7 +47,6 @@ export async function pdfHasSelectableText(file: File): Promise<boolean> {
   for (let i = 1; i <= checkPages; i++) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     text += content.items.map((item: any) => ("str" in item ? item.str : "")).join(" ");
     if (text.trim().length >= TEXT_THRESHOLD) return true;
   }
