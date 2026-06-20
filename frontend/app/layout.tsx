@@ -28,8 +28,8 @@ const firaCode = Fira_Code({
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://clarityai.falak.me";
 const TITLE    = "ClarityAI – Any document, in plain language";
-const DESC     =
-  "Paste or photograph any legal, medical, or government document and instantly get a plain-language summary, a step-by-step action plan, and verified local support resources. Free, private, no sign-in required.";
+const DESC =
+  "Paste or photograph any document and get a plain-language summary, action plan, and local support. Free, private, no sign-in.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
