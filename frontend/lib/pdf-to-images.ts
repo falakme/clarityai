@@ -80,7 +80,7 @@ export async function pdfToImages(file: File): Promise<File[]> {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    await page.render({ canvasContext: ctx, viewport }).promise;
+    await page.render({ canvasContext: ctx, canvas, viewport }).promise;
 
     const blob = await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob(
